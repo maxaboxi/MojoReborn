@@ -1,0 +1,81 @@
+﻿@using Mojo.Shared.Features.Blog
+@inject IBlogService BlogService
+
+<div class="container py-4">
+    @if (_post == null)
+    {
+        <div class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
+            <Spinner Type="SpinnerType.Border" Color="SpinnerColor.Primary" Size="SpinnerSize.Large" />
+        </div>
+    }
+    else
+    {
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10 col-xl-8">
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/blog">Blog</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">@_post.Title</li>
+                    </ol>
+                </nav>
+
+                <Card Class="border-0 shadow-lg mb-5">
+                    <CardBody Class="p-4 p-md-5">
+                        <h1 class="display-4 fw-bold mb-4">@_post.Title</h1>
+                        
+                        <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+                            <div class="d-flex align-items-center text-muted">
+                                <Icon Name="IconName.PersonCircle" Size="IconSize.x5" Class="me-2 text-primary"/> 
+                                <span class="fw-medium">@_post.Author</span>
+                            </div>
+                            <div class="d-flex align-items-center text-muted">
+                                <Icon Name="IconName.CalendarEvent" Size="IconSize.x5" Class="me-2 text-primary"/> 
+                                <span>@_post.CreatedAt.ToLongDateString()</span>
+                            </div>
+                            <div class="d-flex align-items-center text-muted ms-auto">
+                                <Icon Name="IconName.ChatLeft" Size="IconSize.x5" Class="me-2 text-primary"/> 
+                                <span>@_post.CommentCount @(_post.CommentCount == 1 ? "Comment" : "Comments")</span>
+                            </div>
+                        </div>
+
+                        @if (_post.Categories?.Any() == true)
+                        {
+                            <div class="mb-4">
+                                @foreach(var cat in _post.Categories)
+                                {
+                                    <Badge Color="BadgeColor.Info" Class="me-2 mb-2 px-3 py-2 rounded-pill">@cat</Badge>
+                                }
+                            </div>
+                        }
+
+                        <article class="mt-4 fs-5 lh-lg">
+                            @((MarkupString)_post.Content)
+                        </article>
+                    </CardBody>
+                </Card>
+
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <Button Color="ButtonColor.Secondary" To="/blog" Type="ButtonType.Link" Size="ButtonSize.Large">
+                        <Icon Name="IconName.ArrowLeft" /> Back to Blog
+                    </Button>
+                    <Button Color="ButtonColor.Primary" Outline="true" Size="ButtonSize.Large">
+                        <Icon Name="IconName.Share" /> Share
+                    </Button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] 
+    public Guid PostId { get; set; }
+    private BlogPostDto? _post;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _post = await BlogService.GetPostAsync(PostId);
+    }
+
+}

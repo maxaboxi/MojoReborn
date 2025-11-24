@@ -1,0 +1,61 @@
+﻿@using Mojo.Shared.Features.Core
+@inject IPageService PageService
+@rendermode InteractiveAuto
+
+<div class="d-flex flex-column h-100 p-3">
+    
+    <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+        <Icon Name="IconName.LightningFill" Class="me-2 fs-4 text-primary" />
+        <span class="fs-4 fw-bold">MojoReborn</span>
+    </a>
+    
+    <hr>
+    
+    <ul class="nav nav-pills flex-column mb-auto">
+        
+        <li class="nav-item">
+            <NavLink class="nav-link link-body-emphasis" href="" Match="NavLinkMatch.All">
+                <Icon Name="IconName.HouseDoor" Class="me-2" /> Home
+            </NavLink>
+        </li>
+
+        @if (_menuItems == null)
+        {
+            <li class="nav-item mt-3">
+                <span class="text-muted small ms-3">Loading menu...</span>
+            </li>
+        }
+        else 
+        {
+            @foreach (var pageItem in _menuItems)
+            {
+                <NavMenuItem Page="pageItem" />
+            }
+        }
+    </ul>
+    
+    <hr>
+
+    <div class="dropdown">
+        <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <Icon Name="IconName.PersonCircle" Class="me-2 fs-4" />
+            <strong>My Profile</strong>
+        </a>
+        <ul class="dropdown-menu text-small shadow">
+            <li><a class="dropdown-item" href="#">Settings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Sign out</a></li>
+        </ul>
+    </div>
+</div>
+
+@code {
+
+    private List<PageDto>? _menuItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _menuItems = await PageService.GetMenuStructureAsync();
+    }
+    
+}

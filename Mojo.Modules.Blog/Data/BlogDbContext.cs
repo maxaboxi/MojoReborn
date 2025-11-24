@@ -1,0 +1,77 @@
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Mojo.Modules.Blog.Data;
+
+public class BlogDbContext(DbContextOptions<BlogDbContext> options) : DbContext(options)
+{
+    public virtual DbSet<BlogPost> BlogPosts { get; set; }
+
+    public virtual DbSet<Category> Categories { get; set; }
+
+    public virtual DbSet<BlogComment> BlogComments { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<BlogPost>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("mp_Blogs");
+
+            entity.Property(e => e.Id).HasColumnName("ItemID");
+            entity.Property(e => e.BlogPostId).HasColumnName("BlogGuid");
+            entity.Property(e => e.Content).HasColumnName("Description");
+
+            entity.Property(e => e.Author).HasColumnName("CreatedByUser").HasMaxLength(100);
+            entity.Property(e => e.CreatedAt).HasColumnName("CreatedDate").HasColumnType("datetime");
+            entity.Property(e => e.Title).HasColumnName("Heading").HasMaxLength(255);
+            entity.Property(e => e.Slug).HasColumnName("ItemUrl").HasMaxLength(255);
+            entity.Property(e => e.ModifiedAt).HasColumnName("LastModUtc").HasColumnType("datetime");
+            entity.Property(e => e.ModuleId).HasColumnName("ModuleID");
+            entity.Property(e => e.SubTitle).HasMaxLength(500);
+        });
+
+        modelBuilder.Entity<BlogPost>()
+            .HasMany(b => b.Categories)
+            .WithMany(c => c.BlogPosts)
+            .UsingEntity<BlogItemCategory>(
+                l => l.HasOne<Category>().WithMany().HasForeignKey(e => e.CategoryId),
+                r => r.HasOne<BlogPost>().WithMany().HasForeignKey(e => e.ItemId),
+                j =>
+                {
+                    j.ToTable("mp_BlogItemCategories");
+                    j.HasKey(e => e.Id);
+                    j.Property(e => e.Id).HasColumnName("ID");
+                    j.Property(e => e.ItemId).HasColumnName("ItemID");
+                    j.Property(e => e.CategoryId).HasColumnName("CategoryID");
+                });
+        
+        modelBuilder.Entity<BlogComment>(entity =>
+        {
+            entity.ToTable("mp_Comments");
+            entity.HasKey(e => e.Guid);
+
+            entity.Property(e => e.ContentGuid).HasColumnName("ContentGuid");
+            entity.Property(e => e.Content).HasColumnName("UserComment");
+            entity.Property(e => e.CreatedAt).HasColumnName("CreatedUtc");
+            entity.Property(e => e.ModifiedAt).HasColumnName("LastModUtc");
+            
+            entity.HasOne(c => c.BlogPost)
+                .WithMany(b => b.Comments)
+                .HasForeignKey(c => c.ContentGuid)
+                .HasPrincipalKey(b => b.BlogPostId);
+        });
+
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("mp_BlogCategories");
+
+            entity.Property(e => e.Id).HasColumnName("CategoryID");
+            entity.Property(e => e.CategoryName).HasColumnName("Category").HasMaxLength(255);
+            entity.Property(e => e.ModuleId).HasColumnName("ModuleID");
+        });
+    }
+    
+}

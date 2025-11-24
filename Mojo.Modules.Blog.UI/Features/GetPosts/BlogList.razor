@@ -1,0 +1,97 @@
+﻿@using Mojo.Shared.Features.Blog
+@inject IBlogService BlogService
+
+<div class="container py-5">
+    @if (_posts == null)
+    {
+        <div class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
+            <Spinner Type="SpinnerType.Border" Color="SpinnerColor.Primary" Size="SpinnerSize.Large" />
+        </div>
+    }
+    else if (!_posts.Any())
+    {
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <Alert Color="AlertColor.Info" Class="shadow-sm">
+                    <Icon Name="IconName.InfoCircle" Size="IconSize.x4" Class="me-2" />
+                    <strong>No posts found.</strong> The blog is empty. Check back soon for new content!
+                </Alert>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="mb-5 text-center">
+            <h1 class="display-4 fw-bold mb-3">Blog Posts</h1>
+            <p class="lead text-muted">Discover our latest articles and insights</p>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var post in _posts)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <Card Class="h-100 border-0 shadow-sm hover-shadow transition">
+                        <CardHeader Class="border-bottom-0 pt-4 px-4">
+                            <div class="d-flex align-items-center text-muted">
+                                <Icon Name="IconName.CalendarEvent" Class="me-2" />
+                                <small class="fw-medium">@post.CreatedAt.ToString("MMMM dd, yyyy")</small>
+                            </div>
+                        </CardHeader>
+                        
+                        <CardBody Class="d-flex flex-column px-4 pb-4">
+                            <CardTitle Class="h4 fw-bold mb-3 text-dark">@post.Title</CardTitle>
+                            
+                            @if (post.Categories?.Any() == true)
+                            {
+                                <div class="mb-3">
+                                    @foreach(var cat in post.Categories)
+                                    {
+                                        <Badge Color="BadgeColor.Secondary" Class="me-2 mb-2 px-2 py-1 rounded-pill">@cat</Badge>
+                                    }
+                                </div>
+                            }
+
+                            <CardText Class="text-muted mb-4 flex-grow-1">
+                                @((MarkupString)(post.Content.Length > 150 ? post.Content.Substring(0, 150) + "..." : post.Content))
+                            </CardText>
+                            
+                            <Button Color="ButtonColor.Primary" To="@($"/blog/post/{post.BlogPostGuid}")" Type="ButtonType.Link" Class="mt-auto">
+                                Read More <Icon Name="IconName.ArrowRight" Class="ms-1" />
+                            </Button>
+                        </CardBody>
+                        
+                        <CardFooter Class="text-muted d-flex justify-content-between align-items-center py-3 px-4">
+                            <small class="d-flex align-items-center">
+                                <Icon Name="IconName.PersonCircle" Class="me-1" />
+                                <span class="fw-medium">@post.Author</span>
+                            </small>
+                            <small class="d-flex align-items-center">
+                                <Icon Name="IconName.ChatLeft" Class="me-1" /> 
+                                <span>@post.CommentCount</span>
+                            </small>
+                        </CardFooter>
+                    </Card>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+    }
+</style>
+
+@code {
+    private List<BlogPostDto>? _posts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _posts = await BlogService.GetPostsAsync();
+    }
+}
