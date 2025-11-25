@@ -1,0 +1,26 @@
+.blog-list-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.blog-list-container {
+  padding-top: 32px;
+  padding-bottom: 32px;
+  margin: 0 auto;
+}
+
+.blog-list-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.blog-list-title {
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.blog-list-subtitle {
+  font-size: 1.1rem;
+}

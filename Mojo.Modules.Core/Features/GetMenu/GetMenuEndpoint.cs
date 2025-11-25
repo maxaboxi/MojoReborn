@@ -1,5 +1,4 @@
-﻿using Mojo.Shared.Features.Core;
-using Wolverine;
+﻿using Wolverine;
 using Wolverine.Http;
 
 namespace Mojo.Modules.Core.Features.GetMenu;

@@ -1,5 +1,4 @@
-﻿using Mojo.Shared.Features.Blog;
-using Wolverine;
+﻿using Wolverine;
 using Wolverine.Http;
 
 namespace Mojo.Modules.Blog.Features.GetPosts;
@@ -11,11 +10,11 @@ public class GetPostsEndpoint
     // 2. It automatically maps the HTTP request to the GetPostsQuery
     
     [WolverineGet("/api/blog/posts")]
-    public static Task<List<BlogPostDto>> Get(
+    public static Task<List<GetPostsResponse>> Get(
         GetPostsQuery query, 
         IMessageBus bus)
     {
         // It simply delegates to the Handler
-        return bus.InvokeAsync<List<BlogPostDto>>(query);
+        return bus.InvokeAsync<List<GetPostsResponse>>(query);
     }
 }

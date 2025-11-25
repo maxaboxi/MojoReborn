@@ -1,23 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
-using Mojo.Shared.Features.Blog;
 
 namespace Mojo.Modules.Blog.Features.GetPost;
 
-public record GetPostQuery(Guid blogPostId);
+public record GetPostQuery(Guid BlogPostId);
 
 public static class GetPostHandler
 {
-    public static async Task<BlogPostDto> Handle(
+    public static async Task<GetPostResponse> Handle(
         GetPostQuery query,
         BlogDbContext db,
         CancellationToken ct)
     {
-        return await db.BlogPosts.Where(x => x.BlogPostId == query.blogPostId)
+        return await db.BlogPosts.Where(x => x.BlogPostId == query.BlogPostId)
             .AsNoTracking()
             .Include(x => x.Categories)
             .Include(x => x.Comments)
-            .Select(bp => new BlogPostDto()
+            .Select(bp => new GetPostResponse()
             {
                 BlogPostGuid =  bp.BlogPostId,
                 Title = bp.Title,

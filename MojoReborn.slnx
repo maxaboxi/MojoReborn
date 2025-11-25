@@ -1,18 +1,14 @@
 <Solution>
   <Folder Name="/Modules/" />
   <Folder Name="/Modules/Blog/">
-    <Project Path="Mojo.Modules.Blog.UI/Mojo.Modules.Blog.UI.csproj" />
     <Project Path="Mojo.Modules.Blog/Mojo.Modules.Blog.csproj" />
   </Folder>
   <Folder Name="/Modules/Core/">
-    <Project Path="Mojo.Modules.Core.UI/Mojo.Modules.Core.UI.csproj" />
     <Project Path="Mojo.Modules.Core/Mojo.Modules.Core.csproj" />
   </Folder>
   <Folder Name="/Modules/Forum/">
-    <Project Path="Mojo.Modules.Forum.UI/Mojo.Modules.Forum.UI.csproj" />
     <Project Path="Mojo.Modules.Forum/Mojo.Modules.Forum.csproj" />
   </Folder>
   <Project Path="Mojo.Shared/Mojo.Shared.csproj" />
-  <Project Path="Mojo.Web.Client/Mojo.Web.Client.csproj" />
   <Project Path="Mojo.Web/Mojo.Web.csproj" />
 </Solution>

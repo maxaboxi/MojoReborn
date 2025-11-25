@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Core.Data;
-using Mojo.Shared.Features.Core;
 
 namespace Mojo.Modules.Core.Features.GetMenu;
 

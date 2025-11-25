@@ -1,11 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Core.Data;
-using Mojo.Shared.Features.Blog;
-using Mojo.Shared.Features.Core;
-using Mojo.Web.Components;
-using Mojo.Web.Infrastructure.Blog;
-using Mojo.Web.Infrastructure.Core;
 using Wolverine;
 using Wolverine.Http;
 
@@ -27,24 +22,18 @@ builder.Host.UseWolverine(opts =>
     opts.Discovery.IncludeAssembly(typeof(CoreDbContext).Assembly);
 });
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents();
+builder.Services.AddCors();
 
-builder.Services.AddScoped<IBlogService, ServerBlogService>();
-builder.Services.AddScoped<IPageService, ServerPageService>();
 
 builder.Services.AddMemoryCache();
 builder.Services.AddWolverineHttp();
-builder.Services.AddBlazorBootstrap();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseWebAssemblyDebugging();
+
 }
 else
 {
@@ -53,19 +42,10 @@ else
     app.UseHsts();
 }
 
+app.UseCors(opt => opt.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
 app.UseHttpsRedirection();
 
-
-app.UseAntiforgery();
-
 app.MapWolverineEndpoints();
-
-app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(Mojo.Web.Client._Imports).Assembly)
-    .AddAdditionalAssemblies(typeof(Mojo.Modules.Blog.UI.Features.GetPosts.BlogList).Assembly);
-
 
 app.Run();
