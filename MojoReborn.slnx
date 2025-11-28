@@ -11,4 +11,5 @@
   </Folder>
   <Project Path="Mojo.Shared/Mojo.Shared.csproj" />
   <Project Path="Mojo.Web/Mojo.Web.csproj" />
+  <Project Path="MojoPortal.Legacy/MojoPortal.Legacy.csproj" />
 </Solution>
