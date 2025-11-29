@@ -28,15 +28,16 @@ public class BlogDbContext(DbContextOptions<BlogDbContext> options) : DbContext(
             entity.Property(e => e.Slug).HasColumnName("ItemUrl").HasMaxLength(255);
             entity.Property(e => e.ModifiedAt).HasColumnName("LastModUtc").HasColumnType("datetime");
             entity.Property(e => e.ModuleId).HasColumnName("ModuleID");
-            entity.Property(e => e.SubTitle).HasMaxLength(500);
+            entity.Property(e => e.SubTitle).HasColumnName("SubTitle").HasMaxLength(500);
+            entity.Property(e => e.LastModifiedBy).HasColumnName("LastModUserGuid");
         });
 
         modelBuilder.Entity<BlogPost>()
             .HasMany(b => b.Categories)
             .WithMany(c => c.BlogPosts)
             .UsingEntity<BlogItemCategory>(
-                l => l.HasOne<Category>().WithMany().HasForeignKey(e => e.CategoryId),
-                r => r.HasOne<BlogPost>().WithMany().HasForeignKey(e => e.ItemId),
+                r => r.HasOne<Category>().WithMany().HasForeignKey(e => e.CategoryId),
+                l => l.HasOne<BlogPost>().WithMany().HasForeignKey(e => e.ItemId),
                 j =>
                 {
                     j.ToTable("mp_BlogItemCategories");
@@ -50,6 +51,8 @@ public class BlogDbContext(DbContextOptions<BlogDbContext> options) : DbContext(
         {
             entity.ToTable("mp_Comments");
             entity.HasKey(e => e.Guid);
+            
+            entity.HasQueryFilter(e => BlogPosts.Any(b => b.BlogPostId == e.ContentGuid));
 
             entity.Property(e => e.ContentGuid).HasColumnName("ContentGuid");
             entity.Property(e => e.Content).HasColumnName("UserComment");

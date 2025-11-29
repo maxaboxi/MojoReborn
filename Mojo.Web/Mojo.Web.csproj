@@ -8,21 +8,15 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
-        <PackageReference Include="WolverineFx" Version="5.3.0" />
-        <PackageReference Include="WolverineFx.Http" Version="5.3.0" />
-        <ProjectReference Include="..\Mojo.Modules.Blog\Mojo.Modules.Blog.csproj" />
-        <ProjectReference Include="..\Mojo.Modules.Core\Mojo.Modules.Core.csproj" />
-        <ProjectReference Include="..\Mojo.Shared\Mojo.Shared.csproj" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.11"/>
+        <PackageReference Include="WolverineFx" Version="5.4.0" />
+        <PackageReference Include="WolverineFx.Http" Version="5.4.0" />
+        <PackageReference Include="WolverineFx.Http.FluentValidation" Version="5.4.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <_ContentIncludedByDefault Remove="Components\App.razor" />
-      <_ContentIncludedByDefault Remove="Components\Layout\MainLayout.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\Error.razor" />
-      <_ContentIncludedByDefault Remove="Components\Pages\Home.razor" />
-      <_ContentIncludedByDefault Remove="Components\Routes.razor" />
-      <_ContentIncludedByDefault Remove="Components\_Imports.razor" />
+      <ProjectReference Include="..\Mojo.Modules.Blog\Mojo.Modules.Blog.csproj" />
+      <ProjectReference Include="..\Mojo.Modules.Core\Mojo.Modules.Core.csproj" />
+      <ProjectReference Include="..\Mojo.Shared\Mojo.Shared.csproj" />
     </ItemGroup>
 
 </Project>

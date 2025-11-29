@@ -3,7 +3,7 @@ using Wolverine.Http;
 
 namespace Mojo.Modules.Blog.Features.GetPost;
 
-public class GetPostEndpoint
+public static class GetPostEndpoint
 {
     [WolverineGet("/api/blog/posts/{blogPostId}")]
     public static Task<GetPostResponse> Get(

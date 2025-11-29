@@ -1,10 +1,13 @@
-import { Container, Typography, CircularProgress, Alert, Box, Stack } from '@mui/material';
+import { Container, Typography, CircularProgress, Alert, Box, Stack, Button } from '@mui/material';
+import { Add } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { useBlogPosts } from '../hooks/useBlogPosts';
 import { BlogCard } from '../components/BlogCard';
 import './BlogList.css';
 
 export const BlogList = () => {
   const { posts, loading, error } = useBlogPosts();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -35,12 +38,22 @@ export const BlogList = () => {
   return (
     <>
       <Box className="blog-list-header">
-        <Typography variant="h3" component="h1" className="blog-list-title">
-          Blog Posts
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary" className="blog-list-subtitle">
-          Discover our latest articles and insights
-        </Typography>
+        <Box>
+          <Typography variant="h3" component="h1" className="blog-list-title">
+            Blog Posts
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary" className="blog-list-subtitle">
+            Discover our latest articles and insights
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          onClick={() => navigate('/blog/create')}
+          size="large"
+        >
+          Create New Post
+        </Button>
       </Box>
 
       <Stack spacing={3}>

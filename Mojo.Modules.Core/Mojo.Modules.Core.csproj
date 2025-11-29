@@ -9,11 +9,7 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.0" />
-      <PackageReference Include="WolverineFx.Http" Version="5.3.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Mojo.Shared\Mojo.Shared.csproj" />
+      <PackageReference Include="WolverineFx.Http" Version="5.4.0" />
     </ItemGroup>
 
 </Project>

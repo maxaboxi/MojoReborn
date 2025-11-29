@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 public class CoreDbContext(DbContextOptions<CoreDbContext> options) : DbContext(options)
 {
     public DbSet<Page> Pages { get; set; }
+    public DbSet<Module> Modules { get; set; }
+    public DbSet<PageModule> PageModules { get; set; }
+    public DbSet<ModuleDefinition> ModuleDefinitions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,6 +22,56 @@ public class CoreDbContext(DbContextOptions<CoreDbContext> options) : DbContext(
             entity.Property(e => e.PageOrder).HasColumnName("PageOrder");
             entity.Property(e => e.AuthorizedRoles).HasColumnName("AuthorizedRoles");
             entity.Property(e => e.IncludeInMenu).HasColumnName("IncludeInMenu");
+        });
+
+        modelBuilder.Entity<Module>(entity =>
+        {
+            entity.ToTable("mp_Modules");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("ModuleID");
+            entity.Property(e => e.ModuleDefinitionId).HasColumnName("ModuleDefID");
+            entity.Property(e => e.ModuleGuid).HasColumnName("Guid");
+            entity.Property(e => e.CreatedAt).HasColumnName("CreatedDate");
+            entity.Property(e => e.Title).HasColumnName("ModuleTitle").HasMaxLength(255);
+            
+            entity.HasIndex(e => e.ModuleGuid, "idxModulesGuid");
+        });
+
+        modelBuilder.Entity<PageModule>(entity =>
+        {
+            entity.ToTable("mp_PageModules");
+            entity.HasKey(e => new { e.PageId, e.ModuleId });
+            entity.Property(e => e.PageId).HasColumnName("PageID");
+            entity.Property(e => e.ModuleId).HasColumnName("ModuleID");
+            entity.Property(e => e.PaneName).HasMaxLength(50);
+
+            entity.HasOne(e => e.Page)
+                .WithMany(p => p.PageModules)
+                .HasForeignKey(pm => pm.PageId);
+            
+            entity.HasOne(e => e.Module)
+                .WithMany(m => m.PageModules)
+                .HasForeignKey(pm => pm.ModuleId);
+        });
+        
+        modelBuilder.Entity<ModuleDefinition>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("mp_ModuleDefinitions");
+            
+            entity.HasIndex(e => e.ModuleDefinitionGuid, "idxModuleDefGuid");
+
+            entity.Property(e => e.Id).HasColumnName("ModuleDefID");
+            entity.Property(e => e.ControlSrc).HasMaxLength(255);
+            entity.Property(e => e.FeatureName).HasMaxLength(255);
+            entity.Property(e => e.ResourceFile).HasMaxLength(255);
+            entity.Property(e => e.SearchListName).HasMaxLength(255);
+            entity.Property(e => e.SortOrder).HasDefaultValue(500);
+            
+            entity.HasMany(d => d.Modules)
+                .WithOne(m => m.ModuleDefinition)
+                .HasForeignKey(m => m.ModuleDefinitionId);
         });
     }
 }

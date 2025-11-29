@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Core.Data;
+using Mojo.Modules.Core.Features.GetModule;
 using Wolverine;
+using Wolverine.FluentValidation;
 using Wolverine.Http;
+using Wolverine.Http.FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,16 +13,22 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<BlogDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString),
+    // Significant performance gain as per Wolverine docs
+    optionsLifetime: ServiceLifetime.Singleton);
 
 builder.Services.AddDbContext<CoreDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString),
+    optionsLifetime: ServiceLifetime.Singleton);
 
+builder.Services.AddScoped<ModuleResolver>();
 
 builder.Host.UseWolverine(opts =>
 {
     opts.Discovery.IncludeAssembly(typeof(BlogDbContext).Assembly);
     opts.Discovery.IncludeAssembly(typeof(CoreDbContext).Assembly);
+    
+    opts.UseFluentValidation(); 
 });
 
 builder.Services.AddCors();
@@ -46,6 +55,9 @@ app.UseCors(opt => opt.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 app.UseHttpsRedirection();
 
-app.MapWolverineEndpoints();
+app.MapWolverineEndpoints(opts =>
+{
+    opts.UseFluentValidationProblemDetailMiddleware();
+});
 
 app.Run();

@@ -1,0 +1,17 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Mojo.Modules.Core.Data;
+
+namespace Mojo.Modules.Core.Features.GetModule;
+
+public class ModuleResolver(CoreDbContext db)
+{
+    public async Task<ModuleDto?> GetModuleByPageId(int id, CancellationToken ct = default)
+    {
+        return await db.PageModules
+            .Where(x => x.PageId == id)
+            .Where(x => x.Module.ModuleDefinition.FeatureName == "BlogFeatureName")
+            .Select(x => new ModuleDto {Id = x.ModuleId, ModuleGuid = x.ModuleGuid})
+            .FirstOrDefaultAsync(ct);
+        
+    }
+}

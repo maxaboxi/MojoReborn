@@ -20,6 +20,7 @@ public static class GetPostHandler
             {
                 BlogPostGuid =  bp.BlogPostId,
                 Title = bp.Title,
+                SubTitle = bp.SubTitle,
                 Content = bp.Content, 
                 Author = bp.Author,
                 CreatedAt = bp.CreatedAt,

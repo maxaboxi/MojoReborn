@@ -8,4 +8,6 @@ public class Category
 
     public string CategoryName { get; set; } = null!;
 
-    public virtual ICollection<BlogPost> BlogPosts { get; set; } = new List<BlogPost>();}
+    public virtual ICollection<BlogPost> BlogPosts { get; set; } = new List<BlogPost>();
+    
+}

@@ -11,7 +11,7 @@ import {
   CardContent,
   Divider 
 } from '@mui/material';
-import { CalendarToday, Person, Chat, ArrowBack, Share } from '@mui/icons-material';
+import { CalendarToday, Person, Chat, ArrowBack, Share, Edit } from '@mui/icons-material';
 import { useBlogPost } from '../hooks/useBlogPost';
 import './BlogPostDetail.css';
 
@@ -87,6 +87,12 @@ export const BlogPostDetail = () => {
 
           <Divider className="blog-post-divider" />
 
+          <Typography variant="h5" component="h2" className="blog-post-subtitle">
+            {post.subTitle}
+          </Typography>
+
+          <Divider className="blog-post-divider" />
+
           <Box 
             className="blog-post-body"
             dangerouslySetInnerHTML={{ __html: post.content }}
@@ -103,9 +109,19 @@ export const BlogPostDetail = () => {
         >
           Back to Blog
         </Button>
-        <Button variant="outlined" startIcon={<Share />} size="large">
-          Share
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="contained"
+            startIcon={<Edit />}
+            onClick={() => navigate(`/blog/edit/${id}`)}
+            size="large"
+          >
+            Edit Post
+          </Button>
+          <Button variant="outlined" startIcon={<Share />} size="large">
+            Share
+          </Button>
+        </Box>
       </Box>
     </>
   );

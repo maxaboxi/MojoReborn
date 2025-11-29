@@ -1,5 +1,5 @@
 import apiClient from './axios.client';
-import { type BlogPost } from '../types/blog.types';
+import { type BlogPost, type EditPostRequest, type EditPostResponse, type CreatePostRequest, type CreatePostResponse } from '../types/blog.types';
 
 export const blogApi = {
   getPosts: async (): Promise<BlogPost[]> => {
@@ -12,13 +12,13 @@ export const blogApi = {
     return response.data;
   },
 
-  createPost: async (post: Omit<BlogPost, 'blogPostGuid' | 'createdAt' | 'commentCount' | 'comments'>): Promise<BlogPost> => {
-    const response = await apiClient.post<BlogPost>('/blog', post);
+  createPost: async (request: CreatePostRequest): Promise<CreatePostResponse> => {
+    const response = await apiClient.post<CreatePostResponse>('/blog/posts', request);
     return response.data;
   },
 
-  updatePost: async (id: string, post: Partial<BlogPost>): Promise<BlogPost> => {
-    const response = await apiClient.put<BlogPost>(`/blog/${id}`, post);
+  updatePost: async (request: EditPostRequest): Promise<EditPostResponse> => {
+    const response = await apiClient.put<EditPostResponse>('/blog/posts', request);
     return response.data;
   },
 

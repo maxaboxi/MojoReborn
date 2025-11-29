@@ -1,4 +1,6 @@
-﻿namespace Mojo.Modules.Blog.Data;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Mojo.Modules.Blog.Data;
 
 public class BlogPost
 {
@@ -8,8 +10,12 @@ public class BlogPost
 
     public int ModuleId { get; set; }
     
+    public Guid ModuleGuid { get; set; }
+    
+    [Required]
     public string Title { get; set; }
     
+    [Required]
     public string Content { get; set; }
     
     public string SubTitle { get; set; }
@@ -23,7 +29,7 @@ public class BlogPost
     public DateTime ModifiedAt {get; set; }
     
     public bool IsPublished { get; set; }
-    
+
     public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
     public virtual ICollection<BlogComment> Comments { get; set; } = new List<BlogComment>();
 

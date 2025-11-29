@@ -4,6 +4,7 @@ public record GetPostResponse
 {
     public Guid BlogPostGuid { get; set; }
     public string Title { get; set; } = string.Empty;
+    public string SubTitle { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public string Author { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
