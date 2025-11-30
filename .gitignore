@@ -463,3 +463,4 @@ vite.config.ts.timestamp-*
 # yarn.lock
 # pnpm-lock.yaml
 GEMINI.md
+PROJECT_TASKS.md
