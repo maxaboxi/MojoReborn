@@ -58,6 +58,11 @@ app.UseHttpsRedirection();
 app.MapWolverineEndpoints(opts =>
 {
     opts.UseFluentValidationProblemDetailMiddleware();
+    
+    // https://wolverinefx.net/guide/http/#eager-warmup
+    // Wolverine.HTTP has a known issue with applications that make simultaneous requests to the same endpoint at start up
+    // where the runtime code generation can blow up if the first requests come in together.
+    opts.WarmUpRoutes = RouteWarmup.Eager;
 });
 
 app.Run();
