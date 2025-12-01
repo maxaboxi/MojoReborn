@@ -3,9 +3,12 @@ using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Core.Data;
 using Mojo.Modules.Core.Features.GetModule;
 using Wolverine;
+using Wolverine.EntityFrameworkCore;
 using Wolverine.FluentValidation;
 using Wolverine.Http;
 using Wolverine.Http.FluentValidation;
+using Wolverine.Persistence.Durability;
+using Wolverine.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +30,15 @@ builder.Host.UseWolverine(opts =>
 {
     opts.Discovery.IncludeAssembly(typeof(BlogDbContext).Assembly);
     opts.Discovery.IncludeAssembly(typeof(CoreDbContext).Assembly);
+    
+    opts.Durability.MessageStorageSchemaName = "wolverine";
+    
+    opts.UseEntityFrameworkCoreTransactions();
+    opts.Services.AddDbContextWithWolverineIntegration<BlogDbContext>(x => x.UseSqlServer(connectionString));
+    opts.PersistMessagesWithSqlServer(connectionString, role:MessageStoreRole.Ancillary).Enroll<BlogDbContext>();
+    
+    opts.Services.AddDbContextWithWolverineIntegration<CoreDbContext>(x => x.UseSqlServer(connectionString));
+    opts.PersistMessagesWithSqlServer(connectionString, role:MessageStoreRole.Ancillary).Enroll<CoreDbContext>();
     
     opts.UseFluentValidation(); 
 });

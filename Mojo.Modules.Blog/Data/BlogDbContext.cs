@@ -18,8 +18,8 @@ public class BlogDbContext(DbContextOptions<BlogDbContext> options) : DbContext(
 
             entity.ToTable("mp_Blogs");
 
-            entity.Property(e => e.Id).HasColumnName("ItemID");
-            entity.Property(e => e.BlogPostId).HasColumnName("BlogGuid");
+            entity.Property(e => e.Id).HasColumnName("ItemID").UseIdentityColumn();
+            entity.Property(e => e.BlogPostId).HasColumnName("BlogGuid").ValueGeneratedOnAdd();
             entity.Property(e => e.Content).HasColumnName("Description");
 
             entity.Property(e => e.Author).HasColumnName("CreatedByUser").HasMaxLength(100);
@@ -60,7 +60,7 @@ public class BlogDbContext(DbContextOptions<BlogDbContext> options) : DbContext(
             entity.HasIndex(e => e.ModuleGuid, "IX_mp_Comments_3");
             entity.HasIndex(e => e.ParentGuid, "IX_mp_Comments_4");
 
-            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Guid).ValueGeneratedOnAdd();
             entity.Property(e => e.ContentGuid).HasColumnName("ContentGuid");
             entity.Property(e => e.Content).HasColumnName("UserComment");
             entity.Property(e => e.CreatedAt).HasColumnName("CreatedUtc").HasDefaultValueSql("(getutcdate())");
