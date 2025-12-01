@@ -4,12 +4,14 @@ import { Container, Box, Typography, CircularProgress, Alert } from '@mui/materi
 import { BlogPostForm } from '../components/BlogPostForm';
 import { blogApi } from '../../../api/blog.api';
 import { useBlogPost } from '../hooks/useBlogPost';
+import { useCategories } from '../hooks/useCategories';
 import type { EditPostRequest, Category } from '../../../types/blog.types';
 
 export const EditBlogPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { post, loading: loadingPost, error: loadError } = useBlogPost(id || '');
+  const { categories: existingCategories, loading: loadingCategories } = useCategories();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +54,7 @@ export const EditBlogPost = () => {
     navigate(`/blog/post/${id}`);
   };
 
-  if (loadingPost) {
+  if (loadingPost || loadingCategories) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
         <CircularProgress size={60} />
@@ -94,6 +96,8 @@ export const EditBlogPost = () => {
           isEdit
           isLoading={isLoading}
           error={error}
+          existingCategories={existingCategories}
+          loadingCategories={loadingCategories}
         />
       </Box>
     </Container>

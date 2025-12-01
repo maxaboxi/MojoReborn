@@ -4,6 +4,7 @@ import { Container, Box, Typography, CircularProgress, Alert } from '@mui/materi
 import { BlogPostForm } from '../components/BlogPostForm';
 import { blogApi } from '../../../api/blog.api';
 import { useMenuItems } from '../../../hooks/useMenuItems';
+import { useCategories } from '../hooks/useCategories';
 import type { CreatePostRequest } from '../../../types/blog.types';
 
 export const CreateBlogPost = () => {
@@ -11,6 +12,7 @@ export const CreateBlogPost = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { menuItems, loading: loadingMenu, error: menuError } = useMenuItems();
+  const { categories, loading: loadingCategories, error: categoriesError } = useCategories();
 
   // Find the blog page ID from menu items
   const findBlogPageId = (): number | null => {
@@ -65,7 +67,7 @@ export const CreateBlogPost = () => {
     navigate('/blog');
   };
 
-  if (loadingMenu) {
+  if (loadingMenu || loadingCategories) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
         <CircularProgress size={60} />
@@ -73,10 +75,12 @@ export const CreateBlogPost = () => {
     );
   }
 
-  if (menuError) {
+  if (menuError || categoriesError) {
     return (
       <Container maxWidth="md">
-        <Alert severity="error">Failed to load menu: {menuError}</Alert>
+        <Alert severity="error">
+          {menuError ? `Failed to load menu: ${menuError}` : `Failed to load categories: ${categoriesError}`}
+        </Alert>
       </Container>
     );
   }
@@ -93,6 +97,8 @@ export const CreateBlogPost = () => {
           onCancel={handleCancel}
           isLoading={isLoading}
           error={error}
+          existingCategories={categories}
+          loadingCategories={loadingCategories}
         />
       </Box>
     </Container>

@@ -55,3 +55,9 @@ export type EditPostResponse = {
   blogPostId: string;
   message: string;
 }
+
+export type GetCategoriesResponse = {
+  id: number;
+  moduleId: number;
+  categoryName: string;
+}

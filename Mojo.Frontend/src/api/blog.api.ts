@@ -1,5 +1,5 @@
 import apiClient from './axios.client';
-import { type BlogPost, type EditPostRequest, type EditPostResponse, type CreatePostRequest, type CreatePostResponse } from '../types/blog.types';
+import { type BlogPost, type EditPostRequest, type EditPostResponse, type CreatePostRequest, type CreatePostResponse, type GetCategoriesResponse } from '../types/blog.types';
 
 export const blogApi = {
   getPosts: async (): Promise<BlogPost[]> => {
@@ -9,6 +9,11 @@ export const blogApi = {
 
   getPost: async (id: string): Promise<BlogPost> => {
     const response = await apiClient.get<BlogPost>(`/blog/posts/${id}`);
+    return response.data;
+  },
+
+  getCategories: async (): Promise<GetCategoriesResponse[]> => {
+    const response = await apiClient.get<GetCategoriesResponse[]>('/blog/posts/categories');
     return response.data;
   },
 

@@ -7,11 +7,11 @@ import {
   Typography,
   Chip,
   Stack,
-  IconButton,
   Alert,
+  Autocomplete,
+  CircularProgress,
 } from '@mui/material';
-import { Add, Delete } from '@mui/icons-material';
-import type { CreatePostCategoryDto } from '../../../types/blog.types';
+import type { CreatePostCategoryDto, GetCategoriesResponse } from '../../../types/blog.types';
 
 interface BlogPostFormProps {
   initialData?: {
@@ -32,6 +32,8 @@ interface BlogPostFormProps {
   isEdit?: boolean;
   isLoading?: boolean;
   error?: string | null;
+  existingCategories?: GetCategoriesResponse[];
+  loadingCategories?: boolean;
 }
 
 export const BlogPostForm = ({
@@ -41,6 +43,8 @@ export const BlogPostForm = ({
   isEdit = false,
   isLoading = false,
   error = null,
+  existingCategories = [],
+  loadingCategories = false,
 }: BlogPostFormProps) => {
   const [title, setTitle] = useState(initialData?.title || '');
   const [subTitle, setSubTitle] = useState(initialData?.subTitle || '');
@@ -49,20 +53,18 @@ export const BlogPostForm = ({
   const [categories, setCategories] = useState<CreatePostCategoryDto[]>(
     initialData?.categories || []
   );
-  const [newCategoryName, setNewCategoryName] = useState('');
 
-  const handleAddCategory = () => {
-    if (newCategoryName.trim()) {
-      setCategories([
-        ...categories,
-        { id: 0, categoryName: newCategoryName.trim() },
-      ]);
-      setNewCategoryName('');
-    }
-  };
-
-  const handleRemoveCategory = (index: number) => {
-    setCategories(categories.filter((_, i) => i !== index));
+  const handleCategoriesChange = (_event: any, newValue: (GetCategoriesResponse | string)[]) => {
+    const selectedCategories: CreatePostCategoryDto[] = newValue.map((item) => {
+      if (typeof item === 'string') {
+        // New category typed by user
+        return { id: 0, categoryName: item };
+      } else {
+        // Existing category selected from dropdown
+        return { id: item.id, categoryName: item.categoryName };
+      }
+    });
+    setCategories(selectedCategories);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -143,46 +145,65 @@ export const BlogPostForm = ({
             <Typography variant="h6" gutterBottom>
               Categories
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-              {categories.map((category, index) => (
-                <Chip
-                  key={index}
-                  label={category.categoryName}
-                  onDelete={() => handleRemoveCategory(index)}
-                  deleteIcon={<Delete />}
-                  color="primary"
-                  disabled={isLoading}
+            <Autocomplete
+              multiple
+              freeSolo
+              options={existingCategories}
+              getOptionLabel={(option) => 
+                typeof option === 'string' ? option : option.categoryName
+              }
+              value={categories.map(cat => {
+                // Map selected categories back to the format Autocomplete expects
+                const existing = existingCategories.find(ec => ec.id === cat.id && ec.categoryName === cat.categoryName);
+                return existing || cat.categoryName;
+              })}
+              onChange={handleCategoriesChange}
+              loading={loadingCategories}
+              disabled={isLoading}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Select or type categories"
+                  placeholder="Start typing..."
+                  helperText="Select existing categories or type to create new ones"
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loadingCategories ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
                 />
-              ))}
-              {categories.length === 0 && (
-                <Typography variant="body2" color="text.secondary">
-                  No categories added yet
-                </Typography>
               )}
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <TextField
-                label="Add Category"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddCategory();
-                  }
-                }}
-                size="small"
-                disabled={isLoading}
-                sx={{ flexGrow: 1 }}
-              />
-              <IconButton
-                color="primary"
-                onClick={handleAddCategory}
-                disabled={!newCategoryName.trim() || isLoading}
-              >
-                <Add />
-              </IconButton>
-            </Box>
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => {
+                  const label = typeof option === 'string' ? option : option.categoryName;
+                  const isNew = typeof option === 'string' || option.id === 0;
+                  return (
+                    <Chip
+                      label={label}
+                      {...getTagProps({ index })}
+                      color={isNew ? 'secondary' : 'primary'}
+                      variant={isNew ? 'outlined' : 'filled'}
+                    />
+                  );
+                })
+              }
+              isOptionEqualToValue={(option, value) => {
+                if (typeof option === 'string' && typeof value === 'string') {
+                  return option === value;
+                }
+                if (typeof option !== 'string' && typeof value !== 'string') {
+                  return option.id === value.id && option.categoryName === value.categoryName;
+                }
+                if (typeof option !== 'string' && typeof value === 'string') {
+                  return option.categoryName === value;
+                }
+                return false;
+              }}
+            />
           </Box>
 
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
