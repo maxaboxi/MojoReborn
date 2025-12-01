@@ -1,5 +1,5 @@
 import apiClient from './axios.client';
-import { type BlogPost, type EditPostRequest, type EditPostResponse, type CreatePostRequest, type CreatePostResponse, type GetCategoriesResponse } from '../types/blog.types';
+import { type BlogPost, type EditPostRequest, type EditPostResponse, type CreatePostRequest, type CreatePostResponse, type GetCategoriesResponse, type DeletePostResponse } from '../types/blog.types';
 
 export const blogApi = {
   getPosts: async (): Promise<BlogPost[]> => {
@@ -27,7 +27,8 @@ export const blogApi = {
     return response.data;
   },
 
-  deletePost: async (id: string): Promise<void> => {
-    await apiClient.delete(`/blog/${id}`);
+  deletePost: async (id: string): Promise<DeletePostResponse> => {
+    const response = await apiClient.delete<DeletePostResponse>(`/blog/posts/${id}`);
+    return response.data;
   },
 };

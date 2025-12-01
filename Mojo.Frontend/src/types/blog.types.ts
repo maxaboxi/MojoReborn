@@ -61,3 +61,8 @@ export type GetCategoriesResponse = {
   moduleId: number;
   categoryName: string;
 }
+
+export type DeletePostResponse = {
+  isSuccess: boolean;
+  message: string;
+}

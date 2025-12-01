@@ -37,8 +37,8 @@ public class BlogDbContext(DbContextOptions<BlogDbContext> options) : DbContext(
             .HasMany(b => b.Categories)
             .WithMany(c => c.BlogPosts)
             .UsingEntity<BlogItemCategory>(
-                r => r.HasOne<Category>().WithMany().HasForeignKey(e => e.CategoryId),
-                l => l.HasOne<BlogPost>().WithMany().HasForeignKey(e => e.ItemId),
+                r => r.HasOne<Category>().WithMany().HasForeignKey(e => e.CategoryId).OnDelete(DeleteBehavior.Cascade),
+                l => l.HasOne<BlogPost>().WithMany().HasForeignKey(e => e.ItemId).OnDelete(DeleteBehavior.Cascade),
                 j =>
                 {
                     j.ToTable("mp_BlogItemCategories");

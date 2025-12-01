@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { 
   Container, 
   Typography, 
@@ -9,16 +10,25 @@ import {
   Button, 
   Card, 
   CardContent,
-  Divider 
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from '@mui/material';
-import { CalendarToday, Person, Chat, ArrowBack, Share, Edit } from '@mui/icons-material';
+import { CalendarToday, Person, Chat, ArrowBack, Share, Edit, Delete } from '@mui/icons-material';
 import { useBlogPost } from '../hooks/useBlogPost';
+import { blogApi } from '../../../api/blog.api';
 import './BlogPostDetail.css';
 
 export const BlogPostDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { post, loading, error } = useBlogPost(id || '');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -26,6 +36,38 @@ export const BlogPostDetail = () => {
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+    setDeleteError(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setDeleteError(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!id) return;
+
+    setDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const response = await blogApi.deletePost(id);
+      
+      if (response.isSuccess) {
+        // Navigate back to blog list
+        navigate('/blog');
+      } else {
+        setDeleteError(response.message || 'Failed to delete post');
+      }
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'An error occurred while deleting the post');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   if (loading) {
@@ -118,11 +160,55 @@ export const BlogPostDetail = () => {
           >
             Edit Post
           </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<Delete />}
+            onClick={handleDeleteClick}
+            size="large"
+          >
+            Delete
+          </Button>
           <Button variant="outlined" startIcon={<Share />} size="large">
             Share
           </Button>
         </Box>
       </Box>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Delete Blog Post?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete "{post?.title}"? This action cannot be undone.
+          </DialogContentText>
+          {deleteError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {deleteError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleDeleteConfirm} 
+            color="error" 
+            variant="contained"
+            disabled={deleting}
+            autoFocus
+          >
+            {deleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
