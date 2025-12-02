@@ -18,6 +18,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Mojo.Modules.Blog\Mojo.Modules.Blog.csproj" />
       <ProjectReference Include="..\Mojo.Modules.Core\Mojo.Modules.Core.csproj" />
+      <ProjectReference Include="..\Mojo.Modules.Forum\Mojo.Modules.Forum.csproj" />
       <ProjectReference Include="..\Mojo.Shared\Mojo.Shared.csproj" />
     </ItemGroup>
 

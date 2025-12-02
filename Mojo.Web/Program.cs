@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Core.Data;
 using Mojo.Modules.Core.Features.GetModule;
+using Mojo.Modules.Forum.Data;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
 using Wolverine.FluentValidation;
@@ -24,12 +25,17 @@ builder.Services.AddDbContext<CoreDbContext>(options =>
     options.UseSqlServer(connectionString),
     optionsLifetime: ServiceLifetime.Singleton);
 
+builder.Services.AddDbContext<ForumDbContext>(options =>
+        options.UseSqlServer(connectionString),
+    optionsLifetime: ServiceLifetime.Singleton);
+
 builder.Services.AddScoped<ModuleResolver>();
 
 builder.Host.UseWolverine(opts =>
 {
     opts.Discovery.IncludeAssembly(typeof(BlogDbContext).Assembly);
     opts.Discovery.IncludeAssembly(typeof(CoreDbContext).Assembly);
+    opts.Discovery.IncludeAssembly(typeof(ForumDbContext).Assembly);
     
     opts.Durability.MessageStorageSchemaName = "wolverine";
     
@@ -39,6 +45,9 @@ builder.Host.UseWolverine(opts =>
     
     opts.Services.AddDbContextWithWolverineIntegration<CoreDbContext>(x => x.UseSqlServer(connectionString));
     opts.PersistMessagesWithSqlServer(connectionString, role:MessageStoreRole.Ancillary).Enroll<CoreDbContext>();
+    
+    opts.Services.AddDbContextWithWolverineIntegration<ForumDbContext>(x => x.UseSqlServer(connectionString));
+    opts.PersistMessagesWithSqlServer(connectionString, role:MessageStoreRole.Ancillary).Enroll<ForumDbContext>();
     
     opts.UseFluentValidation(); 
 });
