@@ -20,11 +20,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Features\DeletePost\" />
-      <Folder Include="Features\CreatePost\" />
-      <Folder Include="Features\EditPost\" />
-      <Folder Include="Features\GetPost\" />
-      <Folder Include="Features\GetPosts\" />
+      <Folder Include="Features\Posts\" />
+      <Folder Include="Features\Comments\" />
     </ItemGroup>
 
 </Project>
