@@ -16,7 +16,7 @@ The solution is built on a Headless API architecture, separating the backend log
 ## Technology Stack
 
 ### Backend
-*   **Framework**: .NET 10 (Preview) / ASP.NET Core
+*   **Framework**: .NET 10 / ASP.NET Core
 *   **Messaging & Mediation**: Wolverine
 *   **Data Access**: Entity Framework Core (SQL Server)
 *   **Validation**: FluentValidation
@@ -35,7 +35,7 @@ The solution is built on a Headless API architecture, separating the backend log
 *   **Mojo.Modules.Blog**: Implementation of the Blog feature using vertical slices.
 *   **Mojo.Modules.Forum**: Implementation of the Forum feature.
 *   **Mojo.Shared**: Shared contracts, DTOs, and utilities utilized across different modules.
-*   **Mojo.Frontend**: The React-based Single Page Application (SPA). Frontend is 99% generated with LLMs (Claude Sonnet 4.5 / Gemini 3 Pro) and is meant mostly for testing and as an example how to work with the backend.
+*   **Mojo.Frontend**: The React-based Single Page Application (SPA). Frontend is 99% generated with LLMs (Claude Sonnet 4.5 / Gemini 3 Pro / GPT-5.1-Codex) and is meant mostly for testing and as an example how to work with the backend.
 
 ## Getting Started
 
