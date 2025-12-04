@@ -18,6 +18,7 @@ public class CoreDbContext(DbContextOptions<CoreDbContext> options) : DbContext(
             entity.HasIndex(e => e.PageName, "IX_mp_page_name");
 
             entity.Property(e => e.PageId).HasColumnName("PageID");
+            entity.Property(e => e.SiteId).HasColumnName("SiteID");
             entity.Property(e => e.ParentId).HasColumnName("ParentID").HasDefaultValue(-1);
             entity.Property(e => e.PageName).HasColumnName("PageName");
             entity.Property(e => e.Url).HasColumnName("Url");
@@ -32,9 +33,17 @@ public class CoreDbContext(DbContextOptions<CoreDbContext> options) : DbContext(
             entity.HasKey(e => e.Id);
             
             entity.HasIndex(e => e.ModuleDefinitionId, "IX_mp_ModulesDefId");
+            entity.HasIndex(e => e.ModuleDefinitionId, "idxModulesMDef");
             entity.HasIndex(e => e.ModuleGuid, "idxModulesGuid");
+            entity.HasIndex(e => e.SiteId, "IX_mp_ModulesSiteID");
+            entity.HasIndex(e => e.FeatureGuid, "IX_mp_ModulesFeatGuid");
+            entity.HasIndex(e => e.SiteGuid, "IX_mp_ModulesSiteGuid");
+            entity.HasIndex(e => e.FeatureGuid, "idxModulesFGuid");
+
+            entity.HasIndex(e => e.SiteId, "idxModulesSID");
 
             entity.Property(e => e.Id).HasColumnName("ModuleID");
+            entity.Property(e => e.SiteId).HasColumnName("SiteID");
             entity.Property(e => e.ModuleDefinitionId).HasColumnName("ModuleDefID");
             entity.Property(e => e.ModuleGuid).HasColumnName("Guid");
             entity.Property(e => e.CreatedAt).HasColumnName("CreatedDate").HasDefaultValueSql("(getdate())");

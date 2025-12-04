@@ -1,34 +1,62 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { 
-  Container, 
-  Typography, 
-  Box, 
-  Chip, 
-  CircularProgress, 
-  Alert, 
-  Button, 
-  Card, 
+import { useMemo, useState } from 'react';
+import {
+  Typography,
+  Box,
+  Chip,
+  Alert,
+  Button,
+  Card,
   CardContent,
   Divider,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions
+  DialogActions,
 } from '@mui/material';
 import { CalendarToday, Person, Chat, ArrowBack, Share, Edit, Delete } from '@mui/icons-material';
-import { useBlogPost } from '../hooks/useBlogPost';
-import { blogApi } from '../../../api/blog.api';
+import { useBlogPostQuery } from '../hooks/useBlogPostQuery';
+import { useDeleteBlogPostMutation } from '../hooks/useDeleteBlogPostMutation';
+import { useCreateCommentMutation } from '../hooks/useCreateCommentMutation';
+import type { CommentFormValues } from '../components/CommentForm';
+import { BlogCommentsList } from '../components/BlogCommentsList';
+import { BlogCommentFormPanel } from '../components/BlogCommentFormPanel';
+import { useMenuQuery } from '@shared/hooks/useMenuQuery';
+import { LoadingState, StatusMessage } from '@shared/ui';
+import { findBlogPageId } from '../utils/findBlogPageId';
 import './BlogPostDetail.css';
+
 
 export const BlogPostDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { post, loading, error } = useBlogPost(id || '');
+  const {
+    data: post,
+    isLoading: loading,
+    error: postError,
+    refetch,
+  } = useBlogPostQuery(id);
+  const postErrorMessage = postError?.message ?? null;
+  const { menuItems, loading: menuLoading, error: menuError } = useMenuQuery();
+  const blogPageId = useMemo(() => findBlogPageId(menuItems), [menuItems]);
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [commentError, setCommentError] = useState<string | null>(null);
+  const [commentSuccess, setCommentSuccess] = useState<string | null>(null);
+  const [commentFormKey, setCommentFormKey] = useState(0);
+  const deleteMutation = useDeleteBlogPostMutation();
+  const commentMutation = useCreateCommentMutation();
+  const commentFormInitialData = useMemo(
+    () => ({
+      userName: '',
+      userEmail: '',
+      title: '',
+      content: '',
+    }),
+    [commentFormKey]
+  );
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -51,40 +79,67 @@ export const BlogPostDetail = () => {
   const handleDeleteConfirm = async () => {
     if (!id) return;
 
-    setDeleting(true);
     setDeleteError(null);
 
     try {
-      const response = await blogApi.deletePost(id);
-      
+      const response = await deleteMutation.mutateAsync(id);
+
       if (response.isSuccess) {
-        // Navigate back to blog list
         navigate('/blog');
       } else {
         setDeleteError(response.message || 'Failed to delete post');
       }
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : 'An error occurred while deleting the post');
-    } finally {
-      setDeleting(false);
+    }
+  };
+
+  const handleCommentSubmit = async (values: CommentFormValues) => {
+    if (!id) {
+      return;
+    }
+
+    if (!blogPageId) {
+      setCommentError('Unable to determine blog page context. Please try again later.');
+      return;
+    }
+
+    setCommentError(null);
+    setCommentSuccess(null);
+
+    try {
+      const response = await commentMutation.mutateAsync({
+        pageId: blogPageId,
+        blogPostId: id,
+        userId: '00000000-0000-0000-0000-000000000000',
+        userName: values.userName,
+        userEmail: values.userEmail,
+        title: values.title,
+        content: values.content,
+      });
+
+      if (response.isSuccess) {
+        setCommentSuccess('Comment posted successfully.');
+        setCommentFormKey((prev) => prev + 1);
+        refetch();
+      } else {
+        setCommentError(response.message || 'Failed to post comment.');
+      }
+    } catch (err) {
+      setCommentError(err instanceof Error ? err.message : 'An error occurred while posting the comment.');
     }
   };
 
   if (loading) {
-    return (
-      <Box className="blog-post-loading">
-        <CircularProgress size={60} />
-      </Box>
-    );
+    return <LoadingState className="blog-post-loading" minHeight={200} />;
   }
 
-  if (error || !post) {
-    return (
-      <Container maxWidth="md">
-        <Alert severity="error">{error || 'Post not found'}</Alert>
-      </Container>
-    );
+  if (postErrorMessage || !post) {
+    return <StatusMessage>{postErrorMessage || 'Post not found'}</StatusMessage>;
   }
+
+  const comments = post.comments ?? [];
+  const commentCount = post.commentCount ?? comments.length;
 
   return (
     <>
@@ -114,7 +169,7 @@ export const BlogPostDetail = () => {
             <Box className="blog-post-meta-item">
               <Chat color="primary" />
               <Typography variant="body2">
-                {post.commentCount} {post.commentCount === 1 ? 'Comment' : 'Comments'}
+                {commentCount} {commentCount === 1 ? 'Comment' : 'Comments'}
               </Typography>
             </Box>
           </Box>
@@ -141,6 +196,24 @@ export const BlogPostDetail = () => {
           />
         </CardContent>
       </Card>
+
+      <BlogCommentsList
+        comments={comments}
+        commentCount={commentCount}
+        formatDate={formatDate}
+      />
+
+      <BlogCommentFormPanel
+        menuLoading={menuLoading}
+        menuError={menuError}
+        blogPageId={blogPageId}
+        commentFormKey={commentFormKey}
+        initialData={commentFormInitialData}
+        onSubmit={handleCommentSubmit}
+        isSubmitting={commentMutation.isPending}
+        error={commentError}
+        successMessage={commentSuccess}
+      />
 
       <Box className="blog-post-actions">
         <Button
@@ -195,17 +268,17 @@ export const BlogPostDetail = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDeleteCancel} disabled={deleting}>
+          <Button onClick={handleDeleteCancel} disabled={deleteMutation.isPending}>
             Cancel
           </Button>
           <Button 
             onClick={handleDeleteConfirm} 
             color="error" 
             variant="contained"
-            disabled={deleting}
+            disabled={deleteMutation.isPending}
             autoFocus
           >
-            {deleting ? 'Deleting...' : 'Delete'}
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

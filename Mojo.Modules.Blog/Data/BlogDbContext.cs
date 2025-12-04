@@ -51,20 +51,25 @@ public class BlogDbContext(DbContextOptions<BlogDbContext> options) : DbContext(
         modelBuilder.Entity<BlogComment>(entity =>
         {
             entity.ToTable("mp_Comments");
-            entity.HasKey(e => e.Guid);
+            entity.HasKey(e => e.Id);
             
             entity.HasQueryFilter(e => BlogPosts.Any(b => b.BlogPostId == e.ContentGuid));
 
             entity.HasIndex(e => e.ContentGuid, "IX_mp_Comments_1");
             entity.HasIndex(e => e.FeatureGuid, "IX_mp_Comments_2");
             entity.HasIndex(e => e.ModuleGuid, "IX_mp_Comments_3");
-            entity.HasIndex(e => e.ParentGuid, "IX_mp_Comments_4");
+            entity.HasIndex(e => e.SiteGuid, "IX_mp_Comments");
 
-            entity.Property(e => e.Guid).ValueGeneratedOnAdd();
+            entity.Property(e => e.Id).HasColumnName("Guid").ValueGeneratedOnAdd();
             entity.Property(e => e.ContentGuid).HasColumnName("ContentGuid");
             entity.Property(e => e.Content).HasColumnName("UserComment");
             entity.Property(e => e.CreatedAt).HasColumnName("CreatedUtc").HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.ModifiedAt).HasColumnName("LastModUtc").HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.UserIpAddress).HasColumnName("UserIp").HasMaxLength(50);
+            
+            entity.Property(e => e.Title).HasMaxLength(255);
+            entity.Property(e => e.UserEmail).HasMaxLength(100);
+            entity.Property(e => e.UserName).HasMaxLength(50);
             
             entity.HasOne(c => c.BlogPost)
                 .WithMany(b => b.Comments)

@@ -1,18 +1,27 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Box, Typography, CircularProgress, Alert } from '@mui/material';
+import { Container, Box, Typography } from '@mui/material';
 import { BlogPostForm } from '../components/BlogPostForm';
-import { blogApi } from '../../../api/blog.api';
-import { useBlogPost } from '../hooks/useBlogPost';
-import { useCategories } from '../hooks/useCategories';
-import type { EditPostRequest, Category } from '../../../types/blog.types';
+import { useBlogPostQuery } from '../hooks/useBlogPostQuery';
+import { useBlogCategoriesQuery } from '../hooks/useBlogCategoriesQuery';
+import { useUpdateBlogPostMutation } from '../hooks/useUpdateBlogPostMutation';
+import type { EditPostRequest, Category } from '../types/blog.types';
+import { LoadingState, StatusMessage } from '@shared/ui';
 
 export const EditBlogPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { post, loading: loadingPost, error: loadError } = useBlogPost(id || '');
-  const { categories: existingCategories, loading: loadingCategories } = useCategories();
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    data: post,
+    isLoading: loadingPost,
+    error: loadError,
+  } = useBlogPostQuery(id);
+  const {
+    data: existingCategories = [],
+    isLoading: loadingCategories,
+    error: categoriesError,
+  } = useBlogCategoriesQuery();
+  const updatePostMutation = useUpdateBlogPostMutation();
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (data: {
@@ -23,7 +32,6 @@ export const EditBlogPost = () => {
   }) => {
     if (!id) return;
 
-    setIsLoading(true);
     setError(null);
 
     try {
@@ -35,7 +43,7 @@ export const EditBlogPost = () => {
         categories: data.categories,
       };
 
-      const response = await blogApi.updatePost(request);
+      const response = await updatePostMutation.mutateAsync(request);
       
       if (response.isSuccess) {
         // Navigate back to the post
@@ -45,8 +53,6 @@ export const EditBlogPost = () => {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred while updating the post');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -55,18 +61,18 @@ export const EditBlogPost = () => {
   };
 
   if (loadingPost || loadingCategories) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress size={60} />
-      </Box>
-    );
+    return <LoadingState minHeight={400} />;
   }
 
   if (loadError || !post) {
+    return <StatusMessage>{loadError?.message || 'Post not found'}</StatusMessage>;
+  }
+
+  if (categoriesError) {
     return (
-      <Container maxWidth="md">
-        <Alert severity="error">{loadError || 'Post not found'}</Alert>
-      </Container>
+      <StatusMessage>
+        {`Failed to load categories: ${categoriesError.message}`}
+      </StatusMessage>
     );
   }
 
@@ -94,7 +100,7 @@ export const EditBlogPost = () => {
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isEdit
-          isLoading={isLoading}
+          isLoading={updatePostMutation.isPending}
           error={error}
           existingCategories={existingCategories}
           loadingCategories={loadingCategories}

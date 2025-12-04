@@ -2,7 +2,7 @@ import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, Collapse } 
 import { ExpandLess, ExpandMore, Article } from '@mui/icons-material';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import type { PageMenuItem } from '../../types/menu.types';
+import type { PageMenuItem } from '@shared/types/menu.types';
 import './NavMenuItem.css';
 
 interface NavMenuItemProps {

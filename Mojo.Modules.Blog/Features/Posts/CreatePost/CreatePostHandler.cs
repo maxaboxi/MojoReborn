@@ -22,28 +22,9 @@ public static partial class CreatePostHandler
             return BaseResponse.NotFound<CreatePostResponse>("Module not found.");
         }
             
-        var baseSlug = GenerateSlug(command.Title);
-        
-        var similarSlugs = await db.BlogPosts
-            .Where(b => b.Slug == baseSlug || b.Slug.StartsWith(baseSlug + "-"))
-            .Select(b => b.Slug)
-            .ToListAsync(cancellationToken);
+        var baseSlug = GenerateBaseSlug(command.Title);
 
-        var finalSlug = baseSlug;
-
-        if (similarSlugs.Count > 0)
-        {
-            var suffixRegex = new Regex($@"^{Regex.Escape(baseSlug)}-(\d+)$");
-            
-            var maxSuffix = similarSlugs
-                .Select(s => suffixRegex.Match(s))
-                .Where(m => m.Success)
-                .Select(m => int.Parse(m.Groups[1].Value))
-                .DefaultIfEmpty(0)
-                .Max();
-
-            finalSlug = $"{baseSlug}-{maxSuffix + 1}";
-        }
+        var finalSlug = await GenerateFinalSlug(baseSlug, db, cancellationToken);
         
         var newPost = new BlogPost
         {
@@ -57,28 +38,8 @@ public static partial class CreatePostHandler
             ModuleGuid =  moduleDto.ModuleGuid,
             ModuleId = moduleDto.Id
         };
-        
-        var incomingIds = command.Categories.Where(c => c.Id > 0).Select(c => c.Id).ToList();
-        var incomingNames = command.Categories.Select(c => c.CategoryName).Distinct().ToList();
-                
-        var existingCategoriesInDb = await db.Categories
-            .Where(c => incomingIds.Contains(c.Id) || incomingNames.Contains(c.CategoryName))
-            .ToListAsync(cancellationToken);
 
-        foreach (var dto in command.Categories)
-        {
-            Category? match = null;
-
-            if (dto.Id > 0)
-            {
-                match = existingCategoriesInDb.FirstOrDefault(c => c.Id == dto.Id);
-            }
-
-            match ??= existingCategoriesInDb.FirstOrDefault(c =>
-                string.Equals(c.CategoryName, dto.CategoryName, StringComparison.CurrentCultureIgnoreCase));
-
-            newPost.Categories.Add(match ?? new Category { CategoryName = dto.CategoryName });
-        }
+        await AddCategoriesToBlogPost(newPost, command, db, cancellationToken);
         
         await db.BlogPosts.AddAsync(newPost, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
@@ -86,7 +47,7 @@ public static partial class CreatePostHandler
         return new CreatePostResponse { IsSuccess = true, BlogPostId = newPost.BlogPostId, Message = "Blog post created successfully." };
     }
 
-    private static string GenerateSlug(string title)
+    private static string GenerateBaseSlug(string title)
     {
         // Max Column Length: 255
         // Date Prefix: "yyyy-MM-dd-" = 11 chars
@@ -108,6 +69,56 @@ public static partial class CreatePostHandler
         var datePrefix = DateTime.UtcNow.ToString("yyyy-MM-dd");
 
         return $"{datePrefix}-{str}";
+    }
+
+    private static async Task<string> GenerateFinalSlug(string baseSlug, BlogDbContext db, CancellationToken ct)
+    {
+        var finalSlug = baseSlug;
+        
+        var similarSlugs = await db.BlogPosts
+            .Where(b => b.Slug == baseSlug || b.Slug.StartsWith(baseSlug + "-"))
+            .Select(b => b.Slug)
+            .ToListAsync(ct);
+
+        if (similarSlugs.Count <= 0) return finalSlug;
+        
+        var suffixRegex = new Regex($@"^{Regex.Escape(baseSlug)}-(\d+)$");
+            
+        var maxSuffix = similarSlugs
+            .Select(s => suffixRegex.Match(s))
+            .Where(m => m.Success)
+            .Select(m => int.Parse(m.Groups[1].Value))
+            .DefaultIfEmpty(0)
+            .Max();
+
+        finalSlug = $"{baseSlug}-{maxSuffix + 1}";
+
+        return finalSlug;
+    }
+
+    private static async Task AddCategoriesToBlogPost(BlogPost newPost, CreatePostCommand command, BlogDbContext db, CancellationToken ct)
+    {
+        var incomingIds = command.Categories.Where(c => c.Id > 0).Select(c => c.Id).ToList();
+        var incomingNames = command.Categories.Select(c => c.CategoryName).Distinct().ToList();
+                
+        var existingCategoriesInDb = await db.Categories
+            .Where(c => incomingIds.Contains(c.Id) || incomingNames.Contains(c.CategoryName))
+            .ToListAsync(ct);
+
+        foreach (var dto in command.Categories)
+        {
+            Category? match = null;
+
+            if (dto.Id > 0)
+            {
+                match = existingCategoriesInDb.FirstOrDefault(c => c.Id == dto.Id);
+            }
+
+            match ??= existingCategoriesInDb.FirstOrDefault(c =>
+                string.Equals(c.CategoryName, dto.CategoryName, StringComparison.CurrentCultureIgnoreCase));
+
+            newPost.Categories.Add(match ?? new Category { CategoryName = dto.CategoryName });
+        }
     }
 
     [GeneratedRegex(@"[^a-z0-9\s-]")]

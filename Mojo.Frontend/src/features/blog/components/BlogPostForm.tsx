@@ -11,7 +11,7 @@ import {
   Autocomplete,
   CircularProgress,
 } from '@mui/material';
-import type { CreatePostCategoryDto, GetCategoriesResponse } from '../../../types/blog.types';
+import type { CreatePostCategoryDto, GetCategoriesResponse } from '../types/blog.types';
 
 interface BlogPostFormProps {
   initialData?: {

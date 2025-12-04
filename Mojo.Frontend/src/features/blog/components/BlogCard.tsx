@@ -1,7 +1,7 @@
 import { Card, CardContent, Typography, Chip, Box } from '@mui/material';
 import { CalendarToday, Person, Chat } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import type { BlogPost } from '../../../types/blog.types';
+import type { BlogPost } from '../types/blog.types';
 import './BlogCard.css';
 
 interface BlogCardProps {

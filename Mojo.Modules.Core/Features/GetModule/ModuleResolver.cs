@@ -10,8 +10,7 @@ public class ModuleResolver(CoreDbContext db)
         return await db.PageModules
             .Where(x => x.PageId == id)
             .Where(x => x.Module.ModuleDefinition.FeatureName == "BlogFeatureName")
-            .Select(x => new ModuleDto {Id = x.ModuleId, ModuleGuid = x.ModuleGuid})
+            .Select(x => new ModuleDto { Id = x.ModuleId, ModuleGuid = x.ModuleGuid, SiteGuid = x.Module.SiteGuid, SiteId = x.Module.SiteId })
             .FirstOrDefaultAsync(ct);
-        
     }
 }

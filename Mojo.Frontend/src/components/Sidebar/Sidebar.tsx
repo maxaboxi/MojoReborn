@@ -2,7 +2,7 @@ import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Too
 import { Article, Forum, Settings, Layers } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NavMenuItem } from '../NavMenuItem/NavMenuItem';
-import { useMenuItems } from '../../hooks/useMenuItems';
+import { useMenuQuery } from '@shared/hooks/useMenuQuery';
 import './Sidebar.css';
 
 const DRAWER_WIDTH = 260;
@@ -21,7 +21,7 @@ interface SidebarProps {
 export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { menuItems, loading } = useMenuItems();
+  const { menuItems, loading } = useMenuQuery();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 

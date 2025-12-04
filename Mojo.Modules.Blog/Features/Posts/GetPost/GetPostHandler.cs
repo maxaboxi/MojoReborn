@@ -28,7 +28,7 @@ public static class GetPostHandler
                 CommentCount = bp.Comments.Count(),
                 Comments = bp.Comments.Select(bpc => new BlogCommentDto()
                 {
-                    Guid = bpc.Guid,
+                    Guid = bpc.Id,
                     UserGuid = bpc.UserGuid,
                     Title = bpc.Title,
                     Content = bpc.Content.Substring(0, 200),

@@ -100,5 +100,5 @@ const getDesignTokens = (mode: 'light' | 'dark'): ThemeOptions => ({
   },
 });
 
-export const createAppTheme = (mode: 'light' | 'dark') => 
+export const createAppTheme = (mode: 'light' | 'dark') =>
   createTheme(getDesignTokens(mode));

@@ -1,37 +1,32 @@
-import { Container, Typography, CircularProgress, Alert, Box, Stack, Button } from '@mui/material';
+import { Typography, Box, Stack, Button } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useBlogPosts } from '../hooks/useBlogPosts';
+import { useBlogPostsQuery } from '../hooks/useBlogPostsQuery';
 import { BlogCard } from '../components/BlogCard';
+import { LoadingState, StatusMessage } from '@shared/ui';
 import './BlogList.css';
 
 export const BlogList = () => {
-  const { posts, loading, error } = useBlogPosts();
+  const {
+    data: posts = [],
+    isLoading: loading,
+    error,
+  } = useBlogPostsQuery();
   const navigate = useNavigate();
 
   if (loading) {
-    return (
-      <Box className="blog-list-loading">
-        <CircularProgress size={60} />
-      </Box>
-    );
+    return <LoadingState className="blog-list-loading" minHeight={200} />;
   }
 
   if (error) {
-    return (
-      <Container maxWidth="md">
-        <Alert severity="error">{error}</Alert>
-      </Container>
-    );
+    return <StatusMessage>{error.message}</StatusMessage>;
   }
 
   if (posts.length === 0) {
     return (
-      <Container maxWidth="md">
-        <Alert severity="info">
-          No posts found. The blog is empty. Check back soon for new content!
-        </Alert>
-      </Container>
+      <StatusMessage severity="info">
+        No posts found. The blog is empty. Check back soon for new content!
+      </StatusMessage>
     );
   }
 

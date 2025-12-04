@@ -1,46 +1,33 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Box, Typography, CircularProgress, Alert } from '@mui/material';
+import { Container, Box, Typography } from '@mui/material';
 import { BlogPostForm } from '../components/BlogPostForm';
-import { blogApi } from '../../../api/blog.api';
-import { useMenuItems } from '../../../hooks/useMenuItems';
-import { useCategories } from '../hooks/useCategories';
-import type { CreatePostRequest } from '../../../types/blog.types';
+import { useMenuQuery } from '@shared/hooks/useMenuQuery';
+import { useBlogCategoriesQuery } from '../hooks/useBlogCategoriesQuery';
+import { findBlogPageId } from '../utils/findBlogPageId';
+import type { CreatePostRequest } from '../types/blog.types';
+import { useCreateBlogPostMutation } from '../hooks/useCreateBlogPostMutation';
+import { LoadingState, StatusMessage } from '@shared/ui';
 
 export const CreateBlogPost = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { menuItems, loading: loadingMenu, error: menuError } = useMenuItems();
-  const { categories, loading: loadingCategories, error: categoriesError } = useCategories();
-
-  // Find the blog page ID from menu items
-  const findBlogPageId = (): number | null => {
-    // Recursively search for the blog page
-    const findInMenu = (items: typeof menuItems): number | null => {
-      for (const item of items) {
-        if (item.url.toLowerCase().includes('blog') || item.title.toLowerCase().includes('blog')) {
-          return item.id;
-        }
-        if (item.children && item.children.length > 0) {
-          const found = findInMenu(item.children);
-          if (found !== null) return found;
-        }
-      }
-      return null;
-    };
-    return findInMenu(menuItems);
-  };
+  const { menuItems, loading: loadingMenu, error: menuError } = useMenuQuery();
+  const {
+    data: categories = [],
+    isLoading: loadingCategories,
+    error: categoriesError,
+  } = useBlogCategoriesQuery();
+  const createPostMutation = useCreateBlogPostMutation();
 
   const handleSubmit = async (data: Omit<CreatePostRequest, 'pageId' | 'categories'> & { categories: { id: number; categoryName: string }[] }) => {
-    const pageId = findBlogPageId();
+    const pageId = findBlogPageId(menuItems);
     
     if (pageId === null) {
       setError('Could not find blog page ID from menu. Please try again.');
       return;
     }
 
-    setIsLoading(true);
     setError(null);
 
     try {
@@ -48,7 +35,7 @@ export const CreateBlogPost = () => {
         ...data,
         pageId,
       };
-      const response = await blogApi.createPost(request);
+      const response = await createPostMutation.mutateAsync(request);
       
       if (response.isSuccess) {
         // Navigate to the newly created post
@@ -58,8 +45,6 @@ export const CreateBlogPost = () => {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred while creating the post');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -68,21 +53,14 @@ export const CreateBlogPost = () => {
   };
 
   if (loadingMenu || loadingCategories) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress size={60} />
-      </Box>
-    );
+    return <LoadingState minHeight={400} />;
   }
 
   if (menuError || categoriesError) {
-    return (
-      <Container maxWidth="md">
-        <Alert severity="error">
-          {menuError ? `Failed to load menu: ${menuError}` : `Failed to load categories: ${categoriesError}`}
-        </Alert>
-      </Container>
-    );
+    const blockingError = menuError
+      ? `Failed to load menu: ${menuError}`
+      : `Failed to load categories: ${categoriesError?.message || 'Unknown error'}`;
+    return <StatusMessage>{blockingError}</StatusMessage>;
   }
 
   return (
@@ -95,7 +73,7 @@ export const CreateBlogPost = () => {
         <BlogPostForm
           onSubmit={handleSubmit}
           onCancel={handleCancel}
-          isLoading={isLoading}
+          isLoading={createPostMutation.isPending}
           error={error}
           existingCategories={categories}
           loadingCategories={loadingCategories}

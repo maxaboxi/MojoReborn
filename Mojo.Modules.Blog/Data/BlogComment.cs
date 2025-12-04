@@ -2,10 +2,10 @@
 
 public class BlogComment
 {
-    public Guid Guid { get; set; }
-
-    public Guid ParentGuid { get; set; }
-
+    public Guid Id { get; set; }
+    
+    public Guid SiteGuid { get; set; }
+    
     public Guid FeatureGuid { get; set; }
 
     public Guid ModuleGuid { get; set; }
@@ -13,6 +13,8 @@ public class BlogComment
     public Guid ContentGuid { get; set; }
 
     public Guid UserGuid { get; set; }
+    
+    public string UserIpAddress { get; set; }
 
     public string? Title { get; set; } 
 
