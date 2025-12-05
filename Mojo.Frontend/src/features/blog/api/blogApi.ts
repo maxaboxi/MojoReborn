@@ -9,6 +9,10 @@ import type {
   DeletePostResponse,
   CreateCommentRequest,
   CreateCommentResponse,
+  EditCommentRequest,
+  EditCommentResponse,
+  DeleteCommentRequest,
+  DeleteCommentResponse,
 } from '../types/blog.types';
 
 export const blogApi = {
@@ -38,6 +42,16 @@ export const blogApi = {
   },
   createComment: async (request: CreateCommentRequest): Promise<CreateCommentResponse> => {
     const response = await apiClient.post<CreateCommentResponse>('/blog/posts/comment', request);
+    return response.data;
+  },
+  editComment: async (request: EditCommentRequest): Promise<EditCommentResponse> => {
+    const response = await apiClient.put<EditCommentResponse>('/blog/posts/comment', request);
+    return response.data;
+  },
+  deleteComment: async ({ blogPostId, blogCommentId }: DeleteCommentRequest): Promise<DeleteCommentResponse> => {
+    const response = await apiClient.delete<DeleteCommentResponse>(
+      `/blog/posts/${blogPostId}/comment/${blogCommentId}`
+    );
     return response.data;
   },
 };

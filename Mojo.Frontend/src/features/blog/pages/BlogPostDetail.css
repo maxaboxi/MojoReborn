@@ -116,6 +116,17 @@
   margin-bottom: 8px;
 }
 
+.blog-comment-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.blog-comment-edit {
+  margin-top: 12px;
+}
+
 @media (max-width: 768px) {
   .blog-post-content {
     padding: 24px !important;

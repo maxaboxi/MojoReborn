@@ -16,7 +16,7 @@ public class BlogComment
     
     public string UserIpAddress { get; set; }
 
-    public string? Title { get; set; } 
+    public string Title { get; set; } 
 
     public string Content { get; set; } = null!;
 

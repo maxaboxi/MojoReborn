@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import type { SyntheticEvent } from 'react';
 import {
   Typography,
   Box,
@@ -14,11 +15,16 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Snackbar,
 } from '@mui/material';
+import type { AlertColor } from '@mui/material';
+import type { SnackbarCloseReason } from '@mui/material/Snackbar';
 import { CalendarToday, Person, Chat, ArrowBack, Share, Edit, Delete } from '@mui/icons-material';
 import { useBlogPostQuery } from '../hooks/useBlogPostQuery';
 import { useDeleteBlogPostMutation } from '../hooks/useDeleteBlogPostMutation';
 import { useCreateCommentMutation } from '../hooks/useCreateCommentMutation';
+import { useEditCommentMutation } from '../hooks/useEditCommentMutation';
+import { useDeleteCommentMutation } from '../hooks/useDeleteCommentMutation';
 import type { CommentFormValues } from '../components/CommentForm';
 import { BlogCommentsList } from '../components/BlogCommentsList';
 import { BlogCommentFormPanel } from '../components/BlogCommentFormPanel';
@@ -26,6 +32,8 @@ import { useMenuQuery } from '@shared/hooks/useMenuQuery';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { findBlogPageId } from '../utils/findBlogPageId';
 import './BlogPostDetail.css';
+
+const ANONYMOUS_USER_ID = '00000000-0000-0000-0000-000000000000';
 
 
 export const BlogPostDetail = () => {
@@ -46,8 +54,15 @@ export const BlogPostDetail = () => {
   const [commentError, setCommentError] = useState<string | null>(null);
   const [commentSuccess, setCommentSuccess] = useState<string | null>(null);
   const [commentFormKey, setCommentFormKey] = useState(0);
+  const [toastState, setToastState] = useState<{
+    key: number;
+    message: string;
+    severity: AlertColor;
+  } | null>(null);
   const deleteMutation = useDeleteBlogPostMutation();
   const commentMutation = useCreateCommentMutation();
+  const editCommentMutation = useEditCommentMutation();
+  const deleteCommentMutation = useDeleteCommentMutation();
   const commentFormInitialData = useMemo(
     () => ({
       userName: '',
@@ -57,6 +72,24 @@ export const BlogPostDetail = () => {
     }),
     [commentFormKey]
   );
+
+  const showToast = (message: string, severity: AlertColor = 'info') => {
+    setToastState({
+      key: Date.now(),
+      message,
+      severity,
+    });
+  };
+
+  const handleToastClose = (
+    _event?: SyntheticEvent | Event,
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setToastState(null);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -96,11 +129,14 @@ export const BlogPostDetail = () => {
 
   const handleCommentSubmit = async (values: CommentFormValues) => {
     if (!id) {
+      showToast('Unable to determine blog post context.', 'error');
       return;
     }
 
     if (!blogPageId) {
-      setCommentError('Unable to determine blog page context. Please try again later.');
+      const message = 'Unable to determine blog page context. Please try again later.';
+      setCommentError(message);
+      showToast(message, 'error');
       return;
     }
 
@@ -111,7 +147,7 @@ export const BlogPostDetail = () => {
       const response = await commentMutation.mutateAsync({
         pageId: blogPageId,
         blogPostId: id,
-        userId: '00000000-0000-0000-0000-000000000000',
+        userId: ANONYMOUS_USER_ID,
         userName: values.userName,
         userEmail: values.userEmail,
         title: values.title,
@@ -122,11 +158,70 @@ export const BlogPostDetail = () => {
         setCommentSuccess('Comment posted successfully.');
         setCommentFormKey((prev) => prev + 1);
         refetch();
+        showToast('Comment posted successfully.', 'success');
       } else {
-        setCommentError(response.message || 'Failed to post comment.');
+        const message = response.message || 'Failed to post comment.';
+        setCommentError(message);
+        showToast(message, 'error');
       }
     } catch (err) {
-      setCommentError(err instanceof Error ? err.message : 'An error occurred while posting the comment.');
+      const message = err instanceof Error ? err.message : 'An error occurred while posting the comment.';
+      setCommentError(message);
+      showToast(message, 'error');
+    }
+  };
+
+  const handleCommentEdit = async (commentId: string, values: CommentFormValues) => {
+    if (!id) {
+      const error = new Error('Missing blog post context.');
+      showToast(error.message, 'error');
+      throw error;
+    }
+
+    try {
+      const response = await editCommentMutation.mutateAsync({
+        blogPostId: id,
+        blogCommentId: commentId,
+        title: values.title,
+        content: values.content,
+      });
+
+      if (!response.isSuccess) {
+        throw new Error(response.message || 'Failed to update comment.');
+      }
+
+      await refetch();
+      showToast('Comment updated successfully.', 'success');
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to update comment.');
+      showToast(error.message, 'error');
+      throw error;
+    }
+  };
+
+  const handleCommentDelete = async (commentId: string) => {
+    if (!id) {
+      const error = new Error('Missing blog post context.');
+      showToast(error.message, 'error');
+      throw error;
+    }
+
+    try {
+      const response = await deleteCommentMutation.mutateAsync({
+        blogPostId: id,
+        blogCommentId: commentId,
+      });
+
+      if (!response.isSuccess) {
+        throw new Error(response.message || 'Failed to delete comment.');
+      }
+
+      await refetch();
+      showToast('Comment deleted successfully.', 'success');
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to delete comment.');
+      showToast(error.message, 'error');
+      throw error;
     }
   };
 
@@ -201,6 +296,8 @@ export const BlogPostDetail = () => {
         comments={comments}
         commentCount={commentCount}
         formatDate={formatDate}
+        onEditComment={handleCommentEdit}
+        onDeleteComment={handleCommentDelete}
       />
 
       <BlogCommentFormPanel
@@ -282,6 +379,25 @@ export const BlogPostDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        key={toastState?.key}
+        open={Boolean(toastState)}
+        autoHideDuration={5000}
+        onClose={handleToastClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        {toastState ? (
+          <Alert
+            onClose={handleToastClose}
+            severity={toastState.severity}
+            variant="filled"
+            sx={{ width: '100%' }}
+          >
+            {toastState.message}
+          </Alert>
+        ) : undefined}
+      </Snackbar>
     </>
   );
 };

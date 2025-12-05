@@ -26,18 +26,18 @@ public static class GetPostHandler
                 CreatedAt = bp.CreatedAt,
                 Categories = bp.Categories.Select(c => c.CategoryName).ToList(),
                 CommentCount = bp.Comments.Count(),
-                Comments = bp.Comments.Select(bpc => new BlogCommentDto()
-                {
-                    Guid = bpc.Id,
-                    UserGuid = bpc.UserGuid,
-                    Title = bpc.Title,
-                    Content = bpc.Content.Substring(0, 200),
-                    UserName = bpc.UserName,
-                    CreatedAt = bpc.CreatedAt,
-                    ModifiedAt = bpc.ModifiedAt,
-                    ModeratedBy = bpc.ModeratedBy,
-                    ModerationReason = bpc.ModerationReason
-                }).ToList(),
+                Comments = bp.Comments.Select(bpc => 
+                    new BlogCommentDto(
+                        bpc.Id, 
+                        bpc.UserGuid, 
+                        bpc.UserName, 
+                        bpc.Title, 
+                        bpc.Content.Substring(0, 200), 
+                        bpc.CreatedAt, 
+                        bpc.ModifiedAt, 
+                        bpc.ModeratedBy, 
+                        bpc.ModerationReason))
+                    .ToList(),
                 
             })
             .FirstAsync(ct);

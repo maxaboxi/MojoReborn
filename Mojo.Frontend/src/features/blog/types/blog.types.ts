@@ -83,3 +83,25 @@ export type CreateCommentResponse = {
   commentId: string;
   message: string;
 };
+
+export type EditCommentRequest = {
+  blogPostId: string;
+  blogCommentId: string;
+  title: string;
+  content: string;
+};
+
+export type EditCommentResponse = {
+  isSuccess: boolean;
+  message: string;
+};
+
+export type DeleteCommentRequest = {
+  blogPostId: string;
+  blogCommentId: string;
+};
+
+export type DeleteCommentResponse = {
+  isSuccess: boolean;
+  message: string;
+};
