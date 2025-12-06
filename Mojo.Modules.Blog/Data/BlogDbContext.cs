@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Mojo.Modules.Blog.Domain;
 
 namespace Mojo.Modules.Blog.Data;
 
@@ -6,7 +7,7 @@ public class BlogDbContext(DbContextOptions<BlogDbContext> options) : DbContext(
 {
     public virtual DbSet<BlogPost> BlogPosts { get; set; }
 
-    public virtual DbSet<Category> Categories { get; set; }
+    public virtual DbSet<BlogCategory> Categories { get; set; }
 
     public virtual DbSet<BlogComment> BlogComments { get; set; }
 
@@ -36,8 +37,8 @@ public class BlogDbContext(DbContextOptions<BlogDbContext> options) : DbContext(
         modelBuilder.Entity<BlogPost>()
             .HasMany(b => b.Categories)
             .WithMany(c => c.BlogPosts)
-            .UsingEntity<BlogItemCategory>(
-                r => r.HasOne<Category>().WithMany().HasForeignKey(e => e.CategoryId).OnDelete(DeleteBehavior.Cascade),
+            .UsingEntity<BlogPostCategory>(
+                r => r.HasOne<BlogCategory>().WithMany().HasForeignKey(e => e.CategoryId).OnDelete(DeleteBehavior.Cascade),
                 l => l.HasOne<BlogPost>().WithMany().HasForeignKey(e => e.ItemId).OnDelete(DeleteBehavior.Cascade),
                 j =>
                 {
@@ -77,7 +78,7 @@ public class BlogDbContext(DbContextOptions<BlogDbContext> options) : DbContext(
                 .HasPrincipalKey(b => b.BlogPostId);
         });
 
-        modelBuilder.Entity<Category>(entity =>
+        modelBuilder.Entity<BlogCategory>(entity =>
         {
             entity.HasKey(e => e.Id);
 

@@ -1,7 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
-using Mojo.Modules.Core.Features.GetModule;
+using Mojo.Modules.Blog.Domain;
+using Mojo.Modules.Core.Features.SiteStructure.GetModule;
 using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Blog.Features.Posts.CreatePost;
@@ -107,7 +108,7 @@ public static partial class CreatePostHandler
 
         foreach (var dto in command.Categories)
         {
-            Category? match = null;
+            BlogCategory? match = null;
 
             if (dto.Id > 0)
             {
@@ -117,7 +118,7 @@ public static partial class CreatePostHandler
             match ??= existingCategoriesInDb.FirstOrDefault(c =>
                 string.Equals(c.CategoryName, dto.CategoryName, StringComparison.CurrentCultureIgnoreCase));
 
-            newPost.Categories.Add(match ?? new Category { CategoryName = dto.CategoryName });
+            newPost.Categories.Add(match ?? new BlogCategory { CategoryName = dto.CategoryName });
         }
     }
 

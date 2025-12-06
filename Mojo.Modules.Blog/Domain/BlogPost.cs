@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Mojo.Modules.Blog.Data;
 
-namespace Mojo.Modules.Blog.Data;
+namespace Mojo.Modules.Blog.Domain;
 
 public class BlogPost
 {
@@ -30,7 +31,7 @@ public class BlogPost
     
     public bool IsPublished { get; set; }
 
-    public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
+    public virtual ICollection<BlogCategory> Categories { get; set; } = new List<BlogCategory>();
     public virtual ICollection<BlogComment> Comments { get; set; } = new List<BlogComment>();
 
 }

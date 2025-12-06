@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 
-namespace Mojo.Modules.Blog.Features.Posts.GetCategories;
+namespace Mojo.Modules.Blog.Features.Categories.GetCategories;
 
 public class GetCategoriesHandler
 {

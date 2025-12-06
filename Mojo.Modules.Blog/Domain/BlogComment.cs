@@ -1,4 +1,6 @@
-﻿namespace Mojo.Modules.Blog.Data;
+﻿using Mojo.Modules.Blog.Data;
+
+namespace Mojo.Modules.Blog.Domain;
 
 public class BlogComment
 {

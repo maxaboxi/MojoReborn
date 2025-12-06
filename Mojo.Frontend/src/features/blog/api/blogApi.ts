@@ -25,7 +25,7 @@ export const blogApi = {
     return response.data;
   },
   getCategories: async (): Promise<GetCategoriesResponse[]> => {
-    const response = await apiClient.get<GetCategoriesResponse[]>('/blog/posts/categories');
+    const response = await apiClient.get<GetCategoriesResponse[]>('/blog/categories');
     return response.data;
   },
   createPost: async (request: CreatePostRequest): Promise<CreatePostResponse> => {

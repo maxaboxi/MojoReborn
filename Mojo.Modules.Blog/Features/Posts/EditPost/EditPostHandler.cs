@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
+using Mojo.Modules.Blog.Domain;
 using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Blog.Features.Posts.EditPost;
@@ -56,7 +57,7 @@ public static class EditPostHandler
                         continue;
                     }
                     
-                    original.Categories.Add(new Category { CategoryName = dto.CategoryName, ModuleId = original.ModuleId });
+                    original.Categories.Add(new BlogCategory { CategoryName = dto.CategoryName, ModuleId = original.ModuleId });
                     
                 }
             }

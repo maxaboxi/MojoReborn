@@ -1,4 +1,4 @@
-﻿namespace Mojo.Modules.Blog.Data;
+﻿namespace Mojo.Modules.Blog.Domain;
 
 public partial class BlogStat
 {
