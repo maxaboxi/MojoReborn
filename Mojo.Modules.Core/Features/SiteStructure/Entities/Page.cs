@@ -1,4 +1,4 @@
-﻿namespace Mojo.Modules.Core.Data;
+﻿namespace Mojo.Modules.Core.Features.SiteStructure.Entities;
 
 public class Page
 {

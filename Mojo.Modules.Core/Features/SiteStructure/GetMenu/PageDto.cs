@@ -1,4 +1,4 @@
-﻿namespace Mojo.Modules.Core.Features.GetMenu;
+﻿namespace Mojo.Modules.Core.Features.SiteStructure.GetMenu;
 
 public class PageDto
 {

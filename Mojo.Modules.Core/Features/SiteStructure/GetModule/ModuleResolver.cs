@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Core.Data;
 
-namespace Mojo.Modules.Core.Features.GetModule;
+namespace Mojo.Modules.Core.Features.SiteStructure.GetModule;
 
 public class ModuleResolver(CoreDbContext db)
 {
@@ -10,7 +10,8 @@ public class ModuleResolver(CoreDbContext db)
         return await db.PageModules
             .Where(x => x.PageId == id)
             .Where(x => x.Module.ModuleDefinition.FeatureName == "BlogFeatureName")
-            .Select(x => new ModuleDto { Id = x.ModuleId, ModuleGuid = x.ModuleGuid, SiteGuid = x.Module.SiteGuid, SiteId = x.Module.SiteId })
+            .Select(x => 
+                new ModuleDto { Id = x.ModuleId, ModuleGuid = x.ModuleGuid, SiteGuid = x.Module.SiteGuid, SiteId = x.Module.SiteId, FeatureGuid = x.Module.FeatureGuid })
             .FirstOrDefaultAsync(ct);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Wolverine;
 using Wolverine.Http;
 
-namespace Mojo.Modules.Core.Features.GetMenu;
+namespace Mojo.Modules.Core.Features.SiteStructure.GetMenu;
 
 public class GetMenuEndpoint
 {

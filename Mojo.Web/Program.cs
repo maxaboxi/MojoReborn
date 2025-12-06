@@ -1,8 +1,12 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Core.Data;
-using Mojo.Modules.Core.Features.GetModule;
+using Mojo.Modules.Core.Features.Identity;
+using Mojo.Modules.Core.Features.Identity.Entities;
+using Mojo.Modules.Core.Features.SiteStructure.GetModule;
 using Mojo.Modules.Forum.Data;
+using Mojo.Web.Extensions;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
 using Wolverine.FluentValidation;
@@ -28,6 +32,13 @@ builder.Services.AddDbContext<CoreDbContext>(options =>
 builder.Services.AddDbContext<ForumDbContext>(options =>
         options.UseSqlServer(connectionString),
     optionsLifetime: ServiceLifetime.Singleton);
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
+{
+    opt.User.RequireUniqueEmail = true;
+})
+.AddEntityFrameworkStores<CoreDbContext>()
+.AddDefaultTokenProviders();
 
 builder.Services.AddScoped<ModuleResolver>();
 
@@ -59,6 +70,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddWolverineHttp();
 
 var app = builder.Build();
+
+await app.ApplyDatabaseMigrations();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

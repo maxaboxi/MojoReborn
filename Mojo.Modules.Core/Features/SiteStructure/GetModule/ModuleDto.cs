@@ -1,4 +1,4 @@
-﻿namespace Mojo.Modules.Core.Features.GetModule;
+﻿namespace Mojo.Modules.Core.Features.SiteStructure.GetModule;
 
 public class ModuleDto
 {
