@@ -28,9 +28,8 @@ import { useDeleteCommentMutation } from '../hooks/useDeleteCommentMutation';
 import type { CommentFormValues } from '../components/CommentForm';
 import { BlogCommentsList } from '../components/BlogCommentsList';
 import { BlogCommentFormPanel } from '../components/BlogCommentFormPanel';
-import { useMenuQuery } from '@shared/hooks/useMenuQuery';
 import { LoadingState, StatusMessage } from '@shared/ui';
-import { findBlogPageId } from '../utils/findBlogPageId';
+import { useBlogPageContext } from '../hooks/useBlogPageContext';
 import './BlogPostDetail.css';
 
 const ANONYMOUS_USER_ID = '00000000-0000-0000-0000-000000000000';
@@ -39,15 +38,14 @@ const ANONYMOUS_USER_ID = '00000000-0000-0000-0000-000000000000';
 export const BlogPostDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { blogPageId, menuLoading, menuError } = useBlogPageContext();
   const {
     data: post,
     isLoading: loading,
     error: postError,
     refetch,
-  } = useBlogPostQuery(id);
+  } = useBlogPostQuery(id, blogPageId);
   const postErrorMessage = postError?.message ?? null;
-  const { menuItems, loading: menuLoading, error: menuError } = useMenuQuery();
-  const blogPageId = useMemo(() => findBlogPageId(menuItems), [menuItems]);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -225,8 +223,20 @@ export const BlogPostDetail = () => {
     }
   };
 
-  if (loading) {
+  if (menuLoading || loading) {
     return <LoadingState className="blog-post-loading" minHeight={200} />;
+  }
+
+  if (menuError) {
+    return <StatusMessage>{menuError}</StatusMessage>;
+  }
+
+  if (blogPageId == null) {
+    return (
+      <StatusMessage severity="warning">
+        Unable to determine the blog page context. Please refresh the page and try again.
+      </StatusMessage>
+    );
   }
 
   if (postErrorMessage || !post) {

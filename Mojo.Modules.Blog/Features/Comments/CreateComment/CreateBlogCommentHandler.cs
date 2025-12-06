@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain;
+using Mojo.Modules.Blog.Domain.Entities;
 using Mojo.Modules.Core.Features.SiteStructure.GetModule;
 using Mojo.Shared.Responses;
 

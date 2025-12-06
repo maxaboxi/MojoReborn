@@ -1,6 +1,6 @@
-﻿namespace Mojo.Modules.Blog.Domain;
+﻿namespace Mojo.Modules.Blog.Domain.Entities;
 
-public partial class BlogPostCategory
+public class BlogPostCategory
 {
     public int Id { get; set; }
 

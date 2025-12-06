@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Mojo.Modules.Blog.Data;
 
-namespace Mojo.Modules.Blog.Domain;
+namespace Mojo.Modules.Blog.Domain.Entities;
 
 public class BlogPost
 {

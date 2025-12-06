@@ -4,18 +4,32 @@ import { useNavigate } from 'react-router-dom';
 import { useBlogPostsQuery } from '../hooks/useBlogPostsQuery';
 import { BlogCard } from '../components/BlogCard';
 import { LoadingState, StatusMessage } from '@shared/ui';
+import { useBlogPageContext } from '../hooks/useBlogPageContext';
 import './BlogList.css';
 
 export const BlogList = () => {
+  const { blogPageId, menuLoading, menuError } = useBlogPageContext();
   const {
     data: posts = [],
-    isLoading: loading,
+    isLoading: loadingPosts,
     error,
-  } = useBlogPostsQuery();
+  } = useBlogPostsQuery(blogPageId);
   const navigate = useNavigate();
 
-  if (loading) {
+  if (menuLoading || loadingPosts) {
     return <LoadingState className="blog-list-loading" minHeight={200} />;
+  }
+
+  if (menuError) {
+    return <StatusMessage>{menuError}</StatusMessage>;
+  }
+
+  if (blogPageId == null) {
+    return (
+      <StatusMessage severity="warning">
+        Unable to determine the blog page context. Please refresh the page or contact an administrator.
+      </StatusMessage>
+    );
   }
 
   if (error) {

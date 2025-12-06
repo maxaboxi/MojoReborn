@@ -3,8 +3,6 @@ using Mojo.Modules.Blog.Data;
 
 namespace Mojo.Modules.Blog.Features.Posts.GetPost;
 
-public record GetPostQuery(Guid BlogPostId);
-
 public static class GetPostHandler
 {
     public static async Task<GetPostResponse> Handle(

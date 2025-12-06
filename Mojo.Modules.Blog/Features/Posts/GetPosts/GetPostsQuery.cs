@@ -1,3 +1,3 @@
 namespace Mojo.Modules.Blog.Features.Posts.GetPosts;
 
-public record GetPostsQuery;
+public record GetPostsQuery(int PageId);

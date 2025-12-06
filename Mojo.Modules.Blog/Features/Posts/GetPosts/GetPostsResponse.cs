@@ -1,12 +1,8 @@
-﻿namespace Mojo.Modules.Blog.Features.Posts.GetPosts;
+﻿using Mojo.Shared.Responses;
 
-public record GetPostsResponse
+namespace Mojo.Modules.Blog.Features.Posts.GetPosts;
+
+public class GetPostsResponse : BaseResponse
 {
-    public Guid BlogPostGuid { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string Content { get; set; } = string.Empty;
-    public string Author { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; }
-    public List<string> Categories { get; set; } = [];
-    public int CommentCount { get; set; }
+    public List<BlogPostDto> BlogPosts { get; set; } = [];
 }

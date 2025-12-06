@@ -9,6 +9,7 @@ export type BlogComment = {
 export type Category = {
   id: number;
   categoryName: string;
+  moduleId?: number;
 };
 
 export type BlogPost = {
@@ -57,10 +58,22 @@ export type EditPostResponse = {
   message: string;
 };
 
-export type GetCategoriesResponse = {
+export type GetPostsResponse = {
+  isSuccess: boolean;
+  message?: string;
+  blogPosts: BlogPost[];
+};
+
+export type CategoryDto = {
   id: number;
   moduleId: number;
   categoryName: string;
+};
+
+export type GetCategoriesResponse = {
+  isSuccess: boolean;
+  message?: string;
+  categories: CategoryDto[];
 };
 
 export type DeletePostResponse = {

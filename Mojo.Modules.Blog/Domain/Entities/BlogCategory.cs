@@ -1,4 +1,4 @@
-﻿namespace Mojo.Modules.Blog.Domain;
+﻿namespace Mojo.Modules.Blog.Domain.Entities;
 
 public class BlogCategory
 {

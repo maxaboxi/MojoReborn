@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
-using Mojo.Modules.Blog.Domain;
+using Mojo.Modules.Blog.Domain.Entities;
 using Mojo.Modules.Core.Features.SiteStructure.GetModule;
 using Mojo.Shared.Responses;
 
@@ -99,14 +99,21 @@ public static partial class CreatePostHandler
 
     private static async Task AddCategoriesToBlogPost(BlogPost newPost, CreatePostCommand command, BlogDbContext db, CancellationToken ct)
     {
-        var incomingIds = command.Categories.Where(c => c.Id > 0).Select(c => c.Id).ToList();
-        var incomingNames = command.Categories.Select(c => c.CategoryName).Distinct().ToList();
+        var uniqueCategories = command.Categories
+            .Where(x => !string.IsNullOrWhiteSpace(x.CategoryName))
+            .DistinctBy(x => x.CategoryName.Trim(), StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        
+        var incomingIds = uniqueCategories.Where(c => c.Id > 0).Select(c => c.Id).ToList();
+        
+        var incomingNames = uniqueCategories.Select(c => c.CategoryName).Distinct().ToList();
                 
         var existingCategoriesInDb = await db.Categories
+            .Where(c => c.ModuleId == newPost.ModuleId)
             .Where(c => incomingIds.Contains(c.Id) || incomingNames.Contains(c.CategoryName))
             .ToListAsync(ct);
 
-        foreach (var dto in command.Categories)
+        foreach (var dto in uniqueCategories)
         {
             BlogCategory? match = null;
 
@@ -116,9 +123,9 @@ public static partial class CreatePostHandler
             }
 
             match ??= existingCategoriesInDb.FirstOrDefault(c =>
-                string.Equals(c.CategoryName, dto.CategoryName, StringComparison.CurrentCultureIgnoreCase));
+                string.Equals(c.CategoryName, dto.CategoryName.Trim(), StringComparison.CurrentCultureIgnoreCase));
 
-            newPost.Categories.Add(match ?? new BlogCategory { CategoryName = dto.CategoryName });
+            newPost.Categories.Add(match ?? new BlogCategory { CategoryName = dto.CategoryName, ModuleId = newPost.ModuleId });
         }
     }
 

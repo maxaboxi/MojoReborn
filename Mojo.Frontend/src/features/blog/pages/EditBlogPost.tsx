@@ -7,20 +7,22 @@ import { useBlogCategoriesQuery } from '../hooks/useBlogCategoriesQuery';
 import { useUpdateBlogPostMutation } from '../hooks/useUpdateBlogPostMutation';
 import type { EditPostRequest, Category } from '../types/blog.types';
 import { LoadingState, StatusMessage } from '@shared/ui';
+import { useBlogPageContext } from '../hooks/useBlogPageContext';
 
 export const EditBlogPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { blogPageId, menuLoading, menuError } = useBlogPageContext();
   const {
     data: post,
     isLoading: loadingPost,
     error: loadError,
-  } = useBlogPostQuery(id);
+  } = useBlogPostQuery(id, blogPageId);
   const {
     data: existingCategories = [],
     isLoading: loadingCategories,
     error: categoriesError,
-  } = useBlogCategoriesQuery();
+  } = useBlogCategoriesQuery(blogPageId);
   const updatePostMutation = useUpdateBlogPostMutation();
   const [error, setError] = useState<string | null>(null);
 
@@ -60,8 +62,20 @@ export const EditBlogPost = () => {
     navigate(`/blog/post/${id}`);
   };
 
-  if (loadingPost || loadingCategories) {
+  if (menuLoading || loadingPost || loadingCategories) {
     return <LoadingState minHeight={400} />;
+  }
+
+  if (menuError) {
+    return <StatusMessage>{menuError}</StatusMessage>;
+  }
+
+  if (blogPageId === null) {
+    return (
+      <StatusMessage severity="warning">
+        Unable to determine the blog page context. Please refresh the page or contact an administrator.
+      </StatusMessage>
+    );
   }
 
   if (loadError || !post) {

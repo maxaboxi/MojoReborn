@@ -11,7 +11,7 @@ import {
   Autocomplete,
   CircularProgress,
 } from '@mui/material';
-import type { CreatePostCategoryDto, GetCategoriesResponse } from '../types/blog.types';
+import type { CreatePostCategoryDto, CategoryDto } from '../types/blog.types';
 
 interface BlogPostFormProps {
   initialData?: {
@@ -32,7 +32,7 @@ interface BlogPostFormProps {
   isEdit?: boolean;
   isLoading?: boolean;
   error?: string | null;
-  existingCategories?: GetCategoriesResponse[];
+  existingCategories?: CategoryDto[];
   loadingCategories?: boolean;
 }
 
@@ -54,7 +54,7 @@ export const BlogPostForm = ({
     initialData?.categories || []
   );
 
-  const handleCategoriesChange = (_event: any, newValue: (GetCategoriesResponse | string)[]) => {
+  const handleCategoriesChange = (_event: any, newValue: (CategoryDto | string)[]) => {
     const selectedCategories: CreatePostCategoryDto[] = newValue.map((item) => {
       if (typeof item === 'string') {
         // New category typed by user
@@ -177,7 +177,7 @@ export const BlogPostForm = ({
                   }}
                 />
               )}
-              renderTags={(value, getTagProps) =>
+              renderValue={(value, getTagProps) =>
                 value.map((option, index) => {
                   const label = typeof option === 'string' ? option : option.categoryName;
                   const isNew = typeof option === 'string' || option.id === 0;

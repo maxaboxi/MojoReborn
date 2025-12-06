@@ -5,7 +5,9 @@ import type {
   EditPostResponse,
   CreatePostRequest,
   CreatePostResponse,
+  GetPostsResponse,
   GetCategoriesResponse,
+  CategoryDto,
   DeletePostResponse,
   CreateCommentRequest,
   CreateCommentResponse,
@@ -16,17 +18,33 @@ import type {
 } from '../types/blog.types';
 
 export const blogApi = {
-  getPosts: async (): Promise<BlogPost[]> => {
-    const response = await apiClient.get<BlogPost[]>('/blog/posts');
+  getPosts: async (pageId: number): Promise<BlogPost[]> => {
+    const response = await apiClient.get<GetPostsResponse>('/blog/posts', {
+      params: { pageId },
+    });
+
+    if (!response.data.isSuccess) {
+      throw new Error(response.data.message || 'Failed to load blog posts.');
+    }
+
+    return response.data.blogPosts;
+  },
+  getPost: async (id: string, pageId: number): Promise<BlogPost> => {
+    const response = await apiClient.get<BlogPost>(`/blog/posts/${id}`, {
+      params: { pageId },
+    });
     return response.data;
   },
-  getPost: async (id: string): Promise<BlogPost> => {
-    const response = await apiClient.get<BlogPost>(`/blog/posts/${id}`);
-    return response.data;
-  },
-  getCategories: async (): Promise<GetCategoriesResponse[]> => {
-    const response = await apiClient.get<GetCategoriesResponse[]>('/blog/categories');
-    return response.data;
+  getCategories: async (pageId: number): Promise<CategoryDto[]> => {
+    const response = await apiClient.get<GetCategoriesResponse>('/blog/categories', {
+      params: { pageId },
+    });
+
+    if (!response.data.isSuccess) {
+      throw new Error(response.data.message || 'Failed to load categories.');
+    }
+
+    return response.data.categories;
   },
   createPost: async (request: CreatePostRequest): Promise<CreatePostResponse> => {
     const response = await apiClient.post<CreatePostResponse>('/blog/posts', request);

@@ -6,10 +6,10 @@ namespace Mojo.Modules.Blog.Features.Posts.GetPosts;
 public class GetPostsEndpoint
 {
     [WolverineGet("/api/blog/posts")]
-    public static Task<List<GetPostsResponse>> Get(
-        GetPostsQuery query, 
+    public static Task<GetPostsResponse> Get(
+        int pageId,
         IMessageBus bus)
     {
-        return bus.InvokeAsync<List<GetPostsResponse>>(query);
+        return bus.InvokeAsync<GetPostsResponse>(new GetPostsQuery(pageId));
     }
 }

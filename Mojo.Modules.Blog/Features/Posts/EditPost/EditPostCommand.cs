@@ -18,6 +18,7 @@ public class EditPostCommand(Guid blogPostId, string title, string subtitle, str
             RuleFor(x => x.Title).NotNull().MaximumLength(255);
             RuleFor(x => x.SubTitle).NotNull().MaximumLength(500);
             RuleFor(x => x.Content).NotNull();
+            RuleFor(x => x.Categories).NotNull().NotEmpty();
         }
     }
 }

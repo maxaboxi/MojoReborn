@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Box, Typography } from '@mui/material';
 import { BlogPostForm } from '../components/BlogPostForm';
-import { useMenuQuery } from '@shared/hooks/useMenuQuery';
 import { useBlogCategoriesQuery } from '../hooks/useBlogCategoriesQuery';
-import { findBlogPageId } from '../utils/findBlogPageId';
+import { useBlogPageContext } from '../hooks/useBlogPageContext';
 import type { CreatePostRequest } from '../types/blog.types';
 import { useCreateBlogPostMutation } from '../hooks/useCreateBlogPostMutation';
 import { LoadingState, StatusMessage } from '@shared/ui';
@@ -12,18 +11,16 @@ import { LoadingState, StatusMessage } from '@shared/ui';
 export const CreateBlogPost = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-  const { menuItems, loading: loadingMenu, error: menuError } = useMenuQuery();
+  const { blogPageId, menuLoading, menuError } = useBlogPageContext();
   const {
     data: categories = [],
     isLoading: loadingCategories,
     error: categoriesError,
-  } = useBlogCategoriesQuery();
+  } = useBlogCategoriesQuery(blogPageId);
   const createPostMutation = useCreateBlogPostMutation();
 
   const handleSubmit = async (data: Omit<CreatePostRequest, 'pageId' | 'categories'> & { categories: { id: number; categoryName: string }[] }) => {
-    const pageId = findBlogPageId(menuItems);
-    
-    if (pageId === null) {
+    if (blogPageId === null) {
       setError('Could not find blog page ID from menu. Please try again.');
       return;
     }
@@ -33,7 +30,7 @@ export const CreateBlogPost = () => {
     try {
       const request: CreatePostRequest = {
         ...data,
-        pageId,
+        pageId: blogPageId,
       };
       const response = await createPostMutation.mutateAsync(request);
       
@@ -52,7 +49,7 @@ export const CreateBlogPost = () => {
     navigate('/blog');
   };
 
-  if (loadingMenu || loadingCategories) {
+  if (menuLoading || loadingCategories) {
     return <LoadingState minHeight={400} />;
   }
 
@@ -61,6 +58,14 @@ export const CreateBlogPost = () => {
       ? `Failed to load menu: ${menuError}`
       : `Failed to load categories: ${categoriesError?.message || 'Unknown error'}`;
     return <StatusMessage>{blockingError}</StatusMessage>;
+  }
+
+  if (blogPageId === null) {
+    return (
+      <StatusMessage severity="warning">
+        Unable to determine the blog page context. Please refresh the page or contact an administrator.
+      </StatusMessage>
+    );
   }
 
   return (
