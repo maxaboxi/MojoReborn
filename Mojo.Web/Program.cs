@@ -5,6 +5,7 @@ using Mojo.Modules.Core.Data;
 using Mojo.Modules.Core.Features.Identity;
 using Mojo.Modules.Core.Features.Identity.Entities;
 using Mojo.Modules.Core.Features.SiteStructure.GetModule;
+using Mojo.Modules.Core.Features.SiteStructure.GetSite;
 using Mojo.Modules.Forum.Data;
 using Mojo.Web.Extensions;
 using Wolverine;
@@ -40,7 +41,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
 .AddEntityFrameworkStores<CoreDbContext>()
 .AddDefaultTokenProviders();
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddScoped<ModuleResolver>();
+builder.Services.AddScoped<SiteResolver>();
 
 builder.Host.UseWolverine(opts =>
 {

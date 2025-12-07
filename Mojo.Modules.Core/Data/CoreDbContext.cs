@@ -11,6 +11,8 @@ public class CoreDbContext(DbContextOptions<CoreDbContext> options) : IdentityDb
     public DbSet<Module> Modules { get; set; }
     public DbSet<PageModule> PageModules { get; set; }
     public DbSet<ModuleDefinition> ModuleDefinitions { get; set; }
+    public DbSet<Site> Sites { get; set; }
+    public DbSet<SiteHost> SiteHosts { get; set; }
 
     public DbSet<LegacyUser> LegacyUsers { get; set; }
 

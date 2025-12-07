@@ -13,5 +13,6 @@ public class Page
     public string AuthorizedRoles { get; set; } // Legacy column: "Admins;Editors;"
     public bool IncludeInMenu { get; set; }
     
+    public Site Site { get; set; }
     public ICollection<PageModule> PageModules { get; set; } = new List<PageModule>();
 }
