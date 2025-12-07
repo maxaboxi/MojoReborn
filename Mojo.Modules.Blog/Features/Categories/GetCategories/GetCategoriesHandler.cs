@@ -20,7 +20,10 @@ public class GetCategoriesHandler
             return BaseResponse.NotFound<GetCategoriesResponse>("Module not found.");
         }
 
-        var categories = await db.Categories.Select(x => new CategoryDto(x.Id, x.ModuleId, x.CategoryName)).ToListAsync(ct);
+        var categories = await db.Categories
+            .AsNoTracking()
+            .Select(x => new CategoryDto(x.Id, x.ModuleId, x.CategoryName))
+            .ToListAsync(ct);
         return new GetCategoriesResponse { IsSuccess = true, Categories = categories };
     }
 }

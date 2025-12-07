@@ -8,6 +8,7 @@ public class ModuleResolver(CoreDbContext db)
     public async Task<ModuleDto?> GetModuleByPageId(int id, CancellationToken ct = default)
     {
         return await db.PageModules
+            .AsNoTracking()
             .Where(x => x.PageId == id)
             .Where(x => x.Module.ModuleDefinition.FeatureName == "BlogFeatureName")
             .Select(x => 
