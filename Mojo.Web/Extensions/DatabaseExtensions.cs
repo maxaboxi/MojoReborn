@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Core.Data;
+using Mojo.Modules.Core.Data.Seeding;
 
 namespace Mojo.Web.Extensions;
 
@@ -16,6 +17,8 @@ public static class DatabaseExtensions
         var coreDb = services.GetRequiredService<CoreDbContext>();
         await coreDb.Database.MigrateAsync();
         logger.LogInformation("CoreDbContext migrations applied successfully.");
+        
+        await LegacyRoleSeeder.SeedAsync(coreDb, logger);
         
         logger.LogInformation("All database migrations applied successfully.");
     }

@@ -1,13 +1,23 @@
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Core.Data;
-using Mojo.Modules.Core.Features.Identity.Entities;
 
 namespace Mojo.Modules.Core.Features.Identity.GetLegacyUser;
 
 public static class GetLegacyUserHandler
 {
-    public static async Task<LegacyUser> Handle(GetLegacyUserQuery query, CoreDbContext db, CancellationToken ct)
+    public static async Task<GetLegacyUserResponse> Handle(GetLegacyUserQuery query, CoreDbContext db, CancellationToken ct)
     {
-        return await db.LegacyUsers.AsNoTracking().Where(x => x.Email == query.Email).FirstOrDefaultAsync(ct) ?? new LegacyUser();
+        var allWithGivenEmail = await db.LegacyUsers.AsNoTracking()
+            .Include(u => u.UserRoles)
+                .ThenInclude(r => r.Role)
+            .Where(x => x.Email == query.Email && x.IsEmailConfirmed && !x.IsDeleted)
+            .ToListAsync(ct);
+        var response = new GetLegacyUserResponse
+        {
+            LegacyUser = allWithGivenEmail.FirstOrDefault(x => x.SiteGuid == query.SiteGuid),
+            LegacyUsers = allWithGivenEmail
+        };
+
+        return response;
     }
 }

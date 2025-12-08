@@ -4,8 +4,11 @@ using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Mojo.Modules.Core.Data;
 using Mojo.Modules.Core.Features.Identity.Entities;
 using Mojo.Modules.Core.Features.Identity.GetLegacyUser;
+using Mojo.Modules.Core.Features.SiteStructure.GetSite;
 using Wolverine;
 
 namespace Mojo.Modules.Core.Features.Identity.MigrateLegacyUser;
@@ -16,8 +19,11 @@ public class MigrateLegacyUserHandler
         MigrateLegacyUserCommand command,
         SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager,
+        SiteResolver siteResolver,
         IConfiguration configuration,
         IMessageBus bus,
+        CoreDbContext db,
+        ILogger<MigrateLegacyUserHandler> logger,
         CancellationToken ct)
     {
         var baseUrl = configuration["Frontend:Url"];
@@ -38,20 +44,27 @@ public class MigrateLegacyUserHandler
 
         if (string.IsNullOrEmpty(email))
         {
+            logger.LogInformation("Email missing from external login info");
             return Results.Redirect($"{baseUrl}/auth/login?error=email_not_found");
         }
         
-        var legacyUser = await bus.InvokeAsync<LegacyUser>(new GetLegacyUserQuery(email), ct);
+        var site = await siteResolver.GetSite(ct);
         
-        if (string.IsNullOrEmpty(legacyUser.Email))
+        var legacyUserResponse = await bus.InvokeAsync<GetLegacyUserResponse>(new GetLegacyUserQuery(email, site.SiteGuid), ct);
+        
+        if (string.IsNullOrEmpty(legacyUserResponse.LegacyUser?.Email))
         {
+            logger.LogInformation("User not found");
             return Results.Redirect($"{baseUrl}/auth/login?error=email_not_found");
         }
+        
+        var legacyUser = legacyUserResponse.LegacyUser;
 
         if (legacyUser.PwdFormat == 2)
         {
             // Would require implementing a function to mimic the old FormsAuthentication.Decrypt method
             // or find a package to do that.
+            logger.LogInformation("Password format 2, account too old.");
             return Results.Redirect($"{baseUrl}/auth/migrate-legacy?error=account_too_old");
         }
 
@@ -59,23 +72,23 @@ public class MigrateLegacyUserHandler
 
         if (!passwordIsMatch)
         {
+            logger.LogInformation("Password doesn't match");
             return Results.Redirect($"{baseUrl}/auth/migrate-legacy?error=password_mismatch");
         }
 
         var newUser = new ApplicationUser
         {
-            Id = legacyUser.UserGuid.ToString(),
+            Id = legacyUser.UserGuid,
             UserName = email,
             Email = email,
             EmailConfirmed = true,
-            SiteId = legacyUser.SiteId,
-            SiteGuid = legacyUser.SiteGuid
         };
         
         var createResult = await userManager.CreateAsync(newUser);
         if (!createResult.Succeeded)
         {
             var errors = string.Join(",", createResult.Errors.Select(e => e.Description));
+            logger.LogError(errors);
             return Results.Redirect($"{baseUrl}/auth/migrate-legacy?error=creation_failed&details={errors}");
         }
 
@@ -83,6 +96,13 @@ public class MigrateLegacyUserHandler
         if (!linkResult.Succeeded)
         {
             return Results.Redirect($"{baseUrl}/auth/migrate-legacy?error=linking_failed");
+        }
+        
+        var isSuccess = await MapUserRoles(legacyUserResponse, newUser, db, logger, ct);
+
+        if (!isSuccess)
+        {
+            Results.Redirect($"{baseUrl}/auth/migrate-legacy?error=role_migration_failed");
         }
 
         await signInManager.SignInAsync(newUser, isPersistent: false);
@@ -154,6 +174,60 @@ public class MigrateLegacyUserHandler
             "HMACSHA512" => new HMACSHA512(key),
             _ => throw new NotSupportedException($"Legacy Algorithm '{algorithm}' is not supported.")
         };
+    }
+
+    /// <summary>
+    /// mojoPortal can have same user (email) multiple times in mp_Users table (one for every site)
+    /// and that is not something this application is going to support.
+    /// Instead, AspNetUsers has RequireUniqueEmail set to true.
+    /// New database tables are added for storing the information about the users role(s) for site(s).
+    /// </summary>
+    /// <param name="response">Contains the users found with the same email that are not deleted and who's email is confirmed.</param>
+    /// <param name="newUser">The new ApplicationUser entity</param>
+    /// <param name="db">CoreDbContext</param>
+    /// <param name="logger"></param>
+    /// <param name="ct"></param>
+    /// <returns>Boolean to tell whether the role migration was done successfully</returns>
+    private static async Task<bool> MapUserRoles(
+        GetLegacyUserResponse response, 
+        ApplicationUser newUser, 
+        CoreDbContext db, 
+        ILogger<MigrateLegacyUserHandler> logger,
+        CancellationToken ct)
+    {
+        var siteProfiles = new List<UserSiteProfile>();
+        var siteRoleAssignments = new List<UserSiteRoleAssignment>();
+
+        foreach (var user in response.LegacyUsers)
+        {
+            if (siteProfiles.Any(p => p.SiteGuid == user.SiteGuid))
+            {
+                continue;
+            }
+
+            var siteProfile = new UserSiteProfile
+            {
+                UserId = newUser.Id,
+                SiteGuid = user.SiteGuid,
+                SiteId = user.SiteId,
+            };
+
+            siteRoleAssignments.AddRange(user.UserRoles.Select(role => new UserSiteRoleAssignment { UserId = newUser.Id, RoleId = role.RoleGuid }));
+            siteProfiles.Add(siteProfile);
+        }
+
+        try
+        {
+            db.UserSiteProfiles.AddRange(siteProfiles);
+            db.UserSiteRoleAssignments.AddRange(siteRoleAssignments);
+            await db.SaveChangesAsync(ct);
+            return true;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error while trying to map legacy user profiles");
+            return false;
+        }
     }
 
 }

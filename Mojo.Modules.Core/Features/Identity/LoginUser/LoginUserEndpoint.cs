@@ -6,8 +6,8 @@ namespace Mojo.Modules.Core.Features.Identity.LoginUser;
 
 public class LoginUserEndpoint
 {
-    [WolverinePost("/api/auth/login")]
-    public static async Task<IResult> Post(
+    [WolverineGet("/api/auth/login")]
+    public static async Task<IResult> Get(
         LoginUserQuery query,
         IMessageBus bus)
     {

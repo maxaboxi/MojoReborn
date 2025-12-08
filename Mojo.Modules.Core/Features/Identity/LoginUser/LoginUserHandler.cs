@@ -51,22 +51,20 @@ public class LoginUserHandler
             return Results.Redirect($"{baseUrl}/auth/login?error=email_not_found");
         }
         
-        var legacyUser = await bus.InvokeAsync<LegacyUser>(new GetLegacyUserQuery(email), ct);
+        var site = await siteResolver.GetSite(ct);
+        
+        var legacyUserResponse = await bus.InvokeAsync<GetLegacyUserResponse>(new GetLegacyUserQuery(email, site.SiteGuid), ct);
 
-        if (!string.IsNullOrEmpty(legacyUser.Email))
+        if (!string.IsNullOrEmpty(legacyUserResponse.LegacyUser?.Email))
         {
             return Results.Redirect($"{baseUrl}/auth/migrate-legacy");
         }
-
-        var site = await siteResolver.GetSite(ct);
-
+        
         var newUser = new ApplicationUser
         {
             UserName = email,
             Email = email,
             EmailConfirmed = true,
-            SiteId = site.SiteId,
-            SiteGuid = site.SiteGuid
         };
 
         var createResult = await userManager.CreateAsync(newUser);

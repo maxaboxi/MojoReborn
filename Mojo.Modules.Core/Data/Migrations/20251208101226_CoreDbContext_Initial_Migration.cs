@@ -15,7 +15,7 @@ namespace Mojo.Modules.Core.Data.Migrations
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -29,9 +29,7 @@ namespace Mojo.Modules.Core.Data.Migrations
                 name: "AspNetUsers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    SiteId = table.Column<int>(type: "int", nullable: false),
-                    SiteGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     DisplayName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
@@ -63,12 +61,28 @@ namespace Mojo.Modules.Core.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SiteRoles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SiteId = table.Column<int>(type: "int", nullable: false),
+                    SiteGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    DisplayName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SiteRoles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -89,7 +103,7 @@ namespace Mojo.Modules.Core.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -111,7 +125,7 @@ namespace Mojo.Modules.Core.Data.Migrations
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -128,8 +142,8 @@ namespace Mojo.Modules.Core.Data.Migrations
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -152,7 +166,7 @@ namespace Mojo.Modules.Core.Data.Migrations
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -167,23 +181,50 @@ namespace Mojo.Modules.Core.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "UserSiteProfiles",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SiteId = table.Column<int>(type: "int", nullable: false),
+                    SiteGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserSiteProfiles", x => new { x.UserId, x.SiteId });
+                    table.ForeignKey(
+                        name: "FK_UserSiteProfiles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
             
-            // Migrate roles and use the existing RoleGuid as the ID to ensure when a user is linked to a role
-            // it can be found with the old Guid
-            migrationBuilder.Sql(@"
-                IF OBJECT_ID('mp_Roles', 'U') IS NOT NULL
-                BEGIN
-                    INSERT INTO AspNetRoles (Id, Name, NormalizedName, ConcurrencyStamp)
-                    SELECT 
-                        RoleGuid, 
-                        RoleName, 
-                        UPPER(RoleName), 
-                        NEWID()
-                    FROM mp_Roles
-                    WHERE RoleGuid NOT IN (SELECT Id FROM AspNetRoles);
-                END
-            ");
-            
+            migrationBuilder.CreateTable(
+                name: "UserSiteRoleAssignments",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserSiteRoleAssignments", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_UserSiteRoleAssignments_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserSiteRoleAssignments_SiteRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "SiteRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -222,6 +263,16 @@ namespace Mojo.Modules.Core.Data.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SiteRoles_SiteId",
+                table: "SiteRoles",
+                column: "SiteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSiteRoleAssignments_RoleId",
+                table: "UserSiteRoleAssignments",
+                column: "RoleId");
         }
 
         /// <inheritdoc />
@@ -241,12 +292,21 @@ namespace Mojo.Modules.Core.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+            
+            migrationBuilder.DropTable(
+                name: "UserSiteProfiles");
+
+            migrationBuilder.DropTable(
+                name: "UserSiteRoleAssignments");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
-
+            
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "SiteRoles");
         }
     }
 }

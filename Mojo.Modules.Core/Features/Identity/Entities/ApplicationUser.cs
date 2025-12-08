@@ -2,11 +2,8 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Mojo.Modules.Core.Features.Identity.Entities;
 
-public class ApplicationUser : IdentityUser
+public class ApplicationUser : IdentityUser<Guid>
 {
-    public int SiteId { get; set; }
-    public Guid SiteGuid { get; set; }
-    
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
@@ -20,4 +17,6 @@ public class ApplicationUser : IdentityUser
     public DateTime? LastLoginDate { get; set; }
     
     public bool IsDeleted { get; set; }
+    public virtual ICollection<UserSiteProfile> UserSiteProfiles { get; set; } = [];
+    public virtual ICollection<UserSiteRoleAssignment> UserSiteRoleAssignments { get; set; } = [];
 }

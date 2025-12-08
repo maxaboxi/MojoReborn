@@ -23,10 +23,114 @@ namespace Mojo.Modules.Core.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.ApplicationRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -50,116 +154,11 @@ namespace Mojo.Modules.Core.Data.Migrations
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AspNetUserClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
-                {
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("LoginProvider", "ProviderKey");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AspNetUserLogins", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetUserRoles", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserId", "LoginProvider", "Name");
-
-                    b.ToTable("AspNetUserTokens", (string)null);
-                });
-
             modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.ApplicationUser", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
@@ -237,12 +236,6 @@ namespace Mojo.Modules.Core.Data.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<Guid>("SiteGuid")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("SiteId")
-                        .HasColumnType("int");
-
                     b.Property<string>("TimeZoneId")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -267,6 +260,45 @@ namespace Mojo.Modules.Core.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.LegacyRole", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("RoleID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleId"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("RoleGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("SiteGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SiteId")
+                        .HasColumnType("int")
+                        .HasColumnName("SiteID");
+
+                    b.HasKey("RoleId");
+
+                    b.HasIndex("SiteId");
+
+                    b.ToTable("mp_Roles", (string)null);
+                });
+
             modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.LegacyUser", b =>
                 {
                     b.Property<int>("UserId")
@@ -287,11 +319,16 @@ namespace Mojo.Modules.Core.Data.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsEmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PasswordSalt")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Pwd")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PwdFormat")
@@ -310,6 +347,100 @@ namespace Mojo.Modules.Core.Data.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("mp_Users", (string)null);
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.LegacyUserRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("RoleGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int")
+                        .HasColumnName("RoleID");
+
+                    b.Property<Guid>("UserGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("UserID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex(new[] { "RoleId" }, "IX_UserRolesRoleID");
+
+                    b.ToTable("mp_UserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.SiteRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("SiteGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SiteId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SiteId");
+
+                    b.ToTable("SiteRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.UserSiteProfile", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SiteId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SiteGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "SiteId");
+
+                    b.ToTable("UserSiteProfiles", (string)null);
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.UserSiteRoleAssignment", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("UserSiteRoleAssignments", (string)null);
                 });
 
             modelBuilder.Entity("Mojo.Modules.Core.Features.SiteStructure.Entities.Module", b =>
@@ -483,6 +614,8 @@ namespace Mojo.Modules.Core.Data.Migrations
 
                     b.HasKey("PageId");
 
+                    b.HasIndex("SiteId");
+
                     b.HasIndex(new[] { "PageName" }, "IX_mp_page_name");
 
                     b.ToTable("mp_Pages", (string)null);
@@ -524,6 +657,74 @@ namespace Mojo.Modules.Core.Data.Migrations
                     b.HasIndex(new[] { "PaneName" }, "IX_mp_pm_pane");
 
                     b.ToTable("mp_PageModules", (string)null);
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.SiteStructure.Entities.Site", b =>
+                {
+                    b.Property<int>("SiteId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("SiteID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SiteId"));
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Logo")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("ReallyDeleteUsers")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SiteAlias")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("SiteGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SiteName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("SiteId")
+                        .HasName("PK_Portals");
+
+                    b.HasIndex(new[] { "SiteGuid" }, "idxSitesGuid");
+
+                    b.ToTable("mp_Sites", (string)null);
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.SiteStructure.Entities.SiteHost", b =>
+                {
+                    b.Property<int>("HostId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("HostID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HostId"));
+
+                    b.Property<string>("HostName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<Guid>("SiteGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SiteId")
+                        .HasColumnType("int")
+                        .HasColumnName("SiteID");
+
+                    b.HasKey("HostId");
+
+                    b.HasIndex("SiteId");
+
+                    b.ToTable("mp_SiteHosts", (string)null);
                 });
 
             modelBuilder.Entity("Wolverine.EntityFrameworkCore.Internals.IncomingMessage", b =>
@@ -618,16 +819,16 @@ namespace Mojo.Modules.Core.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("Mojo.Modules.Core.Features.Identity.Entities.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
                     b.HasOne("Mojo.Modules.Core.Features.Identity.Entities.ApplicationUser", null)
                         .WithMany()
@@ -636,7 +837,7 @@ namespace Mojo.Modules.Core.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.HasOne("Mojo.Modules.Core.Features.Identity.Entities.ApplicationUser", null)
                         .WithMany()
@@ -645,9 +846,9 @@ namespace Mojo.Modules.Core.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("Mojo.Modules.Core.Features.Identity.Entities.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -660,13 +861,73 @@ namespace Mojo.Modules.Core.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.HasOne("Mojo.Modules.Core.Features.Identity.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.LegacyRole", b =>
+                {
+                    b.HasOne("Mojo.Modules.Core.Features.SiteStructure.Entities.Site", "Site")
+                        .WithMany()
+                        .HasForeignKey("SiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Site");
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.LegacyUserRole", b =>
+                {
+                    b.HasOne("Mojo.Modules.Core.Features.Identity.Entities.LegacyRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Mojo.Modules.Core.Features.Identity.Entities.LegacyUser", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.UserSiteProfile", b =>
+                {
+                    b.HasOne("Mojo.Modules.Core.Features.Identity.Entities.ApplicationUser", "User")
+                        .WithMany("UserSiteProfiles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.UserSiteRoleAssignment", b =>
+                {
+                    b.HasOne("Mojo.Modules.Core.Features.Identity.Entities.SiteRole", "Role")
+                        .WithMany("UserSiteRoleAssignments")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Mojo.Modules.Core.Features.Identity.Entities.ApplicationUser", "User")
+                        .WithMany("UserSiteRoleAssignments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Mojo.Modules.Core.Features.SiteStructure.Entities.Module", b =>
@@ -678,6 +939,17 @@ namespace Mojo.Modules.Core.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("ModuleDefinition");
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.SiteStructure.Entities.Page", b =>
+                {
+                    b.HasOne("Mojo.Modules.Core.Features.SiteStructure.Entities.Site", "Site")
+                        .WithMany("Pages")
+                        .HasForeignKey("SiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Site");
                 });
 
             modelBuilder.Entity("Mojo.Modules.Core.Features.SiteStructure.Entities.PageModule", b =>
@@ -699,6 +971,34 @@ namespace Mojo.Modules.Core.Data.Migrations
                     b.Navigation("Page");
                 });
 
+            modelBuilder.Entity("Mojo.Modules.Core.Features.SiteStructure.Entities.SiteHost", b =>
+                {
+                    b.HasOne("Mojo.Modules.Core.Features.SiteStructure.Entities.Site", "Site")
+                        .WithMany("SiteHosts")
+                        .HasForeignKey("SiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Site");
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.ApplicationUser", b =>
+                {
+                    b.Navigation("UserSiteProfiles");
+
+                    b.Navigation("UserSiteRoleAssignments");
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.LegacyUser", b =>
+                {
+                    b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.Identity.Entities.SiteRole", b =>
+                {
+                    b.Navigation("UserSiteRoleAssignments");
+                });
+
             modelBuilder.Entity("Mojo.Modules.Core.Features.SiteStructure.Entities.Module", b =>
                 {
                     b.Navigation("PageModules");
@@ -712,6 +1012,13 @@ namespace Mojo.Modules.Core.Data.Migrations
             modelBuilder.Entity("Mojo.Modules.Core.Features.SiteStructure.Entities.Page", b =>
                 {
                     b.Navigation("PageModules");
+                });
+
+            modelBuilder.Entity("Mojo.Modules.Core.Features.SiteStructure.Entities.Site", b =>
+                {
+                    b.Navigation("Pages");
+
+                    b.Navigation("SiteHosts");
                 });
 #pragma warning restore 612, 618
         }

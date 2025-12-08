@@ -34,12 +34,29 @@ builder.Services.AddDbContext<ForumDbContext>(options =>
         options.UseSqlServer(connectionString),
     optionsLifetime: ServiceLifetime.Singleton);
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(opt =>
 {
     opt.User.RequireUniqueEmail = true;
 })
 .AddEntityFrameworkStores<CoreDbContext>()
 .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication()
+    .AddGoogle(opt =>
+    {
+        opt.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "";
+        opt.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "";
+    })
+    .AddMicrosoftAccount(opt =>
+    {
+        opt.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"] ?? "";
+        opt.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"] ?? "";
+    })
+    .AddFacebook(opt =>
+    {
+        opt.ClientId = builder.Configuration["Authentication:Facebook:ClientId"] ?? "";
+        opt.ClientSecret = builder.Configuration["Authentication:Facebook:ClientSecret"] ?? "";
+    });
 
 builder.Services.AddHttpContextAccessor();
 

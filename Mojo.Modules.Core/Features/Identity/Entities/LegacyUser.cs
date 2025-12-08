@@ -5,6 +5,7 @@ public class LegacyUser
     public Guid UserGuid { get; set; }
     public int UserId { get; set; }
     public string Email { get; set; } = string.Empty;
+    public bool IsEmailConfirmed { get; set; }
     public string? Pwd { get; set; } = string.Empty; // Plain text password
     public string? PasswordHash { get; set; } = string.Empty;
     public string? PasswordSalt { get; set; }
@@ -13,4 +14,5 @@ public class LegacyUser
     public DateTime CreatedAt { get; set; }
     public int SiteId { get; set; }
     public Guid SiteGuid { get; set; }
+    public ICollection<LegacyUserRole> UserRoles { get; set; } = [];
 }
