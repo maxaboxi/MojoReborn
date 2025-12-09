@@ -2,8 +2,9 @@
 
 namespace Mojo.Modules.Blog.Features.Posts.EditPost;
 
-public class EditPostCommand(Guid blogPostId, string title, string subtitle, string content, List<EditPostCategoryDto> categories)
+public class EditPostCommand(int pageId, Guid blogPostId, string title, string subtitle, string content, List<EditPostCategoryDto> categories)
 {
+    public int PageId { get; set; }
     public Guid BlogPostId { get; set; } = blogPostId;
     public string Title { get; set; } = title;
     public string SubTitle { get; set; } = subtitle;

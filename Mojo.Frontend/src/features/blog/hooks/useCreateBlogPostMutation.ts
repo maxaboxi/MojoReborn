@@ -8,10 +8,12 @@ export const useCreateBlogPostMutation = () => {
 
   return useMutation<CreatePostResponse, Error, CreatePostRequest>({
     mutationFn: blogApi.createPost,
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: blogQueryKeys.posts() });
+    onSuccess: (response, variables) => {
+      queryClient.invalidateQueries({ queryKey: blogQueryKeys.posts(variables.pageId) });
       if (response.blogPostId) {
-        queryClient.invalidateQueries({ queryKey: blogQueryKeys.post(response.blogPostId) });
+        queryClient.invalidateQueries({
+          queryKey: blogQueryKeys.post(response.blogPostId, variables.pageId),
+        });
       }
     },
   });

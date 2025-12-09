@@ -23,24 +23,34 @@ public class SiteResolver(CoreDbContext db, IHttpContextAccessor httpContextAcce
       }
       
       var host = context.Request.Host.Host;
-      
-      _resolvedSite = (await db.SiteHosts.AsNoTracking().Where(x => x.HostName == host)
+
+      _resolvedSite = await db.SiteHosts.AsNoTracking().Where(x => x.HostName == host)
          .Select(x => new SiteDto
          {
             SiteId = x.SiteId,
-            SiteGuid =  x.SiteGuid
+            SiteGuid = x.SiteGuid
          })
-         .FirstOrDefaultAsync(ct) ?? await db.Sites.AsNoTracking().Where(x => x.SiteName == host || x.SiteAlias == host)
-         .Select(x => new SiteDto
-         {
-            SiteId = x.SiteId,
-            SiteGuid =  x.SiteGuid
-         })
-         .FirstOrDefaultAsync(ct)) ?? await db.Sites.AsNoTracking().Where(x => x.SiteId == 1).Select(x => new SiteDto
+         .FirstOrDefaultAsync(ct);
+
+      if (_resolvedSite == null)
       {
-         SiteId = x.SiteId,
-         SiteGuid =  x.SiteGuid
-      }).FirstOrDefaultAsync(ct);
+         _resolvedSite = await db.Sites.AsNoTracking().Where(x => x.SiteName == host || x.SiteAlias == host)
+            .Select(x => new SiteDto
+            {
+               SiteId = x.SiteId,
+               SiteGuid = x.SiteGuid
+            })
+            .FirstOrDefaultAsync(ct);
+      }
+
+      if (_resolvedSite == null)
+      {
+         _resolvedSite = await db.Sites.AsNoTracking().Where(x => x.SiteId == 1).Select(x => new SiteDto
+         {
+            SiteId = x.SiteId,
+            SiteGuid =  x.SiteGuid
+         }).FirstOrDefaultAsync(ct);
+      }
 
       return _resolvedSite ?? throw new Exception("No sites configured in database.");
    }

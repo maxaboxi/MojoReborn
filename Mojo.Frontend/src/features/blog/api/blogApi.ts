@@ -8,6 +8,7 @@ import type {
   GetPostsResponse,
   GetCategoriesResponse,
   CategoryDto,
+  DeletePostRequest,
   DeletePostResponse,
   CreateCommentRequest,
   CreateCommentResponse,
@@ -54,8 +55,8 @@ export const blogApi = {
     const response = await apiClient.put<EditPostResponse>('/blog/posts', request);
     return response.data;
   },
-  deletePost: async (id: string): Promise<DeletePostResponse> => {
-    const response = await apiClient.delete<DeletePostResponse>(`/blog/posts/${id}`);
+  deletePost: async ({ pageId, blogPostId }: DeletePostRequest): Promise<DeletePostResponse> => {
+    const response = await apiClient.delete<DeletePostResponse>(`/${pageId}/blog/posts/${blogPostId}`);
     return response.data;
   },
   createComment: async (request: CreateCommentRequest): Promise<CreateCommentResponse> => {
@@ -66,9 +67,9 @@ export const blogApi = {
     const response = await apiClient.put<EditCommentResponse>('/blog/posts/comment', request);
     return response.data;
   },
-  deleteComment: async ({ blogPostId, blogCommentId }: DeleteCommentRequest): Promise<DeleteCommentResponse> => {
+  deleteComment: async ({ pageId, blogPostId, blogCommentId }: DeleteCommentRequest): Promise<DeleteCommentResponse> => {
     const response = await apiClient.delete<DeleteCommentResponse>(
-      `/blog/posts/${blogPostId}/comment/${blogCommentId}`
+      `/${pageId}/blog/posts/${blogPostId}/comment/${blogCommentId}`
     );
     return response.data;
   },

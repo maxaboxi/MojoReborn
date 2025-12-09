@@ -8,11 +8,13 @@ import { useUpdateBlogPostMutation } from '../hooks/useUpdateBlogPostMutation';
 import type { EditPostRequest, Category } from '../types/blog.types';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { useBlogPageContext } from '../hooks/useBlogPageContext';
+import { useAuth } from '@features/auth/providers/AuthProvider';
 
 export const EditBlogPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { blogPageId, menuLoading, menuError } = useBlogPageContext();
+  const { user } = useAuth();
   const {
     data: post,
     isLoading: loadingPost,
@@ -34,10 +36,16 @@ export const EditBlogPost = () => {
   }) => {
     if (!id) return;
 
+    if (blogPageId === null) {
+      setError('Could not determine blog page context. Please refresh and try again.');
+      return;
+    }
+
     setError(null);
 
     try {
       const request: EditPostRequest = {
+        pageId: blogPageId,
         blogPostId: id,
         title: data.title,
         subTitle: data.subTitle,
@@ -107,10 +115,10 @@ export const EditBlogPost = () => {
           initialData={{
             title: post.title,
             subTitle: post.subTitle,
-            author: post.author,
             content: post.content,
             categories: categoriesAsObjects,
           }}
+          authorEmail={user?.email ?? post.author}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isEdit

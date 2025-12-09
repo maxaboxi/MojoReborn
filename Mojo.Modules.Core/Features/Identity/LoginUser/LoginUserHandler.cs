@@ -65,6 +65,9 @@ public class LoginUserHandler
             UserName = email,
             Email = email,
             EmailConfirmed = true,
+            DisplayName = info.Principal.FindFirstValue(ClaimTypes.Name) ?? string.Empty,
+            FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName) ?? string.Empty,
+            LastName = info.Principal.FindFirstValue(ClaimTypes.Surname) ?? string.Empty,
         };
 
         var createResult = await userManager.CreateAsync(newUser);

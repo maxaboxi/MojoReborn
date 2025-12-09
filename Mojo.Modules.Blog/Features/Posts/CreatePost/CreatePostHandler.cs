@@ -1,7 +1,9 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Security.Claims;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
+using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
 using Mojo.Shared.Responses;
 
@@ -12,38 +14,47 @@ public static partial class CreatePostHandler
     public static async Task<CreatePostResponse> Handle(
         CreatePostCommand command,
         BlogDbContext db,
-        IModuleResolver moduleResolver,
-        CancellationToken cancellationToken)
+        IFeatureContextResolver featureContextResolver,
+        ClaimsPrincipal claimsPrincipal,
+        IUserService userService,
+        IPermissionService permissionService,
+        CancellationToken ct)
     {
-        //TODO: check if user has rights for the module when auth implemented
-        var moduleDto = await moduleResolver.ResolveModule(command.PageId, "BlogFeatureName" ,cancellationToken);
+        var user = userService.GetUserAsync(claimsPrincipal, ct).Result;
         
-        if (moduleDto == null)
+        if (user == null)
         {
-            return BaseResponse.NotFound<CreatePostResponse>("Module not found.");
+            return BaseResponse.Unauthorized<CreatePostResponse>("User not found.");
         }
-            
+        
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
+        
+        if (featureContextDto == null || !permissionService.CanEdit(user, featureContextDto))
+        {
+            return BaseResponse.Unauthorized<CreatePostResponse>();
+        }
+
         var baseSlug = GenerateBaseSlug(command.Title);
 
-        var finalSlug = await GenerateFinalSlug(baseSlug, db, cancellationToken);
+        var finalSlug = await GenerateFinalSlug(baseSlug, db, ct);
         
         var newPost = new BlogPost
         {
             Title = command.Title,
             SubTitle = command.SubTitle,
-            Author = command.Author,
+            Author = user.Email,
             Content = command.Content,
             Slug = finalSlug,
             CreatedAt = DateTime.UtcNow,
             ModifiedAt = DateTime.UtcNow,
-            ModuleGuid =  moduleDto.ModuleGuid,
-            ModuleId = moduleDto.Id
+            ModuleGuid =  featureContextDto.ModuleGuid,
+            ModuleId = featureContextDto.ModuleId
         };
 
-        await AddCategoriesToBlogPost(newPost, command, db, cancellationToken);
+        await AddCategoriesToBlogPost(newPost, command, db, ct);
         
-        await db.BlogPosts.AddAsync(newPost, cancellationToken);
-        await db.SaveChangesAsync(cancellationToken);
+        await db.BlogPosts.AddAsync(newPost, ct);
+        await db.SaveChangesAsync(ct);
         
         return new CreatePostResponse { IsSuccess = true, BlogPostId = newPost.BlogPostId, Message = "Blog post created successfully." };
     }

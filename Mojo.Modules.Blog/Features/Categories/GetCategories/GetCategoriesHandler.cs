@@ -10,10 +10,10 @@ public class GetCategoriesHandler
     public static async Task<GetCategoriesResponse> Handle(
         GetCategoriesQuery query,
         BlogDbContext db,
-        IModuleResolver moduleResolver,
+        IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
-        var moduleDto = await moduleResolver.ResolveModule(query.PageId, "BlogFeatureName", ct);
+        var moduleDto = await featureContextResolver.ResolveModule(query.PageId, "BlogFeatureName", ct);
         
         if (moduleDto == null)
         {

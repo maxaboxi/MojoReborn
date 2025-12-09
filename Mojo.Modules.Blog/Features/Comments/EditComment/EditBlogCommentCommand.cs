@@ -2,8 +2,9 @@ using FluentValidation;
 
 namespace Mojo.Modules.Blog.Features.Comments.EditComment;
 
-public class EditBlogCommentCommand(Guid blogPostId, Guid blogCommentId, string title, string content)
+public class EditBlogCommentCommand(int pageId, Guid blogPostId, Guid blogCommentId, string title, string content)
 {
+    public int PageId { get; set; } = pageId;
     public Guid BlogPostId { get; set; } = blogPostId;
     public Guid BlogCommentId { get; set; } = blogCommentId;
     public string Title { get; set; } = title;

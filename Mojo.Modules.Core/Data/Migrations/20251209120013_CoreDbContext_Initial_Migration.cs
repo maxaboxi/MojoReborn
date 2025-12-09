@@ -292,7 +292,7 @@ namespace Mojo.Modules.Core.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
-            
+
             migrationBuilder.DropTable(
                 name: "UserSiteProfiles");
 
@@ -301,12 +301,13 @@ namespace Mojo.Modules.Core.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
-            
+
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "SiteRoles");
+
         }
     }
 }

@@ -12,7 +12,7 @@ using Mojo.Modules.Core.Data;
 namespace Mojo.Modules.Core.Data.Migrations
 {
     [DbContext(typeof(CoreDbContext))]
-    [Migration("20251208123548_CoreDbContext_Initial_Migration")]
+    [Migration("20251209120013_CoreDbContext_Initial_Migration")]
     partial class CoreDbContext_Initial_Migration
     {
         /// <inheritdoc />
@@ -311,6 +311,9 @@ namespace Mojo.Modules.Core.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
+                    b.Property<string>("AuthorBio")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("DateCreated");
@@ -319,12 +322,21 @@ namespace Mojo.Modules.Core.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsEmailConfirmed")
                         .HasColumnType("bit")
                         .HasColumnName("EmailConfirmed");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LoginName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
@@ -337,6 +349,9 @@ namespace Mojo.Modules.Core.Data.Migrations
 
                     b.Property<int>("PwdFormat")
                         .HasColumnType("int");
+
+                    b.Property<string>("Signature")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("SiteGuid")
                         .HasColumnType("uniqueidentifier");
@@ -579,6 +594,10 @@ namespace Mojo.Modules.Core.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("AuthorizedRoles");
+
+                    b.Property<string>("EditRoles")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IncludeInMenu")
                         .ValueGeneratedOnAdd()

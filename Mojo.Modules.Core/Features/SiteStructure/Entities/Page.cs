@@ -10,7 +10,8 @@ public class Page
     public string PageName { get; set; }
     public string Url { get; set; }
     public int PageOrder { get; set; }
-    public string AuthorizedRoles { get; set; } // Legacy column: "Admins;Editors;"
+    public string AuthorizedRoles { get; set; } // Legacy column: "All Users;"
+    public string EditRoles { get; set; } // Legacy column: "Admins;Editors;"
     public bool IncludeInMenu { get; set; }
     
     public Site Site { get; set; }

@@ -9,7 +9,9 @@ export const useEditCommentMutation = () => {
   return useMutation<EditCommentResponse, Error, EditCommentRequest>({
     mutationFn: blogApi.editComment,
     onSuccess: (_response, variables) => {
-      queryClient.invalidateQueries({ queryKey: blogQueryKeys.post(variables.blogPostId) });
+      queryClient.invalidateQueries({
+        queryKey: blogQueryKeys.post(variables.blogPostId, variables.pageId),
+      });
     },
   });
 };

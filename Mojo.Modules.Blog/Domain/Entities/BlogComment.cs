@@ -12,7 +12,7 @@ public class BlogComment
 
     public Guid ContentGuid { get; set; }
 
-    public Guid UserGuid { get; set; }
+    public Guid? UserGuid { get; set; }
     
     public string UserIpAddress { get; set; }
 
@@ -22,7 +22,7 @@ public class BlogComment
 
     public string UserName { get; set; } = null!;
 
-    public string UserEmail { get; set; } = null!;
+    public string? UserEmail { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
 

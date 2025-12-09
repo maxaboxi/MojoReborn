@@ -82,6 +82,11 @@ public class MigrateLegacyUserHandler
             UserName = email,
             Email = email,
             EmailConfirmed = true,
+            DisplayName = legacyUser.LoginName ?? string.Empty,
+            FirstName = legacyUser.FirstName ?? string.Empty,
+            LastName = legacyUser.LastName ?? string.Empty,
+            Signature = legacyUser.Signature,
+            Bio = legacyUser.AuthorBio
         };
         
         var createResult = await userManager.CreateAsync(newUser);

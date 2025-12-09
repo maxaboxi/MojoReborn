@@ -1,6 +1,7 @@
 export type BlogComment = {
   id: string;
   author: string;
+  userGuid?: string | null;
   title?: string;
   content: string;
   createdAt: string;
@@ -31,7 +32,6 @@ export type CreatePostCategoryDto = {
 
 export type CreatePostRequest = {
   pageId: number;
-  author: string;
   title: string;
   subTitle: string;
   content: string;
@@ -45,11 +45,17 @@ export type CreatePostResponse = {
 };
 
 export type EditPostRequest = {
+  pageId: number;
   blogPostId: string;
   title: string;
   subTitle: string;
   content: string;
   categories: Category[];
+};
+
+export type DeletePostRequest = {
+  pageId: number;
+  blogPostId: string;
 };
 
 export type EditPostResponse = {
@@ -84,9 +90,7 @@ export type DeletePostResponse = {
 export type CreateCommentRequest = {
   pageId: number;
   blogPostId: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
+  author: string;
   title: string;
   content: string;
 };
@@ -98,6 +102,7 @@ export type CreateCommentResponse = {
 };
 
 export type EditCommentRequest = {
+  pageId: number;
   blogPostId: string;
   blogCommentId: string;
   title: string;
@@ -110,6 +115,7 @@ export type EditCommentResponse = {
 };
 
 export type DeleteCommentRequest = {
+  pageId: number;
   blogPostId: string;
   blogCommentId: string;
 };

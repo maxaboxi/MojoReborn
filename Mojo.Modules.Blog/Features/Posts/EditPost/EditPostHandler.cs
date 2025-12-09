@@ -1,17 +1,41 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
+using Mojo.Shared.Interfaces.Identity;
+using Mojo.Shared.Interfaces.SiteStructure;
 using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Blog.Features.Posts.EditPost;
 
 public static class EditPostHandler
 {
-    public static async Task<EditPostResponse> Handle(EditPostCommand command, BlogDbContext db, CancellationToken cancellationToken)
+    public static async Task<EditPostResponse> Handle(
+        EditPostCommand command, 
+        BlogDbContext db,
+        IUserService userService,
+        ClaimsPrincipal claimsPrincipal,
+        IFeatureContextResolver featureContextResolver,
+        IPermissionService permissionService,
+        CancellationToken ct)
     {
+        var user = userService.GetUserAsync(claimsPrincipal, ct).Result;
+        
+        if (user == null)
+        {
+            return BaseResponse.Unauthorized<EditPostResponse>("User not found.");
+        }
+        
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
+        
+        if (featureContextDto == null || !permissionService.CanEdit(user, featureContextDto))
+        {
+            return BaseResponse.Unauthorized<EditPostResponse>();
+        }
+        
         var original = await db.BlogPosts
             .Include(b => b.Categories)
-            .FirstOrDefaultAsync(x => x.BlogPostId == command.BlogPostId, cancellationToken);
+            .FirstOrDefaultAsync(x => x.BlogPostId == command.BlogPostId && x.Author == user.Email, ct);
 
         if (original == null)
         {
@@ -42,7 +66,7 @@ public static class EditPostHandler
             var existingCategoriesInDb = await db.Categories
                 .Where(c => c.ModuleId == original.ModuleId && 
                             (namesToCheck.Contains(c.CategoryName) || idsToCheck.Contains(c.Id)))
-                .ToListAsync(cancellationToken);
+                .ToListAsync(ct);
 
             foreach (var dto in potentiallyNew)
             {
@@ -61,7 +85,7 @@ public static class EditPostHandler
             }
         }
         
-        await db.SaveChangesAsync(cancellationToken);
+        await db.SaveChangesAsync(ct);
         
         return new EditPostResponse { IsSuccess = true, BlogPostId = original.BlogPostId, Message = "Blog post updated successfully." };
     }

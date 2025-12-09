@@ -10,10 +10,10 @@ public static class GetPostsHandler
     public static async Task<GetPostsResponse> Handle(
         GetPostsQuery query, 
         BlogDbContext db,
-        IModuleResolver moduleResolver,
+        IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
-        var moduleDto = await moduleResolver.ResolveModule(query.PageId, "BlogFeatureName", ct);
+        var moduleDto = await featureContextResolver.ResolveModule(query.PageId, "BlogFeatureName", ct);
         
         if (moduleDto == null)
         {

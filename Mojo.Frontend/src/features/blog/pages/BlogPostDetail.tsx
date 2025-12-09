@@ -65,25 +65,12 @@ export const BlogPostDetail = () => {
   const deleteCommentMutation = useDeleteCommentMutation();
   const commentFormInitialData = useMemo(
     () => ({
-      userName: user?.displayName ?? '',
-      userEmail: user?.email ?? '',
+      author: user?.email ?? '',
       title: '',
       content: '',
     }),
-    [commentFormKey, user]
+    [commentFormKey, user?.email]
   );
-
-  const currentUserDisplayName = useMemo(() => {
-    if (!user) {
-      return '';
-    }
-    const trimmedDisplayName = user.displayName?.trim();
-    if (trimmedDisplayName) {
-      return trimmedDisplayName;
-    }
-    const combined = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
-    return combined || user.email;
-  }, [user]);
 
   const showToast = (message: string, severity: AlertColor = 'info') => {
     setToastState({
@@ -129,11 +116,18 @@ export const BlogPostDetail = () => {
 
   const handleDeleteConfirm = async () => {
     if (!id) return;
+    if (blogPageId == null) {
+      setDeleteError('Unable to determine blog page context. Please refresh and try again.');
+      return;
+    }
 
     setDeleteError(null);
 
     try {
-      const response = await deleteMutation.mutateAsync(id);
+      const response = await deleteMutation.mutateAsync({
+        pageId: blogPageId,
+        blogPostId: id,
+      });
 
       if (response.isSuccess) {
         navigate('/blog');
@@ -173,9 +167,7 @@ export const BlogPostDetail = () => {
       const response = await commentMutation.mutateAsync({
         pageId: blogPageId,
         blogPostId: id,
-        userId: user.id,
-        userName: currentUserDisplayName,
-        userEmail: user.email,
+        author: values.author,
         title: values.title,
         content: values.content,
       });
@@ -211,8 +203,15 @@ export const BlogPostDetail = () => {
       throw error;
     }
 
+    if (blogPageId == null) {
+      const error = new Error('Missing blog page context.');
+      showToast(error.message, 'error');
+      throw error;
+    }
+
     try {
       const response = await editCommentMutation.mutateAsync({
+        pageId: blogPageId,
         blogPostId: id,
         blogCommentId: commentId,
         title: values.title,
@@ -246,8 +245,15 @@ export const BlogPostDetail = () => {
       throw error;
     }
 
+    if (blogPageId == null) {
+      const error = new Error('Missing blog page context.');
+      showToast(error.message, 'error');
+      throw error;
+    }
+
     try {
       const response = await deleteCommentMutation.mutateAsync({
+        pageId: blogPageId,
         blogPostId: id,
         blogCommentId: commentId,
       });
@@ -350,6 +356,7 @@ export const BlogPostDetail = () => {
         formatDate={formatDate}
         onEditComment={handleCommentEdit}
         onDeleteComment={handleCommentDelete}
+        currentUserId={user?.id}
       />
 
       <BlogCommentFormPanel
@@ -364,7 +371,8 @@ export const BlogPostDetail = () => {
         successMessage={commentSuccess}
         isAuthenticated={isAuthenticated}
         onRequireAuth={redirectToLogin}
-        showIdentityFields={false}
+        showIdentityFields
+        identityReadOnly={isAuthenticated}
       />
 
       <Box className="blog-post-actions">
@@ -377,23 +385,28 @@ export const BlogPostDetail = () => {
           Back to Blog
         </Button>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            variant="contained"
-            startIcon={<Edit />}
-            onClick={() => navigate(`/blog/edit/${id}`)}
-            size="large"
-          >
-            Edit Post
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<Delete />}
-            onClick={handleDeleteClick}
-            size="large"
-          >
-            Delete
-          </Button>
+          {isAuthenticated && user?.email && post.author &&
+            post.author.toLowerCase() === user.email.toLowerCase() && (
+              <>
+                <Button
+                  variant="contained"
+                  startIcon={<Edit />}
+                  onClick={() => navigate(`/blog/edit/${id}`)}
+                  size="large"
+                >
+                  Edit Post
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<Delete />}
+                  onClick={handleDeleteClick}
+                  size="large"
+                >
+                  Delete
+                </Button>
+              </>
+            )}
           <Button variant="outlined" startIcon={<Share />} size="large">
             Share
           </Button>

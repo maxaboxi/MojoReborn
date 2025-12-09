@@ -9,7 +9,9 @@ export const useCreateCommentMutation = () => {
   return useMutation<CreateCommentResponse, Error, CreateCommentRequest>({
     mutationFn: blogApi.createComment,
     onSuccess: (_response, variables) => {
-      queryClient.invalidateQueries({ queryKey: blogQueryKeys.post(variables.blogPostId) });
+      queryClient.invalidateQueries({
+        queryKey: blogQueryKeys.post(variables.blogPostId, variables.pageId),
+      });
     },
   });
 };

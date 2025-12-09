@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Wolverine;
 using Wolverine.Http;
 
@@ -5,11 +6,13 @@ namespace Mojo.Modules.Blog.Features.Posts.DeletePost;
 
 public class DeletePostEndpoint
 {
-    [WolverineDelete("/api/blog/posts/{blogPostId}")]
+    [Authorize]
+    [WolverineDelete("/api/{pageId}/blog/posts/{blogPostId}")]
     public static Task<DeletePostResponse> Get(
+        int pageId,
         Guid blogPostId, 
         IMessageBus bus)
     {
-        return bus.InvokeAsync<DeletePostResponse>(new DeletePostCommand(blogPostId));
+        return bus.InvokeAsync<DeletePostResponse>(new DeletePostCommand(pageId, blogPostId));
     }
 }

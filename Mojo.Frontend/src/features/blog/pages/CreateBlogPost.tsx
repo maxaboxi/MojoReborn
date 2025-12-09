@@ -7,11 +7,13 @@ import { useBlogPageContext } from '../hooks/useBlogPageContext';
 import type { CreatePostRequest } from '../types/blog.types';
 import { useCreateBlogPostMutation } from '../hooks/useCreateBlogPostMutation';
 import { LoadingState, StatusMessage } from '@shared/ui';
+import { useAuth } from '@features/auth/providers/AuthProvider';
 
 export const CreateBlogPost = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const { blogPageId, menuLoading, menuError } = useBlogPageContext();
+  const { user } = useAuth();
   const {
     data: categories = [],
     isLoading: loadingCategories,
@@ -19,9 +21,19 @@ export const CreateBlogPost = () => {
   } = useBlogCategoriesQuery(blogPageId);
   const createPostMutation = useCreateBlogPostMutation();
 
-  const handleSubmit = async (data: Omit<CreatePostRequest, 'pageId' | 'categories'> & { categories: { id: number; categoryName: string }[] }) => {
+  const handleSubmit = async (data: {
+    title: string;
+    subTitle: string;
+    content: string;
+    categories: { id: number; categoryName: string }[];
+  }) => {
     if (blogPageId === null) {
       setError('Could not find blog page ID from menu. Please try again.');
+      return;
+    }
+
+    if (!user?.email) {
+      setError('Unable to determine your account email. Please sign out and back in.');
       return;
     }
 
@@ -76,6 +88,7 @@ export const CreateBlogPost = () => {
         </Typography>
         
         <BlogPostForm
+          authorEmail={user?.email ?? ''}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isLoading={createPostMutation.isPending}

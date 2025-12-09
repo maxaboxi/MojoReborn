@@ -17,14 +17,13 @@ interface BlogPostFormProps {
   initialData?: {
     title?: string;
     subTitle?: string;
-    author?: string;
     content?: string;
     categories?: CreatePostCategoryDto[];
   };
+  authorEmail?: string | null;
   onSubmit: (data: {
     title: string;
     subTitle: string;
-    author: string;
     content: string;
     categories: CreatePostCategoryDto[];
   }) => void;
@@ -38,6 +37,7 @@ interface BlogPostFormProps {
 
 export const BlogPostForm = ({
   initialData,
+  authorEmail,
   onSubmit,
   onCancel,
   isEdit = false,
@@ -48,7 +48,6 @@ export const BlogPostForm = ({
 }: BlogPostFormProps) => {
   const [title, setTitle] = useState(initialData?.title || '');
   const [subTitle, setSubTitle] = useState(initialData?.subTitle || '');
-  const [author, setAuthor] = useState(initialData?.author || '');
   const [content, setContent] = useState(initialData?.content || '');
   const [categories, setCategories] = useState<CreatePostCategoryDto[]>(
     initialData?.categories || []
@@ -69,17 +68,11 @@ export const BlogPostForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ title, subTitle, author, content, categories });
+    onSubmit({ title, subTitle, content, categories });
   };
 
   const isFormValid = () => {
-    return (
-      title.trim() &&
-      subTitle.trim() &&
-      author.trim() &&
-      content.trim() &&
-      categories.length > 0
-    );
+    return title.trim() && subTitle.trim() && content.trim() && categories.length > 0;
   };
 
   return (
@@ -119,14 +112,11 @@ export const BlogPostForm = ({
           />
 
           <TextField
-            label="Author"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
+            label="Author Email"
+            value={authorEmail ?? ''}
             fullWidth
-            required
-            disabled={isLoading}
-            inputProps={{ maxLength: 100 }}
-            helperText={`${author.length}/100`}
+            disabled
+            helperText="Automatically populated from your signed-in account"
           />
 
           <TextField

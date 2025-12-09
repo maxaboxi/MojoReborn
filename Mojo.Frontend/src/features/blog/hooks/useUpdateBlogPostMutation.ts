@@ -9,8 +9,10 @@ export const useUpdateBlogPostMutation = () => {
   return useMutation<EditPostResponse, Error, EditPostRequest>({
     mutationFn: blogApi.updatePost,
     onSuccess: (_response, variables) => {
-      queryClient.invalidateQueries({ queryKey: blogQueryKeys.posts() });
-      queryClient.invalidateQueries({ queryKey: blogQueryKeys.post(variables.blogPostId) });
+      queryClient.invalidateQueries({ queryKey: blogQueryKeys.posts(variables.pageId) });
+      queryClient.invalidateQueries({
+        queryKey: blogQueryKeys.post(variables.blogPostId, variables.pageId),
+      });
     },
   });
 };

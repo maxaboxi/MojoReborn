@@ -14,6 +14,7 @@ interface BlogCommentFormPanelProps {
   isAuthenticated: boolean;
   onRequireAuth: () => void;
   showIdentityFields?: boolean;
+  identityReadOnly?: boolean;
 }
 
 export const BlogCommentFormPanel = ({
@@ -29,6 +30,7 @@ export const BlogCommentFormPanel = ({
   isAuthenticated,
   onRequireAuth,
   showIdentityFields = true,
+  identityReadOnly = false,
 }: BlogCommentFormPanelProps) => {
   const disableForm = menuLoading || !blogPageId;
 
@@ -73,6 +75,7 @@ export const BlogCommentFormPanel = ({
             successMessage={successMessage}
             disabled={disableForm}
             showIdentityFields={showIdentityFields}
+            identityReadOnly={identityReadOnly}
           />
         )}
       </CardContent>

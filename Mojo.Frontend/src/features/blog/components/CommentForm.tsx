@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Stack, TextField, Button, Alert } from '@mui/material';
 
 export type CommentFormValues = {
-  userName: string;
-  userEmail: string;
+  author: string;
   title: string;
   content: string;
 };
@@ -19,11 +18,11 @@ interface CommentFormProps {
   successMessage?: string | null;
   showIdentityFields?: boolean;
   disabled?: boolean;
+  identityReadOnly?: boolean;
 }
 
 const defaultValues: CommentFormValues = {
-  userName: '',
-  userEmail: '',
+  author: '',
   title: '',
   content: '',
 };
@@ -39,6 +38,7 @@ export const CommentForm = ({
   successMessage = null,
   showIdentityFields = true,
   disabled = false,
+  identityReadOnly = false,
 }: CommentFormProps) => {
   const [values, setValues] = useState<CommentFormValues>({
     ...defaultValues,
@@ -55,13 +55,13 @@ export const CommentForm = ({
   const isFormValid = useMemo(() => {
     const hasTitle = values.title.trim().length > 0;
     const hasContent = values.content.trim().length > 0;
-    if (!showIdentityFields) {
+    const identityRequired = showIdentityFields;
+    if (!identityRequired) {
       return hasTitle && hasContent;
     }
-    const hasName = values.userName.trim().length > 0;
-    const hasEmail = values.userEmail.trim().length > 0;
-    return hasTitle && hasContent && hasName && hasEmail;
-  }, [values, showIdentityFields]);
+    const hasAuthor = values.author.trim().length > 0;
+    return hasTitle && hasContent && hasAuthor;
+  }, [showIdentityFields, values]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -78,23 +78,15 @@ export const CommentForm = ({
         {successMessage && <Alert severity="success">{successMessage}</Alert>}
 
         {showIdentityFields && (
-          <>
-            <TextField
-              label="Your Name"
-              value={values.userName}
-              onChange={(e) => setValues((prev) => ({ ...prev, userName: e.target.value }))}
-              required
-              disabled={isSubmitting || disabled}
-            />
-            <TextField
-              label="Email"
-              type="email"
-              value={values.userEmail}
-              onChange={(e) => setValues((prev) => ({ ...prev, userEmail: e.target.value }))}
-              required
-              disabled={isSubmitting || disabled}
-            />
-          </>
+          <TextField
+            label="Author"
+            value={values.author}
+            onChange={(e) => setValues((prev) => ({ ...prev, author: e.target.value }))}
+            required
+            disabled={identityReadOnly || isSubmitting || disabled}
+            InputProps={identityReadOnly ? { readOnly: true } : undefined}
+            helperText={identityReadOnly ? 'Pulled from your signed-in account' : undefined}
+          />
         )}
 
         <TextField

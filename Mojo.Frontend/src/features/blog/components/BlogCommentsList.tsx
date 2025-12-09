@@ -22,6 +22,7 @@ interface BlogCommentsListProps {
   formatDate: (isoDate: string) => string;
   onEditComment: (commentId: string, values: CommentFormValues) => Promise<void>;
   onDeleteComment: (commentId: string) => Promise<void>;
+  currentUserId?: string | null;
 }
 
 export const BlogCommentsList = ({
@@ -30,6 +31,7 @@ export const BlogCommentsList = ({
   formatDate,
   onEditComment,
   onDeleteComment,
+  currentUserId,
 }: BlogCommentsListProps) => {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [submittingEditId, setSubmittingEditId] = useState<string | null>(null);
@@ -110,26 +112,30 @@ export const BlogCommentsList = ({
                 </Typography>
                 <Typography variant="body1">{comment.content}</Typography>
 
-                <Box className="blog-comment-actions">
-                  <Tooltip title="Edit comment">
-                    <IconButton size="small" onClick={() => handleStartEdit(comment.id)}>
-                      <EditIcon fontSize="inherit" />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete comment">
-                    <span>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDelete(comment.id)}
-                        disabled={deletingCommentId === comment.id}
-                      >
-                        <DeleteIcon fontSize="inherit" />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                </Box>
+                {currentUserId && comment.userGuid &&
+                  comment.userGuid.toLowerCase() === currentUserId.toLowerCase() && (
+                    <Box className="blog-comment-actions">
+                      <Tooltip title="Edit comment">
+                        <IconButton size="small" onClick={() => handleStartEdit(comment.id)}>
+                          <EditIcon fontSize="inherit" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete comment">
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDelete(comment.id)}
+                            disabled={deletingCommentId === comment.id}
+                          >
+                            <DeleteIcon fontSize="inherit" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    </Box>
+                  )}
 
-                {editingCommentId === comment.id && (
+                {editingCommentId === comment.id && currentUserId && comment.userGuid &&
+                  comment.userGuid.toLowerCase() === currentUserId.toLowerCase() && (
                   <Box className="blog-comment-edit" mt={2}>
                     <Divider sx={{ mb: 2 }} />
                     {editError && (

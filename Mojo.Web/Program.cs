@@ -5,9 +5,11 @@ using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Core.Data;
 using Mojo.Modules.Core.Features.Identity;
 using Mojo.Modules.Core.Features.Identity.Entities;
-using Mojo.Modules.Core.Features.SiteStructure.GetModule;
+using Mojo.Modules.Core.Features.Identity.Services;
+using Mojo.Modules.Core.Features.SiteStructure.GetFeatureContext;
 using Mojo.Modules.Core.Features.SiteStructure.GetSite;
 using Mojo.Modules.Forum.Data;
+using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
 using Mojo.Web.Extensions;
 using Wolverine;
@@ -43,6 +45,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(opt =>
 .AddEntityFrameworkStores<CoreDbContext>()
 .AddDefaultTokenProviders();
 
+builder.Services.AddAuthorization();
 builder.Services.AddAuthentication()
     .AddGoogle(opt =>
     {
@@ -60,10 +63,12 @@ builder.Services.AddAuthentication()
         opt.ClientSecret = builder.Configuration["Authentication:Facebook:ClientSecret"] ?? "";
     });
 
-builder.Services.AddScoped<ClaimsPrincipal>();
+builder.Services.AddScoped<ClaimsPrincipal>(s => s.GetService<IHttpContextAccessor>()?.HttpContext?.User ?? new ClaimsPrincipal());
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddScoped<IModuleResolver, ModuleResolver>();
+builder.Services.AddScoped<IFeatureContextResolver, FeatureContextResolver>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<SiteResolver>();
 
 builder.Host.UseWolverine(opts =>
@@ -112,6 +117,8 @@ else
 app.UseCors(opt => opt.WithOrigins("http://localhost:5173").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 
 app.UseHttpsRedirection();
+
+app.UseAuthorization();
 
 app.MapWolverineEndpoints(opts =>
 {

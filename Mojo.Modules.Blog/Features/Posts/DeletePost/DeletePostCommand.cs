@@ -1,3 +1,3 @@
 namespace Mojo.Modules.Blog.Features.Posts.DeletePost;
 
-public record DeletePostCommand(Guid Id);
+public record DeletePostCommand(int PageId, Guid Id);

@@ -9,7 +9,9 @@ export const useDeleteCommentMutation = () => {
   return useMutation<DeleteCommentResponse, Error, DeleteCommentRequest>({
     mutationFn: blogApi.deleteComment,
     onSuccess: (_response, variables) => {
-      queryClient.invalidateQueries({ queryKey: blogQueryKeys.post(variables.blogPostId) });
+      queryClient.invalidateQueries({
+        queryKey: blogQueryKeys.post(variables.blogPostId, variables.pageId),
+      });
     },
   });
 };

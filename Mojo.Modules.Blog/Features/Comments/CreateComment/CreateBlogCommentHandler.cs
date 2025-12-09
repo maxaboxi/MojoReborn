@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
+using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
 using Mojo.Shared.Responses;
 
@@ -11,14 +13,18 @@ public class CreateBlogCommentHandler
     public static async Task<CreateBlogCommentResponse> Handle(
         CreateBlogCommentCommand command,
         BlogDbContext db,
-        IModuleResolver moduleResolver,
+        ClaimsPrincipal claimsPrincipal,
+        IUserService userService,
+        IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
-        var moduleDto = await moduleResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
+        var user = userService.GetUserAsync(claimsPrincipal, ct).Result;
         
-        if (moduleDto == null)
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
+        
+        if (featureContextDto == null)
         {
-            return BaseResponse.NotFound<CreateBlogCommentResponse>("Module not found.");
+            return BaseResponse.NotFound<CreateBlogCommentResponse>();
         }
 
         var blogPost = await db.BlogPosts
@@ -32,12 +38,12 @@ public class CreateBlogCommentHandler
 
         var comment = new BlogComment
         {
-            ModuleGuid = moduleDto.ModuleGuid,
-            SiteGuid = moduleDto.SiteGuid,
-            FeatureGuid =  moduleDto.FeatureGuid,
-            UserGuid = command.UserId,
-            UserEmail = command.UserEmail,
-            UserName = command.UserName,
+            ModuleGuid = featureContextDto.ModuleGuid,
+            SiteGuid = featureContextDto.SiteGuid,
+            FeatureGuid =  featureContextDto.FeatureGuid,
+            UserGuid = user?.Id,
+            UserEmail = user?.Email,
+            UserName = user?.DisplayName ?? command.Author,
             UserIpAddress = command.UserIpAddress ?? "",
             Title = command.Title,
             Content = command.Content,
