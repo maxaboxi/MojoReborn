@@ -12,7 +12,7 @@ using Mojo.Modules.Core.Data;
 namespace Mojo.Modules.Core.Data.Migrations
 {
     [DbContext(typeof(CoreDbContext))]
-    [Migration("20251208101226_CoreDbContext_Initial_Migration")]
+    [Migration("20251208123548_CoreDbContext_Initial_Migration")]
     partial class CoreDbContext_Initial_Migration
     {
         /// <inheritdoc />
@@ -323,7 +323,8 @@ namespace Mojo.Modules.Core.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsEmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("EmailConfirmed");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");

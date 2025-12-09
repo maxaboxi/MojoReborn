@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
@@ -58,6 +59,7 @@ builder.Services.AddAuthentication()
         opt.ClientSecret = builder.Configuration["Authentication:Facebook:ClientSecret"] ?? "";
     });
 
+builder.Services.AddScoped<ClaimsPrincipal>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ModuleResolver>();
@@ -106,7 +108,7 @@ else
     app.UseHsts();
 }
 
-app.UseCors(opt => opt.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+app.UseCors(opt => opt.WithOrigins("http://localhost:5173").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 
 app.UseHttpsRedirection();
 

@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Mojo.Modules.Core.Features.Identity.Entities;
-using Wolverine;
 using Wolverine.Http;
 
 namespace Mojo.Modules.Core.Features.Identity.GetCurrentUser;
@@ -11,11 +10,28 @@ public class GetCurrentUserEndpoint
 {
     [WolverineGet("/api/auth/user")]
     public async Task<IResult> Get(
-        GetCurrentUserQuery query,
-        IMessageBus bus)
+        ClaimsPrincipal principal,
+        UserManager<ApplicationUser> userManager)
     {
-        var response = await bus.InvokeAsync<GetCurrentUserResponse>(query);
+        var user = await userManager.GetUserAsync(principal);
 
-        return response.Id == Guid.Empty ? Results.Unauthorized() : Results.Ok(response);
+        if (user == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var response =  new GetCurrentUserResponse
+        {
+            Id = user.Id,
+            Email = user.Email ?? "",
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            DisplayName = user.DisplayName,
+            AvatarUrl = user.AvatarUrl,
+            Bio =  user.Bio,
+            Signature =  user.Signature
+        };
+        
+        return Results.Ok(response);
     }
 }

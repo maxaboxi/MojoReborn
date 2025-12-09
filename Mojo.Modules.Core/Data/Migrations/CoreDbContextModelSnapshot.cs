@@ -320,7 +320,8 @@ namespace Mojo.Modules.Core.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsEmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("EmailConfirmed");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");

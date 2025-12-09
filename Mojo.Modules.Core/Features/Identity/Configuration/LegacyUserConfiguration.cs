@@ -14,5 +14,6 @@ public class LegacyUserConfiguration : IEntityTypeConfiguration<LegacyUser>
         builder.Property(e => e.UserId).HasColumnName("UserID");
         builder.Property(e => e.SiteId).HasColumnName("SiteID");
         builder.Property(e => e.CreatedAt).HasColumnName("DateCreated");
+        builder.Property(e => e.IsEmailConfirmed).HasColumnName("EmailConfirmed");
     }
 }

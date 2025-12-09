@@ -200,7 +200,7 @@ namespace Mojo.Modules.Core.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-            
+
             migrationBuilder.CreateTable(
                 name: "UserSiteRoleAssignments",
                 columns: table => new

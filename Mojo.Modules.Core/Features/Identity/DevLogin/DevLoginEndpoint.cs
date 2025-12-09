@@ -15,7 +15,7 @@ public class DevLoginEndpoint
         
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
+            new(ClaimTypes.NameIdentifier, userEmail),
             new(ClaimTypes.Name, userEmail),
             new(ClaimTypes.Email, userEmail)
         };
