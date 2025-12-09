@@ -15,7 +15,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Mojo.Modules.Core\Mojo.Modules.Core.csproj" />
       <ProjectReference Include="..\Mojo.Shared\Mojo.Shared.csproj" />
     </ItemGroup>
 

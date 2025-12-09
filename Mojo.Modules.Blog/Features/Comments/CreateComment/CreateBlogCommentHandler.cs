@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
-using Mojo.Modules.Blog.Domain;
 using Mojo.Modules.Blog.Domain.Entities;
-using Mojo.Modules.Core.Features.SiteStructure.GetModule;
+using Mojo.Shared.Interfaces.SiteStructure;
 using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Blog.Features.Comments.CreateComment;
@@ -12,10 +11,10 @@ public class CreateBlogCommentHandler
     public static async Task<CreateBlogCommentResponse> Handle(
         CreateBlogCommentCommand command,
         BlogDbContext db,
-        ModuleResolver moduleResolver,
+        IModuleResolver moduleResolver,
         CancellationToken ct)
     {
-        var moduleDto = await moduleResolver.GetModuleByPageId(command.PageId, ct);
+        var moduleDto = await moduleResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
         
         if (moduleDto == null)
         {

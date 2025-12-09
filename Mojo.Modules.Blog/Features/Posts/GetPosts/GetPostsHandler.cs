@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
-using Mojo.Modules.Core.Features.SiteStructure.GetModule;
+using Mojo.Shared.Interfaces.SiteStructure;
 using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Blog.Features.Posts.GetPosts;
@@ -10,10 +10,10 @@ public static class GetPostsHandler
     public static async Task<GetPostsResponse> Handle(
         GetPostsQuery query, 
         BlogDbContext db,
-        ModuleResolver moduleResolver,
+        IModuleResolver moduleResolver,
         CancellationToken ct)
     {
-        var moduleDto = await moduleResolver.GetModuleByPageId(query.PageId, ct);
+        var moduleDto = await moduleResolver.ResolveModule(query.PageId, "BlogFeatureName", ct);
         
         if (moduleDto == null)
         {

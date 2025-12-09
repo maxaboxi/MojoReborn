@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
-using Mojo.Modules.Core.Features.SiteStructure.GetModule;
+using Mojo.Shared.Interfaces.SiteStructure;
 using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Blog.Features.Posts.CreatePost;
@@ -12,11 +12,11 @@ public static partial class CreatePostHandler
     public static async Task<CreatePostResponse> Handle(
         CreatePostCommand command,
         BlogDbContext db,
-        ModuleResolver moduleResolver,
+        IModuleResolver moduleResolver,
         CancellationToken cancellationToken)
     {
         //TODO: check if user has rights for the module when auth implemented
-        var moduleDto = await moduleResolver.GetModuleByPageId(command.PageId, cancellationToken);
+        var moduleDto = await moduleResolver.ResolveModule(command.PageId, "BlogFeatureName" ,cancellationToken);
         
         if (moduleDto == null)
         {

@@ -8,6 +8,7 @@ using Mojo.Modules.Core.Features.Identity.Entities;
 using Mojo.Modules.Core.Features.SiteStructure.GetModule;
 using Mojo.Modules.Core.Features.SiteStructure.GetSite;
 using Mojo.Modules.Forum.Data;
+using Mojo.Shared.Interfaces.SiteStructure;
 using Mojo.Web.Extensions;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
@@ -62,7 +63,7 @@ builder.Services.AddAuthentication()
 builder.Services.AddScoped<ClaimsPrincipal>();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddScoped<ModuleResolver>();
+builder.Services.AddScoped<IModuleResolver, ModuleResolver>();
 builder.Services.AddScoped<SiteResolver>();
 
 builder.Host.UseWolverine(opts =>
