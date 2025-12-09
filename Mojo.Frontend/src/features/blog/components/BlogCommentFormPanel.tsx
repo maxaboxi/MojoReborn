@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, Box, CircularProgress, Alert } from '@mui/material';
+import { Card, CardContent, Typography, Box, CircularProgress, Alert, Button } from '@mui/material';
 import { CommentForm, type CommentFormValues } from './CommentForm';
 
 interface BlogCommentFormPanelProps {
@@ -11,6 +11,9 @@ interface BlogCommentFormPanelProps {
   isSubmitting: boolean;
   error: string | null;
   successMessage: string | null;
+  isAuthenticated: boolean;
+  onRequireAuth: () => void;
+  showIdentityFields?: boolean;
 }
 
 export const BlogCommentFormPanel = ({
@@ -23,6 +26,9 @@ export const BlogCommentFormPanel = ({
   isSubmitting,
   error,
   successMessage,
+  isAuthenticated,
+  onRequireAuth,
+  showIdentityFields = true,
 }: BlogCommentFormPanelProps) => {
   const disableForm = menuLoading || !blogPageId;
 
@@ -50,15 +56,25 @@ export const BlogCommentFormPanel = ({
             Unable to determine the blog page. Please refresh or try again later.
           </Alert>
         )}
-        <CommentForm
-          key={commentFormKey}
-          initialData={initialData}
-          onSubmit={onSubmit}
-          isSubmitting={isSubmitting}
-          error={error}
-          successMessage={successMessage}
-          disabled={disableForm}
-        />
+        {!isAuthenticated ? (
+          <Alert severity="info" sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <span>Sign in to join the discussion.</span>
+            <Button variant="contained" size="small" onClick={onRequireAuth} sx={{ alignSelf: 'flex-start' }}>
+              Go to Sign In
+            </Button>
+          </Alert>
+        ) : (
+          <CommentForm
+            key={commentFormKey}
+            initialData={initialData}
+            onSubmit={onSubmit}
+            isSubmitting={isSubmitting}
+            error={error}
+            successMessage={successMessage}
+            disabled={disableForm}
+            showIdentityFields={showIdentityFields}
+          />
+        )}
       </CardContent>
     </Card>
   );

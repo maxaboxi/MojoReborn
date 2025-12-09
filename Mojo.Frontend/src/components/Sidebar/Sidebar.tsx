@@ -1,5 +1,5 @@
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Box, Divider, useMediaQuery, useTheme } from '@mui/material';
-import { Article, Forum, Settings, Layers } from '@mui/icons-material';
+import { Article, Forum, Settings, Layers, Home } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NavMenuItem } from '../NavMenuItem/NavMenuItem';
 import { useMenuQuery } from '@shared/hooks/useMenuQuery';
@@ -8,6 +8,7 @@ import './Sidebar.css';
 const DRAWER_WIDTH = 260;
 
 const staticMenuItems = [
+  { text: 'Home', icon: <Home />, path: '/' },
   { text: 'Blog', icon: <Article />, path: '/blog' },
   { text: 'Forum', icon: <Forum />, path: '/forum' },
   { text: 'Admin', icon: <Settings />, path: '/admin' },

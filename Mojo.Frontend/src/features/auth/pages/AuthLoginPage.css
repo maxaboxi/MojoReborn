@@ -1,0 +1,23 @@
+.auth-login-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background: radial-gradient(circle at top, rgba(0, 102, 204, 0.2), transparent 60%),
+    linear-gradient(135deg, rgba(0, 0, 0, 0.04), transparent 70%);
+}
+
+.auth-login-card {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 24px;
+  padding: 16px;
+}
+
+.auth-provider-button {
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 12px 20px;
+  font-weight: 600;
+}

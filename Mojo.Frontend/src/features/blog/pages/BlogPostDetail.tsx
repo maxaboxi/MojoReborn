@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import type { SyntheticEvent } from 'react';
 import {
@@ -30,14 +30,16 @@ import { BlogCommentsList } from '../components/BlogCommentsList';
 import { BlogCommentFormPanel } from '../components/BlogCommentFormPanel';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { useBlogPageContext } from '../hooks/useBlogPageContext';
+import { useAuth } from '@features/auth/providers/AuthProvider';
+import { savePostLoginRedirect } from '@features/auth/utils/postLoginRedirect';
 import './BlogPostDetail.css';
-
-const ANONYMOUS_USER_ID = '00000000-0000-0000-0000-000000000000';
 
 
 export const BlogPostDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
   const { blogPageId, menuLoading, menuError } = useBlogPageContext();
   const {
     data: post,
@@ -63,13 +65,25 @@ export const BlogPostDetail = () => {
   const deleteCommentMutation = useDeleteCommentMutation();
   const commentFormInitialData = useMemo(
     () => ({
-      userName: '',
-      userEmail: '',
+      userName: user?.displayName ?? '',
+      userEmail: user?.email ?? '',
       title: '',
       content: '',
     }),
-    [commentFormKey]
+    [commentFormKey, user]
   );
+
+  const currentUserDisplayName = useMemo(() => {
+    if (!user) {
+      return '';
+    }
+    const trimmedDisplayName = user.displayName?.trim();
+    if (trimmedDisplayName) {
+      return trimmedDisplayName;
+    }
+    const combined = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+    return combined || user.email;
+  }, [user]);
 
   const showToast = (message: string, severity: AlertColor = 'info') => {
     setToastState({
@@ -77,6 +91,12 @@ export const BlogPostDetail = () => {
       message,
       severity,
     });
+  };
+
+  const redirectToLogin = () => {
+    const target = `${location.pathname}${location.search}`;
+    savePostLoginRedirect(target);
+    navigate(`/auth/login?redirect=${encodeURIComponent(target)}`);
   };
 
   const handleToastClose = (
@@ -138,6 +158,14 @@ export const BlogPostDetail = () => {
       return;
     }
 
+    if (!isAuthenticated || !user?.id) {
+      const message = 'Please sign in to post a comment.';
+      setCommentError(message);
+      showToast(message, 'warning');
+      redirectToLogin();
+      return;
+    }
+
     setCommentError(null);
     setCommentSuccess(null);
 
@@ -145,9 +173,9 @@ export const BlogPostDetail = () => {
       const response = await commentMutation.mutateAsync({
         pageId: blogPageId,
         blogPostId: id,
-        userId: ANONYMOUS_USER_ID,
-        userName: values.userName,
-        userEmail: values.userEmail,
+        userId: user.id,
+        userName: currentUserDisplayName,
+        userEmail: user.email,
         title: values.title,
         content: values.content,
       });
@@ -176,6 +204,13 @@ export const BlogPostDetail = () => {
       throw error;
     }
 
+    if (!isAuthenticated) {
+      const error = new Error('Sign in to edit comments.');
+      showToast(error.message, 'warning');
+      redirectToLogin();
+      throw error;
+    }
+
     try {
       const response = await editCommentMutation.mutateAsync({
         blogPostId: id,
@@ -201,6 +236,13 @@ export const BlogPostDetail = () => {
     if (!id) {
       const error = new Error('Missing blog post context.');
       showToast(error.message, 'error');
+      throw error;
+    }
+
+    if (!isAuthenticated) {
+      const error = new Error('Sign in to delete comments.');
+      showToast(error.message, 'warning');
+      redirectToLogin();
       throw error;
     }
 
@@ -320,6 +362,9 @@ export const BlogPostDetail = () => {
         isSubmitting={commentMutation.isPending}
         error={commentError}
         successMessage={commentSuccess}
+        isAuthenticated={isAuthenticated}
+        onRequireAuth={redirectToLogin}
+        showIdentityFields={false}
       />
 
       <Box className="blog-post-actions">

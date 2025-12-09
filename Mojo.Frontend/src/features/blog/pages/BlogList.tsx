@@ -5,6 +5,8 @@ import { useBlogPostsQuery } from '../hooks/useBlogPostsQuery';
 import { BlogCard } from '../components/BlogCard';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { useBlogPageContext } from '../hooks/useBlogPageContext';
+import { useAuth } from '@features/auth/providers/AuthProvider';
+import { savePostLoginRedirect } from '@features/auth/utils/postLoginRedirect';
 import './BlogList.css';
 
 export const BlogList = () => {
@@ -15,6 +17,7 @@ export const BlogList = () => {
     error,
   } = useBlogPostsQuery(blogPageId);
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   if (menuLoading || loadingPosts) {
     return <LoadingState className="blog-list-loading" minHeight={200} />;
@@ -58,7 +61,15 @@ export const BlogList = () => {
         <Button
           variant="contained"
           startIcon={<Add />}
-          onClick={() => navigate('/blog/create')}
+          onClick={() => {
+            if (isAuthenticated) {
+              navigate('/blog/create');
+              return;
+            }
+            const target = '/blog/create';
+            savePostLoginRedirect(target);
+            navigate(`/auth/login?redirect=${encodeURIComponent(target)}`);
+          }}
           size="large"
         >
           Create New Post

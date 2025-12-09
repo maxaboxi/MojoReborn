@@ -2,6 +2,10 @@ import { Navigate } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 import { AppLayout } from '@components/AppLayout/AppLayout';
 import { blogRoutes } from '@features/blog/routes';
+import { HomePage } from '@features/home/pages/HomePage';
+import { AuthLayout } from '@features/auth/layouts/AuthLayout';
+import { AuthLoginPage } from '@features/auth/pages/AuthLoginPage';
+import { LegacyMigrationPage } from '@features/auth/pages/LegacyMigrationPage';
 
 const comingSoon = (label: string) => <div>{label} - Coming Soon</div>;
 
@@ -10,11 +14,19 @@ export const rootRoutes: RouteObject[] = [
     path: '/',
     element: <AppLayout />,
     children: [
-      { index: true, element: <Navigate to="/blog" replace /> },
+      { index: true, element: <HomePage /> },
       ...blogRoutes,
       { path: 'forum', element: comingSoon('Forum') },
       { path: 'admin', element: comingSoon('Admin') },
-      { path: '*', element: <Navigate to="/blog" replace /> },
+      { path: '*', element: <Navigate to="/" replace /> },
+    ],
+  },
+  {
+    path: '/auth',
+    element: <AuthLayout />,
+    children: [
+      { path: 'login', element: <AuthLoginPage /> },
+      { path: 'migrate-legacy', element: <LegacyMigrationPage /> },
     ],
   },
 ];

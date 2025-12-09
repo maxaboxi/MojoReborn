@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { useState } from 'react';
 import { Sidebar } from '../Sidebar/Sidebar';
 import { Header } from '../Header/Header';
+import { PostLoginRedirectListener } from '@features/auth/components/PostLoginRedirectListener';
 import './AppLayout.css';
 
 export const AppLayout = () => {
@@ -14,6 +15,7 @@ export const AppLayout = () => {
 
   return (
     <Box className="app-layout">
+      <PostLoginRedirectListener />
       <Header onMenuClick={handleDrawerToggle} />
       <Sidebar mobileOpen={mobileOpen} onClose={handleDrawerToggle} />
       <Box
