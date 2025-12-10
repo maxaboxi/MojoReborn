@@ -10,8 +10,8 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
-      <PackageReference Include="WolverineFx.FluentValidation" Version="5.4.0" />
-      <PackageReference Include="WolverineFx.Http" Version="5.4.0" />
+      <PackageReference Include="WolverineFx.FluentValidation" Version="5.6.0" />
+      <PackageReference Include="WolverineFx.Http" Version="5.6.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -19,7 +19,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Features\Categories\" />
+      <Folder Include="Features\Categories\DeleteCategory\" />
+      <Folder Include="Features\Categories\EditCategory\" />
       <Folder Include="Features\Posts\" />
       <Folder Include="Features\Comments\" />
     </ItemGroup>

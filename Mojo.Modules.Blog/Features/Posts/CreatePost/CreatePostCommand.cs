@@ -2,24 +2,19 @@
 
 namespace Mojo.Modules.Blog.Features.Posts.CreatePost;
 
-public class CreatePostCommand(int pageId, string title, string subtitle, string content, List<CreatePostCategoryDto> categories)
+public record CreatePostCommand(int PageId, string Title, string SubTitle, string Content, List<CreatePostCategoryDto> Categories)
 {
-    public int PageId { get; set; } = pageId;
-    public string Title { get; set; } = title;
-    public string SubTitle { get; set; } = subtitle;
-    public string Content { get; set; } = content;
-    
-    public List<CreatePostCategoryDto> Categories { get; set; } = categories;
-
     public class CreatePostValidator : AbstractValidator<CreatePostCommand>
     {
         public CreatePostValidator()
         {
-            RuleFor(x => x.PageId).NotNull();
-            RuleFor(x => x.Title).NotNull().MaximumLength(255);
-            RuleFor(x => x.SubTitle).NotNull().MaximumLength(500);
-            RuleFor(x => x.Content).NotNull();
-            RuleFor(x => x.Categories).NotNull();
+            RuleFor(x => x.PageId).NotNull().WithMessage("PageId cannot be empty.");
+            RuleFor(x => x.Title).NotNull().WithMessage("Title cannot be empty.")
+                .MaximumLength(255).WithMessage("Title cannot exceed 255 characters.");
+            RuleFor(x => x.SubTitle).NotNull().WithMessage("SubTitle cannot be empty.")
+                .MaximumLength(500).WithMessage("SubTitle cannot exceed 500 characters.");
+            RuleFor(x => x.Content).NotNull().WithMessage("Content cannot be empty.");
+            RuleFor(x => x.Categories).NotNull().NotEmpty().WithMessage("Categories cannot be empty.");
         }
     }
 }

@@ -2,24 +2,20 @@
 
 namespace Mojo.Modules.Blog.Features.Posts.EditPost;
 
-public class EditPostCommand(int pageId, Guid blogPostId, string title, string subtitle, string content, List<EditPostCategoryDto> categories)
+public record EditPostCommand(int PageId, Guid BlogPostId, string Title, string SubTitle, string Content, List<EditPostCategoryDto> Categories)
 {
-    public int PageId { get; set; }
-    public Guid BlogPostId { get; set; } = blogPostId;
-    public string Title { get; set; } = title;
-    public string SubTitle { get; set; } = subtitle;
-    public string Content { get; set; } = content;
-    public List<EditPostCategoryDto> Categories { get; set; } = categories;
-
     public class EditPostValidator : AbstractValidator<EditPostCommand>
     {
         public EditPostValidator()
         {
-            RuleFor(x => x.BlogPostId).NotNull();
-            RuleFor(x => x.Title).NotNull().MaximumLength(255);
-            RuleFor(x => x.SubTitle).NotNull().MaximumLength(500);
-            RuleFor(x => x.Content).NotNull();
-            RuleFor(x => x.Categories).NotNull().NotEmpty();
+            RuleFor(x => x.PageId).NotNull().WithMessage("PageId cannot be empty.");
+            RuleFor(x => x.BlogPostId).NotNull().WithMessage("BlogPostId cannot be empty.");
+            RuleFor(x => x.Title).NotNull().WithMessage("Title cannot be empty.")
+                .MaximumLength(255).WithMessage("Title cannot exceed 255 characters.");
+            RuleFor(x => x.SubTitle).NotNull().WithMessage("SubTitle cannot be empty.")
+                .MaximumLength(500).WithMessage("SubTitle cannot exceed 500 characters.");
+            RuleFor(x => x.Content).NotNull().WithMessage("Content cannot be empty.");
+            RuleFor(x => x.Categories).NotNull().NotEmpty().WithMessage("Categories cannot be empty.");
         }
     }
 }
