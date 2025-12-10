@@ -32,7 +32,11 @@ public class DeleteBlogCommentHandler
         }
         
         var comment = await db.BlogComments
-            .Where(x => x.BlogPost.BlogPostId == command.BlogPostId && x.Id == command.BlogPostCommentId && x.UserGuid == user.Id)
+            .Where(x => 
+                x.ModuleGuid == featureContextDto.ModuleGuid &&
+                x.BlogPost.BlogPostId == command.BlogPostId && 
+                x.Id == command.BlogPostCommentId && 
+                x.UserGuid == user.Id)
             .FirstOrDefaultAsync(ct);
 
         if (comment == null)

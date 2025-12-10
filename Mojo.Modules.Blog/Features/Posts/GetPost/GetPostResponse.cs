@@ -1,6 +1,8 @@
-﻿namespace Mojo.Modules.Blog.Features.Posts.GetPost;
+﻿using Mojo.Shared.Responses;
 
-public record GetPostResponse
+namespace Mojo.Modules.Blog.Features.Posts.GetPost;
+
+public class GetPostResponse : BaseResponse
 {
     public Guid BlogPostGuid { get; set; }
     public string Title { get; set; } = string.Empty;

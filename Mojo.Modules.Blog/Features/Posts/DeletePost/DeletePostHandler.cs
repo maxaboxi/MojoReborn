@@ -33,7 +33,10 @@ public class DeletePostHandler
         }
         
         var blogPost =  await db.BlogPosts
-            .Where(x => x.BlogPostId == command.Id && x.Author == user.Email)
+            .Where(x => 
+                x.ModuleId == featureContextDto.ModuleId &&
+                x.BlogPostId == command.Id && 
+                x.Author == user.Email)
             .Include(x => x.Categories)
             .FirstOrDefaultAsync(ct);
 

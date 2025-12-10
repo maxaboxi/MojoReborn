@@ -13,14 +13,16 @@ public static class GetPostsHandler
         IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
-        var moduleDto = await featureContextResolver.ResolveModule(query.PageId, "BlogFeatureName", ct);
+        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, "BlogFeatureName", ct);
         
-        if (moduleDto == null)
+        if (featureContextDto == null)
         {
             return BaseResponse.NotFound<GetPostsResponse>("Module not found.");
         }
+        
         var posts = await db.BlogPosts
             .AsNoTracking()
+            .Where(x => x.ModuleId == featureContextDto.ModuleId)
             .Include(p => p.Categories)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new BlogPostDto

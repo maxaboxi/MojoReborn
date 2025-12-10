@@ -32,7 +32,11 @@ public class EditBlogCommentHandler
         }
 
         var comment = await db.BlogComments
-            .Where(x => x.BlogPost.BlogPostId == command.BlogPostId && x.Id == command.BlogCommentId && x.UserGuid == user.Id)
+            .Where(x => 
+                x.BlogPost.ModuleId == featureContextDto.ModuleId &&
+                x.BlogPost.BlogPostId == command.BlogPostId && 
+                x.Id == command.BlogCommentId && 
+                x.UserGuid == user.Id)
             .FirstOrDefaultAsync(ct);
 
         if (comment == null)

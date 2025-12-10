@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Mojo.Modules.Blog.Domain;
 using Mojo.Modules.Blog.Domain.Entities;
 
 namespace Mojo.Modules.Blog.Data;

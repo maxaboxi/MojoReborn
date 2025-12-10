@@ -13,15 +13,16 @@ public class GetCategoriesHandler
         IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
-        var moduleDto = await featureContextResolver.ResolveModule(query.PageId, "BlogFeatureName", ct);
+        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, "BlogFeatureName", ct);
         
-        if (moduleDto == null)
+        if (featureContextDto == null)
         {
             return BaseResponse.NotFound<GetCategoriesResponse>("Module not found.");
         }
 
         var categories = await db.Categories
             .AsNoTracking()
+            .Where(x => x.ModuleId == featureContextDto.ModuleId)
             .Select(x => new CategoryDto(x.Id, x.ModuleId, x.CategoryName))
             .ToListAsync(ct);
         return new GetCategoriesResponse { IsSuccess = true, Categories = categories };

@@ -35,7 +35,10 @@ public static class EditPostHandler
         
         var original = await db.BlogPosts
             .Include(b => b.Categories)
-            .FirstOrDefaultAsync(x => x.BlogPostId == command.BlogPostId && x.Author == user.Email, ct);
+            .FirstOrDefaultAsync(x => 
+                x.ModuleId == featureContextDto.ModuleId &&
+                x.BlogPostId == command.BlogPostId && 
+                x.Author == user.Email, ct);
 
         if (original == null)
         {
