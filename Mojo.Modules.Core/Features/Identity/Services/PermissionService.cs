@@ -18,12 +18,17 @@ public class PermissionService : IPermissionService
         {
             return true;
         }
+        
+        var userRoles = user.UserSiteRoles.Select(x => x.Name).ToList();
+
+        if (userRoles.Contains("Admins"))
+        {
+            return true;
+        }
 
         var editRoles = featureContextDto.PageDto.EditRoles
             .Split(';', StringSplitOptions.RemoveEmptyEntries)
             .Select(x => x.Trim());
-        
-        var userRoles = user.UserSiteRoles.Select(x => x.Name);
         
         var hasAccess = editRoles.Intersect(userRoles).Any();
 
