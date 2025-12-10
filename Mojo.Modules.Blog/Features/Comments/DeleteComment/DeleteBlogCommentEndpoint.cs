@@ -8,7 +8,7 @@ public class DeleteBlogCommentEndpoint
 {
     [Authorize]
     [WolverineDelete("/api/{pageId}/blog/posts/{blogPostId}/comment/{blogCommentId}")]
-    public static Task<DeleteBlogCommentResponse> Get(
+    public static Task<DeleteBlogCommentResponse> Delete(
         int pageId,
         Guid blogPostId,
         Guid blogCommentId, 

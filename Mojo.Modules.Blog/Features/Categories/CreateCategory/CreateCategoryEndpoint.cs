@@ -9,7 +9,7 @@ public class CreateCategoryEndpoint
     [Authorize]
     [WolverinePost("/api/blog/category")]
     public static Task<CreateCategoryResponse> Post(
-        CreateCategoryResponse createCategoryCommand,
+        CreateCategoryCommand createCategoryCommand,
         IMessageBus bus)
     {
         return bus.InvokeAsync<CreateCategoryResponse>(createCategoryCommand);

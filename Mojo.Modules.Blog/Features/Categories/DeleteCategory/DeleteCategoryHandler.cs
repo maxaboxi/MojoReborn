@@ -1,17 +1,16 @@
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
-using Mojo.Modules.Blog.Domain.Entities;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
 using Mojo.Shared.Responses;
 
-namespace Mojo.Modules.Blog.Features.Categories.CreateCategory;
+namespace Mojo.Modules.Blog.Features.Categories.DeleteCategory;
 
-public class CreateCategoryHandler
+public class DeleteCategoryHandler
 {
-    public static async Task<CreateCategoryResponse> Handle(
-        CreateCategoryCommand command,
+    public static async Task<DeleteCategoryResponse> Handle(
+        DeleteCategoryCommand command,
         BlogDbContext db,
         IFeatureContextResolver featureContextResolver,
         ClaimsPrincipal claimsPrincipal,
@@ -23,30 +22,29 @@ public class CreateCategoryHandler
         
         if (user == null)
         {
-            return BaseResponse.Unauthorized<CreateCategoryResponse>("User not found.");
+            return BaseResponse.Unauthorized<DeleteCategoryResponse>("User not found.");
         }
         
         var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
         
         if (featureContextDto == null || !permissionService.CanEdit(user, featureContextDto))
         {
-            return BaseResponse.Unauthorized<CreateCategoryResponse>();
+            return BaseResponse.Unauthorized<DeleteCategoryResponse>();
         }
 
         var existingCategoryInDb = await db.Categories
             .Where(c => c.ModuleId == featureContextDto.ModuleId)
-            .Where(c => c.CategoryName == command.CategoryName)
+            .Where(c => c.Id == command.CategoryId)
             .FirstOrDefaultAsync(ct);
 
-        if (existingCategoryInDb != null)
+        if (existingCategoryInDb == null)
         {
-            return new CreateCategoryResponse { IsSuccess = false, Message = "Category already exists." };
+            return BaseResponse.NotFound<DeleteCategoryResponse>("Category not found.");
         }
-            
-        await db.Categories.AddAsync(new BlogCategory { CategoryName = command.CategoryName, ModuleId = featureContextDto.ModuleId },
-            ct);
+
+        db.Categories.Remove(existingCategoryInDb);
         await db.SaveChangesAsync(ct);
 
-        return BaseResponse.Success<CreateCategoryResponse>();
+        return BaseResponse.Success<DeleteCategoryResponse>();
     }
 }

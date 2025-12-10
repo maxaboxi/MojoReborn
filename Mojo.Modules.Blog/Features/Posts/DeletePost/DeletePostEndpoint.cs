@@ -8,7 +8,7 @@ public class DeletePostEndpoint
 {
     [Authorize]
     [WolverineDelete("/api/{pageId}/blog/posts/{blogPostId}")]
-    public static Task<DeletePostResponse> Get(
+    public static Task<DeletePostResponse> Delete(
         int pageId,
         Guid blogPostId, 
         IMessageBus bus)
