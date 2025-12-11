@@ -1,67 +1,44 @@
 # MojoReborn
 
-## Overview
-MojoReborn is a modern full-stack web application project designed as a "Greenfield on Brownfield" modernization of the legacy MojoPortal CMS. The primary objective is to re-architect the system using a Modular Monolith approach with Vertical Slice Architecture, leveraging the latest technologies in the .NET and React ecosystems.
+A modernization of the MojoPortal legacy system, built with .NET 10 (Vertical Slice Architecture) and React 19.
 
-**Status: Work In Progress (WIP)**
-This project is currently in active development. Features and architecture are subject to change as the modernization effort progresses.
+## Project Status: Active Development (Pre-Alpha)
+
+This project is currently under active development and is subject to rapid iteration. While the core architectural foundations are being established, many features remain incomplete, and the codebase may undergo significant breaking changes without prior notice.
+
+**Note:** This software is not yet ready for production use. Contributions and feedback are welcome as we work towards a stable release.
 
 ## Architecture
-The solution is built on a Headless API architecture, separating the backend logic from the frontend presentation.
 
-*   **Modular Monolith**: The backend is structured as a single deployment unit logically separated into distinct business modules (Core, Blog, Forum).
-*   **Vertical Slice Architecture**: Features are self-contained within their respective modules, encapsulating the user interface, business logic, and data access requirements for that specific feature.
-*   **CQRS & Messaging**: Wolverine is utilized for command/query handling and internal messaging, promoting a decoupled and testable design.
+### Modular Monolith
+The backend is structured as a Modular Monolith.
+*   **Host:** `Mojo.Web` (ASP.NET Core Web API)
+*   **Modules:** `Mojo.Modules.*` (e.g., Blog, Core, Forum)
+*   **Shared Kernel:** `Mojo.Shared`
 
-## Technology Stack
+### Vertical Slice Architecture (VSA)
+Each module organizes code by **Feature** rather than technical layer.
+*   Example: `Features/Posts/CreatePost` contains the Endpoint, Command, Handler, and Validator for that specific feature.
 
-### Backend
-*   **Framework**: .NET 10 / ASP.NET Core
-*   **Messaging & Mediation**: Wolverine
-*   **Data Access**: Entity Framework Core (SQL Server)
-*   **Validation**: FluentValidation
-
-### Frontend
-*   **Library**: React 19
-*   **Build Tool**: Vite
-*   **Language**: TypeScript
-*   **UI Framework**: Material UI (MUI)
-*   **Networking**: Axios
-
-## Project Structure
-
-*   **Mojo.Web**: The host ASP.NET Core application. Responsible for bootstrapping the application, configuring the DI container, and hosting the API endpoints.
-*   **Mojo.Modules.Core**: Contains the core domain logic, including system configuration and shared module definitions.
-*   **Mojo.Modules.Blog**: Implementation of the Blog feature using vertical slices.
-*   **Mojo.Modules.Forum**: Implementation of the Forum feature.
-*   **Mojo.Shared**: Shared contracts, DTOs, and utilities utilized across different modules.
-*   **Mojo.Frontend**: The React-based Single Page Application (SPA). Frontend is 99% generated with LLMs (Claude Sonnet 4.5 / Gemini 3 Pro / GPT-5.1-Codex) and is meant mostly for testing and as an example how to work with the backend.
+### Legacy Compatibility
+*   **Database:** The system runs on existing MojoPortal SQL Server databases.
+*   **Mapping:** EF Core entities are mapped to legacy table names (e.g., `mp_Blog` -> `BlogPost`).
+*   **Shared Data:** Some tables (like `mp_Comments`) are shared across modules.
 
 ## Getting Started
 
-### Prerequisites
-*   .NET 10 SDK
-*   Node.js (Latest LTS recommended)
-*   SQL Server instance
+### Backend
+1.  **Prerequisites:** .NET 10 SDK.
+2.  **Database:** Update `appsettings.json` in `Mojo.Web` with your MojoPortal database connection string.
+3.  **Run:** `dotnet run --project Mojo.Web`
 
-### Backend Setup
-1.  Navigate to the `Mojo.Web` directory.
-2.  Update `appsettings.json` with your SQL Server connection string.
-3.  Run the application:
-    ```bash
-    dotnet run
-    ```
+### Frontend
+1.  **Prerequisites:** Node.js 20+.
+2.  **Install:** `cd Mojo.Frontend && npm install`
+3.  **Run:** `npm run dev`
 
-### Frontend Setup
-1.  Navigate to the `Mojo.Frontend` directory.
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Start the development server:
-    ```bash
-    npm run dev
-    ```
+## Development Guidelines
 
-## License
-This project is intended for educational and demonstration purposes.
+*   **Async/Await:** Avoid `.Result` or `.Wait()`. Always use `await`.
+*   **Pagination:** All list endpoints MUST implement pagination.
+*   **Projections:** Use `Select` to project to DTOs. Avoid returning Entities directly.
