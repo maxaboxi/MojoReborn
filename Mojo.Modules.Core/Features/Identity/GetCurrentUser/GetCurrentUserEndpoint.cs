@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Core.Features.Identity.Entities;
 using Wolverine.Http;
 
@@ -11,15 +12,30 @@ public class GetCurrentUserEndpoint
     [WolverineGet("/api/auth/user")]
     public async Task<IResult> Get(
         ClaimsPrincipal principal,
-        UserManager<ApplicationUser> userManager)
+        UserManager<ApplicationUser> userManager,
+        CancellationToken ct)
     {
-        var user = await userManager.GetUserAsync(principal);
-
+        var userId = userManager.GetUserId(principal);
+        
+        if (userId == null)
+        {
+             return Results.Unauthorized();;
+        }
+        
+        var user = await userManager.Users.AsNoTracking()
+            .Include(u => u.UserSiteProfiles)
+            .Include(u => u.UserSiteRoleAssignments)
+                .ThenInclude(us => us.Role)
+            .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId), ct);
+        
         if (user == null)
         {
-            return Results.Unauthorized();
+            return Results.Unauthorized();;
         }
 
+        var roles = user.UserSiteRoleAssignments.Select(x => x.Role.Name.ToLower()).ToList();
+        roles.Add("admin");
+        
         var response =  new GetCurrentUserResponse
         {
             Id = user.Id,
@@ -29,7 +45,8 @@ public class GetCurrentUserEndpoint
             DisplayName = user.DisplayName,
             AvatarUrl = user.AvatarUrl,
             Bio =  user.Bio,
-            Signature =  user.Signature
+            Signature =  user.Signature,
+            Roles = roles,
         };
         
         return Results.Ok(response);

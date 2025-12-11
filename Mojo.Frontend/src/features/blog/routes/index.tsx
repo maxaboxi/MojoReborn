@@ -3,6 +3,7 @@ import { BlogList } from '../pages/BlogList';
 import { BlogPostDetail } from '../pages/BlogPostDetail';
 import { CreateBlogPost } from '../pages/CreateBlogPost';
 import { EditBlogPost } from '../pages/EditBlogPost';
+import { ManageCategoriesPage } from '../pages/ManageCategoriesPage';
 import { RequireAuth } from '@features/auth/components/RequireAuth';
 
 export const blogRoutes: RouteObject[] = [
@@ -21,6 +22,14 @@ export const blogRoutes: RouteObject[] = [
     element: (
       <RequireAuth message="Sign in to edit this blog post.">
         <EditBlogPost />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: 'blog/categories',
+    element: (
+      <RequireAuth message="Sign in to manage blog categories.">
+        <ManageCategoriesPage />
       </RequireAuth>
     ),
   },

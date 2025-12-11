@@ -1,0 +1,82 @@
+.manage-categories-loading {
+  min-height: 320px;
+}
+
+.manage-categories-page {
+  padding-top: 32px;
+  padding-bottom: 48px;
+}
+
+.manage-categories-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.manage-categories-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.manage-categories-header button {
+  white-space: nowrap;
+}
+
+.manage-categories-feedback {
+  margin-bottom: 16px;
+}
+
+.manage-categories-card {
+  margin-bottom: 24px;
+  border-radius: 16px;
+}
+
+.manage-categories-form {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.manage-categories-form-field {
+  flex: 1;
+  min-width: 220px;
+}
+
+.manage-categories-cta {
+  align-self: flex-start;
+}
+
+.manage-categories-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.manage-categories-table {
+  margin-top: 16px;
+}
+
+.manage-categories-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 768px) {
+  .manage-categories-header {
+    flex-direction: column;
+  }
+
+  .manage-categories-form {
+    flex-direction: column;
+  }
+
+  .manage-categories-cta,
+  .manage-categories-form-field {
+    width: 100%;
+  }
+}

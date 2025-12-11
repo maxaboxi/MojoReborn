@@ -1,8 +1,9 @@
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Box, Divider, useMediaQuery, useTheme } from '@mui/material';
-import { Article, Forum, Settings, Layers, Home } from '@mui/icons-material';
+import { Article, Forum, Settings, Layers, Home, Category } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NavMenuItem } from '../NavMenuItem/NavMenuItem';
 import { useMenuQuery } from '@shared/hooks/useMenuQuery';
+import { useAuth } from '@features/auth/providers/AuthProvider';
 import './Sidebar.css';
 
 const DRAWER_WIDTH = 260;
@@ -25,6 +26,8 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
   const { menuItems, loading } = useMenuQuery();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole('admin');
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -54,6 +57,19 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
             </ListItemButton>
           </ListItem>
         ))}
+        {isAdmin && (
+          <ListItem key="blog-categories" disablePadding>
+            <ListItemButton
+              selected={location.pathname === '/blog/categories'}
+              onClick={() => handleNavigation('/blog/categories')}
+            >
+              <ListItemIcon>
+                <Category />
+              </ListItemIcon>
+              <ListItemText primary="Manage Categories" />
+            </ListItemButton>
+          </ListItem>
+        )}
       </List>
 
       {!loading && menuItems.length > 0 && (

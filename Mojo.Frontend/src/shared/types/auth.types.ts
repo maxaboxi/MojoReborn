@@ -8,4 +8,5 @@ export type CurrentUser = {
   bio?: string | null;
   signature?: string | null;
   timeZoneId?: string | null;
+  roles: string[];
 };

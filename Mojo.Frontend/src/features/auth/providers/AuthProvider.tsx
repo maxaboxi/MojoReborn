@@ -9,18 +9,43 @@ export type AuthContextValue = {
   isFetching: boolean;
   error: unknown;
   refetchUser: () => Promise<CurrentUser | null>;
+  hasRole: (role: string) => boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { data, error, isLoading, isFetching, refetch } = useCurrentUserQuery();
-  const user = data ?? null;
+
+  const user = useMemo<CurrentUser | null>(() => {
+    if (!data) {
+      return null;
+    }
+    return {
+      ...data,
+      roles: Array.isArray(data.roles) ? data.roles : [],
+    };
+  }, [data]);
+
+  const normalizedRoles = useMemo(
+    () => (user?.roles ?? []).map((role) => role.toLowerCase()),
+    [user?.roles]
+  );
 
   const refetchUser = useCallback(async () => {
     const result = await refetch();
     return result.data ?? null;
   }, [refetch]);
+
+  const hasRole = useCallback(
+    (role: string) => {
+      if (!role) {
+        return false;
+      }
+      return normalizedRoles.includes(role.trim().toLowerCase());
+    },
+    [normalizedRoles]
+  );
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -30,8 +55,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isFetching,
       error,
       refetchUser,
+      hasRole,
     }),
-    [error, isFetching, isLoading, refetchUser, user]
+    [error, hasRole, isFetching, isLoading, refetchUser, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

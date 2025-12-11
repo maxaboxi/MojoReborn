@@ -82,6 +82,29 @@ export type GetCategoriesResponse = {
   categories: CategoryDto[];
 };
 
+export type CategoryMutationResponse = {
+  isSuccess: boolean;
+  message?: string;
+  isNotFound?: boolean;
+  isNotAuthorized?: boolean;
+};
+
+export type CreateCategoryRequest = {
+  pageId: number;
+  categoryName: string;
+};
+
+export type EditCategoryRequest = {
+  pageId: number;
+  categoryId: number;
+  categoryName: string;
+};
+
+export type DeleteCategoryRequest = {
+  pageId: number;
+  categoryId: number;
+};
+
 export type DeletePostResponse = {
   isSuccess: boolean;
   message: string;

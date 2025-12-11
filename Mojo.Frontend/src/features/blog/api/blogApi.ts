@@ -8,6 +8,10 @@ import type {
   GetPostsResponse,
   GetCategoriesResponse,
   CategoryDto,
+  CategoryMutationResponse,
+  CreateCategoryRequest,
+  EditCategoryRequest,
+  DeleteCategoryRequest,
   DeletePostRequest,
   DeletePostResponse,
   CreateCommentRequest,
@@ -46,6 +50,20 @@ export const blogApi = {
     }
 
     return response.data.categories;
+  },
+  createCategory: async (request: CreateCategoryRequest): Promise<CategoryMutationResponse> => {
+    const response = await apiClient.post<CategoryMutationResponse>('/blog/category', request);
+    return response.data;
+  },
+  updateCategory: async (request: EditCategoryRequest): Promise<CategoryMutationResponse> => {
+    const response = await apiClient.put<CategoryMutationResponse>('/blog/category', request);
+    return response.data;
+  },
+  deleteCategory: async (request: DeleteCategoryRequest): Promise<CategoryMutationResponse> => {
+    const response = await apiClient.delete<CategoryMutationResponse>(
+      `/${request.pageId}/blog/category/${request.categoryId}`
+    );
+    return response.data;
   },
   createPost: async (request: CreatePostRequest): Promise<CreatePostResponse> => {
     const response = await apiClient.post<CreatePostResponse>('/blog/posts', request);

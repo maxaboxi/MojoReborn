@@ -12,4 +12,5 @@ public class GetCurrentUserResponse
     public string? Signature { get; set; }
     
     public string? TimeZoneId { get; set; }
+    public List<string> Roles { get; set; } = [];
 }
