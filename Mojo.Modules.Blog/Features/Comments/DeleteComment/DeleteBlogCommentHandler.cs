@@ -17,7 +17,7 @@ public class DeleteBlogCommentHandler
         IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
-        var user = userService.GetUserAsync(claimsPrincipal, ct).Result;
+        var user = await userService.GetUserAsync(claimsPrincipal, ct);
         
         if (user == null)
         {

@@ -18,7 +18,7 @@ public class CreateBlogCommentHandler
         IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
-        var user = userService.GetUserAsync(claimsPrincipal, ct).Result;
+        var user = await userService.GetUserAsync(claimsPrincipal, ct);
         
         var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
         
@@ -28,7 +28,7 @@ public class CreateBlogCommentHandler
         }
 
         var blogPost = await db.BlogPosts
-            .Where(x => x.BlogPostId == command.BlogPostId)
+            .Where(x => x.BlogPostId == command.BlogPostId && x.ModuleGuid == featureContextDto.ModuleGuid)
             .FirstOrDefaultAsync(ct);
 
         if (blogPost == null)
@@ -41,6 +41,7 @@ public class CreateBlogCommentHandler
             ModuleGuid = featureContextDto.ModuleGuid,
             SiteGuid = featureContextDto.SiteGuid,
             FeatureGuid =  featureContextDto.FeatureGuid,
+            ContentGuid = blogPost.BlogPostId,
             UserGuid = user?.Id,
             UserEmail = user?.Email,
             UserName = user?.DisplayName ?? command.Author,

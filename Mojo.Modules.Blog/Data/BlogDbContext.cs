@@ -14,9 +14,6 @@ public class BlogDbContext(DbContextOptions<BlogDbContext> options) : DbContext(
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BlogDbContext).Assembly);
-        
-        modelBuilder.Entity<BlogComment>()
-            .HasQueryFilter(x => this.Set<BlogPost>().Any(b => b.BlogPostId == x.ContentGuid));
     }
     
 }
