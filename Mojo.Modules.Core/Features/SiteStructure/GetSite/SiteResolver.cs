@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Mojo.Modules.Core.Data;
 
 namespace Mojo.Modules.Core.Features.SiteStructure.GetSite;
 
-public class SiteResolver(CoreDbContext db, IHttpContextAccessor httpContextAccessor)
+public class SiteResolver(CoreDbContext db, IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
 {
    private SiteDto? _resolvedSite;
    
@@ -13,6 +14,19 @@ public class SiteResolver(CoreDbContext db, IHttpContextAccessor httpContextAcce
       if (_resolvedSite != null)
       {
          return _resolvedSite;
+      }
+
+      var forcedSiteId = configuration["ForceSiteId"];
+
+      if (!string.IsNullOrEmpty(forcedSiteId))
+      {
+         _resolvedSite = await db.Sites.AsNoTracking().Where(x => x.SiteId == int.Parse(forcedSiteId)).Select(x => new SiteDto
+         {
+            SiteId = x.SiteId,
+            SiteGuid =  x.SiteGuid
+         }).FirstOrDefaultAsync(ct);
+         
+         return _resolvedSite ?? throw new Exception($"No sites configured in database with the forced site id: {forcedSiteId}.");
       }
       
       var context = httpContextAccessor.HttpContext;

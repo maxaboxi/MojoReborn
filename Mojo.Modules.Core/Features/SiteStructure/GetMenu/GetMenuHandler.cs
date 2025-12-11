@@ -25,7 +25,7 @@ public class GetMenuHandler
                 Id = p.PageId,
                 ParentId = p.ParentId,
                 Title = p.PageName,
-                ModuleTitle = p.PageModules.First(x => x.PageId == p.PageId).Module.Title,
+                FeatureName = p.PageModules.First(x => x.PageId == p.PageId).Module.ModuleDefinition.FeatureName,
                 Url = p.Url.Replace("~/", "/"), // Fix legacy ASP.NET paths
                 ViewRoles = p.AuthorizedRoles,
                 Order = p.PageOrder

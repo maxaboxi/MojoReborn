@@ -25,7 +25,7 @@ public static class GetPostHandler
             .Where(x => x.ModuleId == featureContextDto.ModuleId)
             .Include(x => x.Categories)
             .Include(x => x.Comments)
-            .Select(bp => new GetPostResponse()
+            .Select(bp => new GetPostResponse
             {
                 BlogPostGuid =  bp.BlogPostId,
                 Title = bp.Title,
@@ -34,7 +34,7 @@ public static class GetPostHandler
                 Author = bp.Author,
                 CreatedAt = bp.CreatedAt,
                 Categories = bp.Categories.Select(c => c.CategoryName).ToList(),
-                CommentCount = bp.Comments.Count(),
+                CommentCount = bp.Comments.Count,
                 Comments = bp.Comments.Select(bpc => 
                     new BlogCommentDto(
                         bpc.Id, 
