@@ -32,9 +32,6 @@ public class GetCurrentUserEndpoint
         {
             return Results.Unauthorized();;
         }
-
-        var roles = user.UserSiteRoleAssignments.Select(x => x.Role.Name.ToLower()).ToList();
-        roles.Add("admin");
         
         var response =  new GetCurrentUserResponse
         {
@@ -46,7 +43,7 @@ public class GetCurrentUserEndpoint
             AvatarUrl = user.AvatarUrl,
             Bio =  user.Bio,
             Signature =  user.Signature,
-            Roles = roles,
+            Roles = user.UserSiteRoleAssignments.Select(x => x.Role.Name.ToLower()).ToList()
         };
         
         return Results.Ok(response);
