@@ -6,7 +6,7 @@ A modernization of the MojoPortal legacy system, built with .NET 10 (Vertical Sl
 
 This project is currently under active development and is subject to rapid iteration. While the core architectural foundations are being established, many features remain incomplete, and the codebase may undergo significant breaking changes without prior notice.
 
-**Note:** This software is not yet ready for production use. Contributions and feedback are welcome as we work towards a stable release.
+**Note:** This software is not yet ready for production use.
 
 ## Architecture
 
