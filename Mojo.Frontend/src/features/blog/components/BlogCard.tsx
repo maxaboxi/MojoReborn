@@ -6,10 +6,12 @@ import './BlogCard.css';
 
 interface BlogCardProps {
   post: BlogPost;
+  basePath?: string;
 }
 
-export const BlogCard = ({ post }: BlogCardProps) => {
+export const BlogCard = ({ post, basePath = '/blog' }: BlogCardProps) => {
   const navigate = useNavigate();
+  const encodedPageUrl = basePath ? `?pageUrl=${encodeURIComponent(basePath)}` : '';
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -25,7 +27,7 @@ export const BlogCard = ({ post }: BlogCardProps) => {
   };
 
   const handleClick = () => {
-    navigate(`/blog/post/${post.blogPostGuid}`);
+    navigate(`/blog/post/${post.blogPostGuid}${encodedPageUrl}`);
   };
 
   return (

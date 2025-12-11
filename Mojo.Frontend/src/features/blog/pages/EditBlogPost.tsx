@@ -13,7 +13,8 @@ import { useAuth } from '@features/auth/providers/AuthProvider';
 export const EditBlogPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { blogPageId, menuLoading, menuError } = useBlogPageContext();
+  const { blogPageId, blogPageUrl, menuLoading, menuError } = useBlogPageContext();
+  const pageUrlQuery = blogPageUrl ? `?pageUrl=${encodeURIComponent(blogPageUrl)}` : '';
   const { user } = useAuth();
   const {
     data: post,
@@ -57,7 +58,7 @@ export const EditBlogPost = () => {
       
       if (response.isSuccess) {
         // Navigate back to the post
-        navigate(`/blog/post/${id}`);
+        navigate(`/blog/post/${id}${pageUrlQuery}`);
       } else {
         setError(response.message || 'Failed to update post');
       }
@@ -67,7 +68,7 @@ export const EditBlogPost = () => {
   };
 
   const handleCancel = () => {
-    navigate(`/blog/post/${id}`);
+    navigate(`/blog/post/${id}${pageUrlQuery}`);
   };
 
   if (menuLoading || loadingPost || loadingCategories) {

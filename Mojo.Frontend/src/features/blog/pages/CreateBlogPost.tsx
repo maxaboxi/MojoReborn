@@ -12,7 +12,7 @@ import { useAuth } from '@features/auth/providers/AuthProvider';
 export const CreateBlogPost = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-  const { blogPageId, menuLoading, menuError } = useBlogPageContext();
+  const { blogPageId, blogPageUrl, menuLoading, menuError } = useBlogPageContext();
   const { user } = useAuth();
   const {
     data: categories = [],
@@ -47,8 +47,8 @@ export const CreateBlogPost = () => {
       const response = await createPostMutation.mutateAsync(request);
       
       if (response.isSuccess) {
-        // Navigate to the newly created post
-        navigate(`/blog/post/${response.blogPostId}`);
+        const pageUrlQuery = blogPageUrl ? `?pageUrl=${encodeURIComponent(blogPageUrl)}` : '';
+        navigate(`/blog/post/${response.blogPostId}${pageUrlQuery}`);
       } else {
         setError(response.message || 'Failed to create post');
       }
@@ -58,7 +58,7 @@ export const CreateBlogPost = () => {
   };
 
   const handleCancel = () => {
-    navigate('/blog');
+    navigate(blogPageUrl ?? '/blog');
   };
 
   if (menuLoading || loadingCategories) {

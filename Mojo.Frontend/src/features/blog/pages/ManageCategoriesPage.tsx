@@ -38,7 +38,7 @@ type FeedbackState = {
 
 export const ManageCategoriesPage = () => {
   const navigate = useNavigate();
-  const { blogPageId, menuLoading, menuError } = useBlogPageContext();
+  const { blogPageId, blogPageUrl, menuLoading, menuError } = useBlogPageContext();
   const { isLoading: authLoading, hasRole } = useAuth();
   const isAdmin = hasRole('admin');
 
@@ -247,7 +247,7 @@ export const ManageCategoriesPage = () => {
             </Typography>
           )}
         </Box>
-        <Button variant="outlined" onClick={() => navigate('/blog')}>
+        <Button variant="outlined" onClick={() => navigate(blogPageUrl ?? '/blog')}>
           Back to blog
         </Button>
       </Box>

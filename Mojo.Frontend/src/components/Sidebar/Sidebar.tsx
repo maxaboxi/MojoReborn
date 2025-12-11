@@ -1,5 +1,5 @@
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Box, Divider, useMediaQuery, useTheme } from '@mui/material';
-import { Article, Forum, Settings, Layers, Home, Category } from '@mui/icons-material';
+import { Settings, Layers, Category } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NavMenuItem } from '../NavMenuItem/NavMenuItem';
 import { useMenuQuery } from '@shared/hooks/useMenuQuery';
@@ -7,13 +7,6 @@ import { useAuth } from '@features/auth/providers/AuthProvider';
 import './Sidebar.css';
 
 const DRAWER_WIDTH = 260;
-
-const staticMenuItems = [
-  { text: 'Home', icon: <Home />, path: '/' },
-  { text: 'Blog', icon: <Article />, path: '/blog' },
-  { text: 'Forum', icon: <Forum />, path: '/forum' },
-  { text: 'Admin', icon: <Settings />, path: '/admin' },
-];
 
 interface SidebarProps {
   mobileOpen: boolean;
@@ -46,39 +39,46 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
       </Toolbar>
       
       <List>
-        {staticMenuItems.map((item) => (
-          <ListItem key={item.path} disablePadding>
-            <ListItemButton
-              selected={location.pathname === item.path}
-              onClick={() => handleNavigation(item.path)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-        {isAdmin && (
-          <ListItem key="blog-categories" disablePadding>
-            <ListItemButton
-              selected={location.pathname === '/blog/categories'}
-              onClick={() => handleNavigation('/blog/categories')}
-            >
-              <ListItemIcon>
-                <Category />
-              </ListItemIcon>
-              <ListItemText primary="Manage Categories" />
-            </ListItemButton>
+        {loading && (
+          <ListItem>
+            <ListItemText primary="Loading navigation..." />
           </ListItem>
         )}
+        {!loading && menuItems.length === 0 && (
+          <ListItem>
+            <ListItemText primary="No navigation available" secondary="Please check back later." />
+          </ListItem>
+        )}
+        {!loading &&
+          menuItems.map((item) => <NavMenuItem key={item.id} item={item} onNavigate={onClose} />)}
       </List>
 
-      {!loading && menuItems.length > 0 && (
+      {isAdmin && (
         <>
           <Divider />
           <List>
-            {menuItems.map((item) => (
-              <NavMenuItem key={item.id} item={item} onNavigate={onClose} />
-            ))}
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.startsWith('/admin')}
+                onClick={() => handleNavigation('/admin')}
+              >
+                <ListItemIcon>
+                  <Settings />
+                </ListItemIcon>
+                <ListItemText primary="Admin" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname === '/blog/categories'}
+                onClick={() => handleNavigation('/blog/categories')}
+              >
+                <ListItemIcon>
+                  <Category />
+                </ListItemIcon>
+                <ListItemText primary="Manage Categories" />
+              </ListItemButton>
+            </ListItem>
           </List>
         </>
       )}

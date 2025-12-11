@@ -3,6 +3,7 @@ import { ExpandLess, ExpandMore, Article } from '@mui/icons-material';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { PageMenuItem } from '@shared/types/menu.types';
+import { isPathMatch, normalizeMenuPath } from '@shared/utils/menuUtils';
 import './NavMenuItem.css';
 
 interface NavMenuItemProps {
@@ -16,17 +17,18 @@ export const NavMenuItem = ({ item, depth = 0, onNavigate }: NavMenuItemProps) =
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
+  const targetPath = normalizeMenuPath(item.url);
 
   const handleClick = () => {
     if (hasChildren) {
       setOpen(!open);
     } else {
-      navigate(item.url);
+      navigate(targetPath);
       onNavigate?.();
     }
   };
 
-  const isActive = location.pathname === item.url;
+  const isActive = isPathMatch(targetPath, location.pathname);
 
   return (
     <>

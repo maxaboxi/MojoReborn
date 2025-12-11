@@ -10,7 +10,7 @@ import { savePostLoginRedirect } from '@features/auth/utils/postLoginRedirect';
 import './BlogList.css';
 
 export const BlogList = () => {
-  const { blogPageId, menuLoading, menuError } = useBlogPageContext();
+  const { blogPageId, blogPageUrl, menuLoading, menuError } = useBlogPageContext();
   const {
     data: posts = [],
     isLoading: loadingPosts,
@@ -18,6 +18,8 @@ export const BlogList = () => {
   } = useBlogPostsQuery(blogPageId);
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const normalizedBlogPath = blogPageUrl ?? '/blog';
+  const pageUrlQuery = blogPageUrl ? `?pageUrl=${encodeURIComponent(blogPageUrl)}` : '';
 
   if (menuLoading || loadingPosts) {
     return <LoadingState className="blog-list-loading" minHeight={200} />;
@@ -62,11 +64,11 @@ export const BlogList = () => {
           variant="contained"
           startIcon={<Add />}
           onClick={() => {
+            const target = `/blog/create${pageUrlQuery}`;
             if (isAuthenticated) {
-              navigate('/blog/create');
+              navigate(target);
               return;
             }
-            const target = '/blog/create';
             savePostLoginRedirect(target);
             navigate(`/auth/login?redirect=${encodeURIComponent(target)}`);
           }}
@@ -78,7 +80,7 @@ export const BlogList = () => {
 
       <Stack spacing={3}>
         {posts.map((post) => (
-          <BlogCard key={post.blogPostGuid} post={post} />
+          <BlogCard key={post.blogPostGuid} post={post} basePath={normalizedBlogPath} />
         ))}
       </Stack>
     </>

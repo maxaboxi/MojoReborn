@@ -1,22 +1,33 @@
 import type { PageMenuItem } from '@shared/types/menu.types';
+import { findMenuItemByPath } from '@shared/utils/menuUtils';
 
-const matchesBlog = (item: PageMenuItem): boolean => {
+const BLOG_FEATURE_NAME = 'BlogFeatureName';
+
+export const isBlogMenuItem = (item: PageMenuItem): boolean => {
+  if (item.featureName === BLOG_FEATURE_NAME) {
+    return true;
+  }
+
   const title = item.title?.toLowerCase() ?? '';
   const url = item.url?.toLowerCase() ?? '';
   return title.includes('blog') || url.includes('blog');
 };
 
-export const findBlogPageId = (menuItems: PageMenuItem[]): number | null => {
-  const stack: PageMenuItem[] = [...menuItems];
+export const findBlogMenuItem = (menuItems: PageMenuItem[], pathname: string): PageMenuItem | null => {
+  const primaryMatch = findMenuItemByPath(menuItems, pathname, isBlogMenuItem);
+  if (primaryMatch) {
+    return primaryMatch;
+  }
 
+  const stack: PageMenuItem[] = [...menuItems];
   while (stack.length > 0) {
     const current = stack.shift();
     if (!current) {
       continue;
     }
 
-    if (matchesBlog(current)) {
-      return current.id;
+    if (isBlogMenuItem(current)) {
+      return current;
     }
 
     if (current.children && current.children.length > 0) {
@@ -26,3 +37,6 @@ export const findBlogPageId = (menuItems: PageMenuItem[]): number | null => {
 
   return null;
 };
+
+export const findBlogPageId = (menuItems: PageMenuItem[], pathname: string): number | null =>
+  findBlogMenuItem(menuItems, pathname)?.id ?? null;

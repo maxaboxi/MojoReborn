@@ -40,7 +40,8 @@ export const BlogPostDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated } = useAuth();
-  const { blogPageId, menuLoading, menuError } = useBlogPageContext();
+  const { blogPageId, blogPageUrl, menuLoading, menuError } = useBlogPageContext();
+  const pageUrlQuery = blogPageUrl ? `?pageUrl=${encodeURIComponent(blogPageUrl)}` : '';
   const {
     data: post,
     isLoading: loading,
@@ -130,7 +131,7 @@ export const BlogPostDetail = () => {
       });
 
       if (response.isSuccess) {
-        navigate('/blog');
+        navigate(blogPageUrl ?? '/blog');
       } else {
         setDeleteError(response.message || 'Failed to delete post');
       }
@@ -379,7 +380,7 @@ export const BlogPostDetail = () => {
         <Button
           variant="outlined"
           startIcon={<ArrowBack />}
-          onClick={() => navigate('/blog')}
+          onClick={() => navigate(blogPageUrl ?? '/blog')}
           size="large"
         >
           Back to Blog
@@ -391,7 +392,7 @@ export const BlogPostDetail = () => {
                 <Button
                   variant="contained"
                   startIcon={<Edit />}
-                  onClick={() => navigate(`/blog/edit/${id}`)}
+                  onClick={() => navigate(`/blog/edit/${id}${pageUrlQuery}`)}
                   size="large"
                 >
                   Edit Post
