@@ -2,13 +2,13 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
-using Mojo.Modules.Core.Data;
-using Mojo.Modules.Core.Features.Identity;
-using Mojo.Modules.Core.Features.Identity.Entities;
-using Mojo.Modules.Core.Features.Identity.Services;
-using Mojo.Modules.Core.Features.SiteStructure.GetFeatureContext;
-using Mojo.Modules.Core.Features.SiteStructure.GetSite;
 using Mojo.Modules.Forum.Data;
+using Mojo.Modules.Identity.Data;
+using Mojo.Modules.Identity.Domain.Entities;
+using Mojo.Modules.Identity.Features.Services;
+using Mojo.Modules.SiteStructure.Data;
+using Mojo.Modules.SiteStructure.Features.GetFeatureContext;
+using Mojo.Modules.SiteStructure.Features.GetSite;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
 using Mojo.Web.Extensions;
@@ -30,8 +30,12 @@ builder.Services.AddDbContext<BlogDbContext>(options =>
     // Significant performance gain as per Wolverine docs
     optionsLifetime: ServiceLifetime.Singleton);
 
-builder.Services.AddDbContext<CoreDbContext>(options =>
+builder.Services.AddDbContext<IdentityDbContext>(options =>
     options.UseSqlServer(connectionString),
+    optionsLifetime: ServiceLifetime.Singleton);
+
+builder.Services.AddDbContext<SiteStructureDbContext>(options =>
+        options.UseSqlServer(connectionString),
     optionsLifetime: ServiceLifetime.Singleton);
 
 builder.Services.AddDbContext<ForumDbContext>(options =>
@@ -42,7 +46,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(opt =>
 {
     opt.User.RequireUniqueEmail = true;
 })
-.AddEntityFrameworkStores<CoreDbContext>()
+.AddEntityFrameworkStores<IdentityDbContext>()
 .AddDefaultTokenProviders();
 
 builder.Services.AddAuthorization();
@@ -69,12 +73,13 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IFeatureContextResolver, FeatureContextResolver>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
-builder.Services.AddScoped<SiteResolver>();
+builder.Services.AddScoped<ISiteResolver, SiteResolver>();
 
 builder.Host.UseWolverine(opts =>
 {
     opts.Discovery.IncludeAssembly(typeof(BlogDbContext).Assembly);
-    opts.Discovery.IncludeAssembly(typeof(CoreDbContext).Assembly);
+    opts.Discovery.IncludeAssembly(typeof(IdentityDbContext).Assembly);
+    opts.Discovery.IncludeAssembly(typeof(SiteStructureDbContext).Assembly);
     opts.Discovery.IncludeAssembly(typeof(ForumDbContext).Assembly);
     
     opts.Durability.MessageStorageSchemaName = "wolverine";
@@ -83,8 +88,11 @@ builder.Host.UseWolverine(opts =>
     opts.Services.AddDbContextWithWolverineIntegration<BlogDbContext>(x => x.UseSqlServer(connectionString));
     opts.PersistMessagesWithSqlServer(connectionString, role:MessageStoreRole.Ancillary).Enroll<BlogDbContext>();
     
-    opts.Services.AddDbContextWithWolverineIntegration<CoreDbContext>(x => x.UseSqlServer(connectionString));
-    opts.PersistMessagesWithSqlServer(connectionString, role:MessageStoreRole.Ancillary).Enroll<CoreDbContext>();
+    opts.Services.AddDbContextWithWolverineIntegration<IdentityDbContext>(x => x.UseSqlServer(connectionString));
+    opts.PersistMessagesWithSqlServer(connectionString, role:MessageStoreRole.Ancillary).Enroll<IdentityDbContext>();
+    
+    opts.Services.AddDbContextWithWolverineIntegration<SiteStructureDbContext>(x => x.UseSqlServer(connectionString));
+    opts.PersistMessagesWithSqlServer(connectionString, role:MessageStoreRole.Ancillary).Enroll<SiteStructureDbContext>();
     
     opts.Services.AddDbContextWithWolverineIntegration<ForumDbContext>(x => x.UseSqlServer(connectionString));
     opts.PersistMessagesWithSqlServer(connectionString, role:MessageStoreRole.Ancillary).Enroll<ForumDbContext>();

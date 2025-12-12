@@ -1,0 +1,16 @@
+using Microsoft.AspNetCore.Http;
+using Wolverine;
+using Wolverine.Http;
+
+namespace Mojo.Modules.Identity.Features.LoginUser;
+
+public class LoginUserEndpoint
+{
+    [WolverineGet("/api/auth/login")]
+    public static async Task<IResult> Get(
+        LoginUserQuery query,
+        IMessageBus bus)
+    {
+        return await bus.InvokeAsync<IResult>(query);
+    }
+}
