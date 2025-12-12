@@ -1,12 +1,12 @@
-﻿namespace Mojo.Modules.Forum.Data;
+﻿namespace Mojo.Modules.Forum.Domain.Entities;
 
-public partial class Forum
+public class ForumEntity
 {
-    public int ItemId { get; set; }
+    public int Id { get; set; }
 
     public int ModuleId { get; set; }
 
-    public DateTime CreatedDate { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public int CreatedBy { get; set; }
 
@@ -19,10 +19,6 @@ public partial class Forum
     public bool IsActive { get; set; }
 
     public int SortOrder { get; set; }
-
-    public int ThreadCount { get; set; }
-
-    public int PostCount { get; set; }
 
     public DateTime? MostRecentPostDate { get; set; }
 
@@ -41,11 +37,7 @@ public partial class Forum
     public string? RolesThatCanModerate { get; set; }
 
     public string? ModeratorNotifyEmail { get; set; }
-
-    public bool IncludeInGoogleMap { get; set; }
-
-    public bool AddNoIndexMeta { get; set; }
-
+    
     public bool Closed { get; set; }
 
     public bool Visible { get; set; }
@@ -58,5 +50,5 @@ public partial class Forum
 
     public bool AllowTrustedDirectNotify { get; set; }
 
-    public virtual ICollection<ForumThread> MpForumThreads { get; set; } = new List<ForumThread>();
+    public virtual ICollection<ForumThread> ForumThreads { get; set; } = new List<ForumThread>();
 }

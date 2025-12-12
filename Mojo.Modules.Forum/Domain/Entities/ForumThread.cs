@@ -1,14 +1,14 @@
-﻿namespace Mojo.Modules.Forum.Data;
+﻿namespace Mojo.Modules.Forum.Domain.Entities;
 
-public partial class ForumThread
+public class ForumThread
 {
-    public int ThreadId { get; set; }
+    public int Id { get; set; }
 
     public int ForumId { get; set; }
 
     public string ThreadSubject { get; set; } = null!;
 
-    public DateTime ThreadDate { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public int TotalViews { get; set; }
 
@@ -28,17 +28,7 @@ public partial class ForumThread
 
     public Guid ThreadGuid { get; set; }
 
-    public bool IsQuestion { get; set; }
-
-    public bool IncludeInSiteMap { get; set; }
-
-    public bool SetNoIndexMeta { get; set; }
-
-    public string? PtitleOverride { get; set; }
-
     public int ModStatus { get; set; }
-
-    public string? ThreadType { get; set; }
 
     public Guid AssignedTo { get; set; }
 
@@ -48,9 +38,7 @@ public partial class ForumThread
 
     public DateTime? LockedUtc { get; set; }
 
-    public virtual Data.Forum Forum { get; set; } = null!;
+    public virtual ForumEntity Forum { get; set; } = null!;
 
-    public virtual ICollection<ForumPost> MpForumPosts { get; set; } = new List<ForumPost>();
-
-    public virtual ICollection<ForumThreadSubscription> MpForumThreadSubscriptions { get; set; } = new List<ForumThreadSubscription>();
+    public virtual ICollection<ForumPost> ForumPosts { get; set; } = new List<ForumPost>();
 }

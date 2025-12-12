@@ -1,8 +1,8 @@
-﻿namespace Mojo.Modules.Forum.Data;
+﻿namespace Mojo.Modules.Forum.Domain.Entities;
 
-public partial class ForumPost
+public class ForumPost
 {
-    public int PostId { get; set; }
+    public int Id { get; set; }
 
     public int ThreadId { get; set; }
 
