@@ -5,21 +5,18 @@ import { findMenuItemByPath } from '@shared/utils/menuUtils';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { BlogList } from '@features/blog/pages/BlogList';
 import type { PageMenuItem } from '@shared/types/menu.types';
-import { isBlogMenuItem } from '@features/blog/utils/findBlogPageId';
+import { ForumFeaturePage } from '@features/forum/pages/ForumFeaturePage';
 
 const BLOG_FEATURE_NAME = 'BlogFeatureName';
 
 const renderFeaturePage = (page: PageMenuItem) => {
-  if (isBlogMenuItem(page)) {
-    return <BlogList />;
-  }
-
   switch (page.featureName) {
     case BLOG_FEATURE_NAME:
       return <BlogList />;
+    case 'ForumsFeatureName':
+      return <ForumFeaturePage />;
     case 'NewsletterSignUpFeatureName':
     case 'ContactFormFeatureName':
-    case 'ForumsFeatureName':
     case 'ImageGalleryFeatureName':
     case 'PollFeatureName':
     case 'SharedFilesFeatureName':

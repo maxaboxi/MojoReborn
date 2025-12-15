@@ -1,0 +1,153 @@
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Stack,
+  Chip,
+  Button,
+  Tooltip,
+} from '@mui/material';
+import ForumIcon from '@mui/icons-material/Forum';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import LockIcon from '@mui/icons-material/Lock';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useForumPageContext } from '../hooks/useForumPageContext';
+import { useForumThreadsQuery } from '../hooks/useForumThreadsQuery';
+import { LoadingState, StatusMessage } from '@shared/ui';
+import type { ForumThreadSummary } from '../types/forum.types';
+import './ForumThreadsPage.css';
+
+const formatDate = (value?: string | null) =>
+  value ? new Date(value).toLocaleString() : 'No activity yet';
+
+export const ForumThreadsPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { forumPageId, forumPageUrl, forumPageTitle, menuLoading, menuError } = useForumPageContext();
+  const {
+    data: threads = [],
+    isLoading: threadsLoading,
+    error,
+  } = useForumThreadsQuery({ pageId: forumPageId });
+  const normalizedListPath = forumPageUrl ?? location.pathname ?? '/forum';
+
+  const handleThreadNavigation = (thread: ForumThreadSummary) => {
+    const basePath = normalizedListPath.endsWith('/')
+      ? normalizedListPath.slice(0, -1)
+      : normalizedListPath;
+    const threadPath = `${basePath}/thread/${thread.id}`;
+    const params = new URLSearchParams();
+    params.set('forumId', String(thread.forumId));
+    if (forumPageUrl) {
+      params.set('pageUrl', forumPageUrl);
+    }
+    if (forumPageId != null) {
+      params.set('pageId', String(forumPageId));
+    }
+
+    const target = params.size > 0 ? `${threadPath}?${params.toString()}` : threadPath;
+    navigate(target);
+  };
+
+  if (menuLoading || threadsLoading) {
+    return <LoadingState message="Loading forum threads..." minHeight={240} />;
+  }
+
+  if (menuError) {
+    return <StatusMessage>{menuError}</StatusMessage>;
+  }
+
+  if (forumPageId == null) {
+    return (
+      <StatusMessage severity="warning">
+        Unable to determine the forum module for this page. Confirm the CMS navigation entry is configured for the Forums feature.
+      </StatusMessage>
+    );
+  }
+
+  if (error) {
+    return <StatusMessage>{error.message}</StatusMessage>;
+  }
+
+  if (threads.length === 0) {
+    return (
+      <StatusMessage severity="info">
+        This forum does not have any threads yet. Be the first to start a conversation!
+      </StatusMessage>
+    );
+  }
+
+  return (
+    <Box className="forum-threads-page">
+      <Box className="forum-threads-hero">
+        <Chip icon={<ForumIcon />} label="Community Forum" color="primary" variant="outlined" size="small" />
+        <Typography variant="h3" component="h1">
+          {forumPageTitle ?? 'Forum threads'}
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Choose a thread to dive into the discussion. New replies bubble to the top as soon as they are posted.
+        </Typography>
+      </Box>
+
+      <Stack spacing={2} className="forum-thread-list">
+        {threads.map((thread) => {
+          const lastUpdated = formatDate(thread.mostRecentPostDate);
+          return (
+            <Card key={thread.id} className="forum-thread-card" variant="outlined">
+              <CardContent>
+                <Box className="forum-thread-card-header">
+                  <Box>
+                    <Typography variant="h5" component="h2" className="forum-thread-title">
+                      {thread.subject}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Started by {thread.startedByUserName} on {formatDate(thread.createdAt)}
+                    </Typography>
+                  </Box>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    {thread.isLocked && (
+                      <Chip icon={<LockIcon fontSize="small" />} label="Locked" color="error" size="small" />
+                    )}
+                    <Button
+                      variant="contained"
+                      size="small"
+                      endIcon={<ArrowForwardIcon />}
+                      onClick={() => handleThreadNavigation(thread)}
+                    >
+                      Open thread
+                    </Button>
+                  </Stack>
+                </Box>
+
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} className="forum-thread-stats">
+                  <Tooltip title="Replies">
+                    <Box className="forum-thread-stat">
+                      <ChatBubbleOutlineIcon />
+                      <Typography variant="body2">{thread.totalReplies} replies</Typography>
+                    </Box>
+                  </Tooltip>
+                  <Tooltip title="Views">
+                    <Box className="forum-thread-stat">
+                      <VisibilityIcon />
+                      <Typography variant="body2">{thread.totalViews} views</Typography>
+                    </Box>
+                  </Tooltip>
+                  <Tooltip title="Most recent activity">
+                    <Box className="forum-thread-stat">
+                      <Typography variant="body2" color="text.secondary">
+                        Last activity {lastUpdated}
+                      </Typography>
+                    </Box>
+                  </Tooltip>
+                </Stack>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </Stack>
+    </Box>
+  );
+};

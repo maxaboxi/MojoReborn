@@ -1,0 +1,32 @@
+.forum-post-card {
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: var(--mui-palette-background-paper);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.forum-post-card-classic:hover {
+  transform: translateY(-2px);
+}
+
+.forum-post-meta {
+  margin-bottom: 0.75rem;
+}
+
+.forum-post-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--mui-palette-text-secondary);
+}
+
+.forum-post-content {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--mui-palette-text-primary);
+}
+
+.forum-post-content p + p {
+  margin-top: 0.75rem;
+}

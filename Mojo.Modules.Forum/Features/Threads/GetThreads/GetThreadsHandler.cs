@@ -21,7 +21,7 @@ public class GetThreadsHandler
         }
 
         var queryable = db.ForumThreads.AsNoTracking()
-            .Where(x => x.ForumId == query.ForumId && x.Forum.ModuleId == featureContextDto.ModuleId);
+            .Where(x => x.Forum.ModuleId == featureContextDto.ModuleId);
 
         if (query is { LastThreadDate: not null, LastThreadId: not null })
         {

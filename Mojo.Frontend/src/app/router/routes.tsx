@@ -6,6 +6,7 @@ import { AuthLayout } from '@features/auth/layouts/AuthLayout';
 import { AuthLoginPage } from '@features/auth/pages/AuthLoginPage';
 import { LegacyMigrationPage } from '@features/auth/pages/LegacyMigrationPage';
 import { DynamicFeaturePage } from '@features/navigation/components/DynamicFeaturePage';
+import { forumRoutes } from '@features/forum/routes';
 
 const comingSoon = (label: string) => <div>{label} - Coming Soon</div>;
 
@@ -16,7 +17,7 @@ export const rootRoutes: RouteObject[] = [
     children: [
       { index: true, element: <HomePage /> },
       ...blogRoutes,
-      { path: 'forum', element: comingSoon('Forum') },
+      ...forumRoutes,
       { path: 'admin', element: comingSoon('Admin') },
       { path: '*', element: <DynamicFeaturePage /> },
     ],
