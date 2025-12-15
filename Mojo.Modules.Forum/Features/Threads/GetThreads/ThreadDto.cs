@@ -12,6 +12,7 @@ public record ThreadDto(
     DateTime? MostRecentPostDate,
     int? MostRecentPostUserId,
     int StartedByUserId,
+    string StartedByUserName,
     Guid ThreadGuid,
     string? LockedReason,
     DateTime? LockedUtc

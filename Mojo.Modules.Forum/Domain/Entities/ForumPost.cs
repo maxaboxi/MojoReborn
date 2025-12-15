@@ -35,4 +35,6 @@ public class ForumPost
     public int ModStatus { get; set; }
 
     public virtual ForumThread Thread { get; set; } = null!;
+    public virtual ForumUser Author { get; set; }
+    public virtual ICollection<ForumPostReplyLink> Replies { get; set; } = [];
 }

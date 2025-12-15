@@ -41,4 +41,5 @@ public class ForumThread
     public virtual ForumEntity Forum { get; set; } = null!;
 
     public virtual ICollection<ForumPost> ForumPosts { get; set; } = new List<ForumPost>();
+    public virtual ForumUser Author { get; set; }
 }

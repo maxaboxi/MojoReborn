@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Mojo.Modules.Forum.Data;
 using Mojo.Modules.Identity.Data;
 using Mojo.Modules.Identity.Data.Seeding;
 
@@ -16,9 +17,13 @@ public static class DatabaseExtensions
     
         var identityDb = services.GetRequiredService<IdentityDbContext>();
         await identityDb.Database.MigrateAsync();
-        logger.LogInformation("CoreDbContext migrations applied successfully.");
+        logger.LogInformation("IdentityDbContext migrations applied successfully.");
         
         await LegacyRoleSeeder.SeedAsync(identityDb, logger);
+        
+        var forumDb = services.GetRequiredService<ForumDbContext>();
+        await forumDb.Database.MigrateAsync();
+        logger.LogInformation("ForumDbContext migrations applied successfully.");
         
         logger.LogInformation("All database migrations applied successfully.");
     }

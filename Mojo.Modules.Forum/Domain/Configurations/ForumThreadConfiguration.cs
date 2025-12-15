@@ -36,5 +36,7 @@ public class ForumThreadConfiguration : IEntityTypeConfiguration<ForumThread>
             .HasForeignKey(d => d.ForumId)
             .OnDelete(DeleteBehavior.ClientSetNull)
             .HasConstraintName("FK_mp_ForumThreads_mp_Forums");
+
+        builder.HasOne(x => x.Author).WithMany().HasForeignKey(t => t.StartedByUserId);
     }
 }
