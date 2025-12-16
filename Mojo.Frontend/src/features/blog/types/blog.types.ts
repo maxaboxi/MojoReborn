@@ -7,22 +7,45 @@ export type BlogComment = {
   createdAt: string;
 };
 
+export type RawBlogCommentDto = {
+  id: string;
+  userGuid?: string | null;
+  userName: string;
+  title?: string;
+  content: string;
+  createdAt: string;
+  modifiedAt?: string;
+  moderatedBy?: string;
+  moderationReason?: string | null;
+};
+
 export type Category = {
   id: number;
   categoryName: string;
   moduleId?: number;
 };
 
-export type BlogPost = {
+export type BlogPostSummary = {
+  id: number;
   blogPostGuid: string;
   title: string;
-  subTitle: string;
   content: string;
   author: string;
   createdAt: string;
   categories: string[];
   commentCount: number;
+};
+
+export type BlogPostDetail = BlogPostSummary & {
+  subTitle: string;
   comments: BlogComment[];
+};
+
+export type BlogApiResponseMetadata = {
+  isSuccess: boolean;
+  message?: string;
+  isNotFound?: boolean;
+  isNotAuthorized?: boolean;
 };
 
 export type CreatePostCategoryDto = {
@@ -64,11 +87,14 @@ export type EditPostResponse = {
   message: string;
 };
 
-export type GetPostsResponse = {
-  isSuccess: boolean;
-  message?: string;
-  blogPosts: BlogPost[];
+export type GetPostsResponse = BlogApiResponseMetadata & {
+  blogPosts: BlogPostSummary[];
 };
+
+export type GetPostApiResponse = BlogApiResponseMetadata &
+  Omit<BlogPostDetail, 'comments'> & {
+    comments: RawBlogCommentDto[];
+  };
 
 export type CategoryDto = {
   id: number;

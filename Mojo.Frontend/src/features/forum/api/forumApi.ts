@@ -1,6 +1,5 @@
 import apiClient from '@shared/api/axiosClient';
 import type {
-  ForumThreadSummary,
   GetThreadsResponseDto,
   GetThreadsRequest,
   GetThreadRequest,
@@ -13,23 +12,20 @@ export const forumApi = {
     amount = 20,
     lastThreadDate,
     lastThreadId,
-  }: GetThreadsRequest): Promise<ForumThreadSummary[]> => {
-    const response = await apiClient.get<GetThreadsResponseDto>(
-      `/${pageId}/forums/threads`,
-      {
-        params: {
-          amount,
-          lastThreadDate,
-          lastThreadId,
-        },
-      }
-    );
+  }: GetThreadsRequest): Promise<GetThreadsResponseDto> => {
+    const response = await apiClient.get<GetThreadsResponseDto>(`/${pageId}/forums/threads`, {
+      params: {
+        amount,
+        lastThreadDate,
+        lastThreadId,
+      },
+    });
 
     if (!response.data.isSuccess) {
       throw new Error(response.data.message ?? 'Failed to load forum threads.');
     }
 
-    return response.data.threads;
+    return response.data;
   },
   getThread: async ({
     pageId,

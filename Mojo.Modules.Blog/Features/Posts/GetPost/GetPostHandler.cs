@@ -20,11 +20,8 @@ public static class GetPostHandler
             return BaseResponse.NotFound<GetPostResponse>("Module not found.");
         }
         
-        return await db.BlogPosts.Where(x => x.BlogPostId == query.BlogPostId)
-            .AsNoTracking()
-            .Where(x => x.ModuleId == featureContextDto.ModuleId)
-            .Include(x => x.Categories)
-            .Include(x => x.Comments)
+        return await db.BlogPosts.AsNoTracking()
+            .Where(x => x.BlogPostId == query.BlogPostId && x.ModuleId == featureContextDto.ModuleId)
             .Select(bp => new GetPostResponse
             {
                 BlogPostGuid =  bp.BlogPostId,
@@ -35,7 +32,11 @@ public static class GetPostHandler
                 CreatedAt = bp.CreatedAt,
                 Categories = bp.Categories.Select(c => c.CategoryName).ToList(),
                 CommentCount = bp.Comments.Count,
-                Comments = bp.Comments.Select(bpc => 
+                Comments = bp.Comments
+                    .Where(x => query.LastCommentDate == null || x.CreatedAt < query.LastCommentDate.Value)
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Take(query.Amount ?? 50)
+                    .Select(bpc => 
                     new BlogCommentDto(
                         bpc.Id, 
                         bpc.UserGuid, 

@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Mojo.Modules.Blog.Features.Posts.GetPost;
 
-public record GetPostQuery(int PageId, Guid BlogPostId)
+public record GetPostQuery(int PageId, Guid BlogPostId, DateTime? LastCommentDate, int? Amount)
 {
     public class GetPostQueryValidator : AbstractValidator<GetPostQuery>
     {

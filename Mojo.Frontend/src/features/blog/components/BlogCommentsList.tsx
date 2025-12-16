@@ -9,6 +9,7 @@ import {
   IconButton,
   Tooltip,
   Divider,
+  Button,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -23,6 +24,9 @@ interface BlogCommentsListProps {
   onEditComment: (commentId: string, values: CommentFormValues) => Promise<void>;
   onDeleteComment: (commentId: string) => Promise<void>;
   currentUserId?: string | null;
+  canLoadMore?: boolean;
+  onLoadMoreComments?: () => void;
+  isLoadingMoreComments?: boolean;
 }
 
 export const BlogCommentsList = ({
@@ -32,6 +36,9 @@ export const BlogCommentsList = ({
   onEditComment,
   onDeleteComment,
   currentUserId,
+  canLoadMore = false,
+  onLoadMoreComments,
+  isLoadingMoreComments = false,
 }: BlogCommentsListProps) => {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [submittingEditId, setSubmittingEditId] = useState<string | null>(null);
@@ -160,6 +167,18 @@ export const BlogCommentsList = ({
               </Box>
             ))}
           </Stack>
+        )}
+
+        {canLoadMore && onLoadMoreComments && (
+          <Box className="blog-comments-footer">
+            <Button
+              variant="outlined"
+              onClick={onLoadMoreComments}
+              disabled={isLoadingMoreComments}
+            >
+              {isLoadingMoreComments ? 'Loading...' : 'Load More Comments'}
+            </Button>
+          </Box>
         )}
       </CardContent>
     </Card>

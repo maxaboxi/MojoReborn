@@ -8,8 +8,11 @@ public class GetPostsEndpoint
     [WolverineGet("/api/blog/posts")]
     public static Task<GetPostsResponse> Get(
         int pageId,
+        DateTime? lastPostDate,
+        int? lastPostId,
+        int? amount,
         IMessageBus bus)
     {
-        return bus.InvokeAsync<GetPostsResponse>(new GetPostsQuery(pageId));
+        return bus.InvokeAsync<GetPostsResponse>(new GetPostsQuery(pageId,  lastPostDate, lastPostId, amount));
     }
 }

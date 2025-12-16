@@ -12,14 +12,18 @@ import './BlogList.css';
 export const BlogList = () => {
   const { blogPageId, blogPageUrl, menuLoading, menuError } = useBlogPageContext();
   const {
-    data: posts = [],
+    data,
     isLoading: loadingPosts,
     error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useBlogPostsQuery(blogPageId);
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const normalizedBlogPath = blogPageUrl ?? '/blog';
   const pageUrlQuery = blogPageUrl ? `?pageUrl=${encodeURIComponent(blogPageUrl)}` : '';
+  const posts = data?.pages.flatMap((page) => page.blogPosts ?? []) ?? [];
 
   if (menuLoading || loadingPosts) {
     return <LoadingState className="blog-list-loading" minHeight={200} />;
@@ -83,6 +87,18 @@ export const BlogList = () => {
           <BlogCard key={post.blogPostGuid} post={post} basePath={normalizedBlogPath} />
         ))}
       </Stack>
+
+      {hasNextPage && (
+        <Box className="blog-list-load-more">
+          <Button
+            variant="outlined"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? 'Loading...' : 'Load More Posts'}
+          </Button>
+        </Box>
+      )}
     </>
   );
 };

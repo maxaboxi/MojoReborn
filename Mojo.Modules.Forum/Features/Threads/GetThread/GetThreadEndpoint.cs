@@ -10,7 +10,7 @@ public class GetThreadEndpoint
         int pageId,
         int forumId,
         int threadId,
-        int amount,
+        int? amount,
         int lastThreadSequence,
         IMessageBus bus)
     {

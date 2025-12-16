@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Typography,
@@ -19,6 +19,7 @@ import { LoadingState, StatusMessage } from '@shared/ui';
 import type { ForumPost, ForumViewMode } from '../types/forum.types';
 import { ForumPostCard } from '../components/ForumPostCard';
 import { ForumViewToggle } from '../components/ForumViewToggle';
+import { forumApi } from '../api/forumApi';
 import './ForumThreadPage.css';
 
 interface ForumThreadPageProps {
@@ -27,6 +28,8 @@ interface ForumThreadPageProps {
 }
 
 type ForumPostNode = ForumPost & { replies: ForumPostNode[] };
+
+const THREAD_POSTS_PAGE_SIZE = 50;
 
 const buildPostTree = (posts: ForumPost[]): ForumPostNode[] => {
   const sorted = [...posts].sort((a, b) => a.threadSequence - b.threadSequence);
@@ -87,12 +90,23 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
   const threadId = overrideThreadId ?? derivedThreadId;
   const { forumPageId, forumPageUrl, forumPageTitle, menuLoading, menuError } = useForumPageContext();
   const [viewMode, setViewMode] = useState<ForumViewMode>('classic');
+  const [posts, setPosts] = useState<ForumPost[]>([]);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [isFetchingMorePosts, setIsFetchingMorePosts] = useState(false);
+  const [postPaginationError, setPostPaginationError] = useState<string | null>(null);
   const {
     data: thread,
     isLoading,
     error,
-  } = useForumThreadQuery({ pageId: forumPageId, forumId, threadId });
-  const posts = useMemo(() => thread?.forumPosts ?? [], [thread]);
+  } = useForumThreadQuery({ pageId: forumPageId, forumId, threadId, amount: THREAD_POSTS_PAGE_SIZE });
+
+  useEffect(() => {
+    const initialPosts = thread?.forumPosts ?? [];
+    setPosts(initialPosts);
+    setPostPaginationError(null);
+    setHasMorePosts(initialPosts.length === THREAD_POSTS_PAGE_SIZE);
+  }, [thread]);
+
   const nestedPosts = useMemo(() => buildPostTree(posts), [posts]);
 
   const listPath = forumPageUrl ?? (currentPath?.split('/thread')[0] ?? '/forum');
@@ -108,6 +122,41 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
       params.set('pageId', String(forumPageId));
     }
     return params.size > 0 ? `${listPath}?${params.toString()}` : listPath;
+  };
+
+  const handleLoadMorePosts = async () => {
+    if (isFetchingMorePosts || !forumPageId || !forumId || !threadId) {
+      return;
+    }
+
+    const lastSequence = posts[posts.length - 1]?.threadSequence ?? 0;
+    setIsFetchingMorePosts(true);
+    setPostPaginationError(null);
+    try {
+      const response = await forumApi.getThread({
+        pageId: forumPageId,
+        forumId,
+        threadId,
+        amount: THREAD_POSTS_PAGE_SIZE,
+        lastThreadSequence: lastSequence,
+      });
+
+      setPosts((prev) => {
+        const filtered = response.forumPosts.filter(
+          (post) => !prev.some((existing) => existing.postGuid === post.postGuid)
+        );
+        return [...prev, ...filtered];
+      });
+      if (response.forumPosts.length < THREAD_POSTS_PAGE_SIZE) {
+        setHasMorePosts(false);
+      }
+    } catch (err) {
+      setPostPaginationError(
+        err instanceof Error ? err.message : 'Failed to load additional replies.'
+      );
+    } finally {
+      setIsFetchingMorePosts(false);
+    }
   };
 
   if (menuLoading || isLoading) {
@@ -182,6 +231,24 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
           {nestedPosts.map((node) => (
             <ForumNestedPost key={node.postGuid} node={node} depth={0} />
           ))}
+        </Box>
+      )}
+
+      {postPaginationError && (
+        <Typography variant="body2" color="error" textAlign="center">
+          {postPaginationError}
+        </Typography>
+      )}
+
+      {hasMorePosts && (
+        <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Button
+            variant="outlined"
+            onClick={handleLoadMorePosts}
+            disabled={isFetchingMorePosts}
+          >
+            {isFetchingMorePosts ? 'Loading more replies…' : 'Load more replies'}
+          </Button>
         </Box>
       )}
     </Box>

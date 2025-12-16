@@ -1,5 +1,5 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { SyntheticEvent } from 'react';
 import {
   Typography,
@@ -32,6 +32,9 @@ import { LoadingState, StatusMessage } from '@shared/ui';
 import { useBlogPageContext } from '../hooks/useBlogPageContext';
 import { useAuth } from '@features/auth/providers/AuthProvider';
 import { savePostLoginRedirect } from '@features/auth/utils/postLoginRedirect';
+import { blogApi } from '../api/blogApi';
+import type { BlogComment } from '../types/blog.types';
+import { BLOG_COMMENTS_PAGE_SIZE } from '../constants';
 import './BlogPostDetail.css';
 
 
@@ -49,6 +52,8 @@ export const BlogPostDetail = () => {
     refetch,
   } = useBlogPostQuery(id, blogPageId);
   const postErrorMessage = postError?.message ?? null;
+  const [comments, setComments] = useState<BlogComment[]>([]);
+  const [isLoadingMoreComments, setIsLoadingMoreComments] = useState(false);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -72,6 +77,14 @@ export const BlogPostDetail = () => {
     }),
     [commentFormKey, user?.email]
   );
+
+  useEffect(() => {
+    if (post?.comments) {
+      setComments(post.comments);
+    } else {
+      setComments([]);
+    }
+  }, [post]);
 
   const showToast = (message: string, severity: AlertColor = 'info') => {
     setToastState({
@@ -272,6 +285,45 @@ export const BlogPostDetail = () => {
     }
   };
 
+  const handleLoadMoreComments = async () => {
+    if (!id || blogPageId == null || !post) {
+      showToast('Unable to load more comments right now.', 'error');
+      return;
+    }
+
+    if (isLoadingMoreComments || comments.length === 0 || comments.length >= post.commentCount) {
+      return;
+    }
+
+    const lastLoaded = comments[comments.length - 1];
+
+    if (!lastLoaded) {
+      return;
+    }
+
+    setIsLoadingMoreComments(true);
+
+    try {
+      const response = await blogApi.getPost({
+        id,
+        pageId: blogPageId,
+        amount: BLOG_COMMENTS_PAGE_SIZE,
+        lastCommentDate: lastLoaded.createdAt,
+      });
+
+      if (!response.comments.length) {
+        return;
+      }
+
+      setComments((prev) => [...prev, ...response.comments]);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load more comments.';
+      showToast(message, 'error');
+    } finally {
+      setIsLoadingMoreComments(false);
+    }
+  };
+
   if (menuLoading || loading) {
     return <LoadingState className="blog-post-loading" minHeight={200} />;
   }
@@ -292,8 +344,8 @@ export const BlogPostDetail = () => {
     return <StatusMessage>{postErrorMessage || 'Post not found'}</StatusMessage>;
   }
 
-  const comments = post.comments ?? [];
   const commentCount = post.commentCount ?? comments.length;
+  const canLoadMoreComments = comments.length < commentCount;
 
   return (
     <>
@@ -358,6 +410,9 @@ export const BlogPostDetail = () => {
         onEditComment={handleCommentEdit}
         onDeleteComment={handleCommentDelete}
         currentUserId={user?.id}
+        canLoadMore={canLoadMoreComments}
+        onLoadMoreComments={handleLoadMoreComments}
+        isLoadingMoreComments={isLoadingMoreComments}
       />
 
       <BlogCommentFormPanel

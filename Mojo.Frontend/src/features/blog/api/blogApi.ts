@@ -1,11 +1,13 @@
 import apiClient from '@shared/api/axiosClient';
 import type {
-  BlogPost,
+  BlogComment,
+  BlogPostDetail,
   EditPostRequest,
   EditPostResponse,
   CreatePostRequest,
   CreatePostResponse,
   GetPostsResponse,
+  GetPostApiResponse,
   GetCategoriesResponse,
   CategoryDto,
   CategoryMutationResponse,
@@ -22,23 +24,63 @@ import type {
   DeleteCommentResponse,
 } from '../types/blog.types';
 
+type GetPostsParams = {
+  pageId: number;
+  amount?: number;
+  lastPostDate?: string;
+  lastPostId?: number;
+};
+
+type GetPostParams = {
+  id: string;
+  pageId: number;
+  amount?: number;
+  lastCommentDate?: string;
+};
+
+const mapCommentDto = (comment: GetPostApiResponse['comments'][number]): BlogComment => ({
+  id: comment.id,
+  author: comment.userName,
+  userGuid: comment.userGuid,
+  title: comment.title,
+  content: comment.content,
+  createdAt: comment.createdAt,
+});
+
 export const blogApi = {
-  getPosts: async (pageId: number): Promise<BlogPost[]> => {
+  getPosts: async ({ pageId, amount, lastPostDate, lastPostId }: GetPostsParams): Promise<GetPostsResponse> => {
     const response = await apiClient.get<GetPostsResponse>('/blog/posts', {
-      params: { pageId },
+      params: { pageId, amount, lastPostDate, lastPostId },
     });
 
     if (!response.data.isSuccess) {
       throw new Error(response.data.message || 'Failed to load blog posts.');
     }
 
-    return response.data.blogPosts;
-  },
-  getPost: async (id: string, pageId: number): Promise<BlogPost> => {
-    const response = await apiClient.get<BlogPost>(`/blog/posts/${id}`, {
-      params: { pageId },
-    });
     return response.data;
+  },
+  getPost: async ({ id, pageId, amount, lastCommentDate }: GetPostParams): Promise<BlogPostDetail> => {
+    const response = await apiClient.get<GetPostApiResponse>(`/blog/posts/${id}`, {
+      params: { pageId, amount, lastCommentDate },
+    });
+
+    if (!response.data.isSuccess) {
+      throw new Error(response.data.message || 'Failed to load blog post.');
+    }
+
+    const {
+      isSuccess: _isSuccess,
+      message: _message,
+      isNotAuthorized: _isNotAuthorized,
+      isNotFound: _isNotFound,
+      comments = [],
+      ...rest
+    } = response.data;
+
+    return {
+      ...(rest as Omit<BlogPostDetail, 'comments'>),
+      comments: comments.map(mapCommentDto),
+    } satisfies BlogPostDetail;
   },
   getCategories: async (pageId: number): Promise<CategoryDto[]> => {
     const response = await apiClient.get<GetCategoriesResponse>('/blog/categories', {

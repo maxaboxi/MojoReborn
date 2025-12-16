@@ -34,7 +34,7 @@ public class GetThreadsHandler
         var threads = await queryable
             .OrderByDescending(x => x.MostRecentPostDate)
             .ThenByDescending(x => x.Id)
-            .Take(query.Amount)
+            .Take(query.Amount ?? 20)
             .Select(x => new ThreadDto(
                 x.Id,
                 x.ForumId,

@@ -9,8 +9,10 @@ public static class GetPostEndpoint
     public static Task<GetPostResponse> Get(
         Guid blogPostId,
         int pageId,
+        DateTime? lastCommentDate,
+        int? amount,
         IMessageBus bus)
     {
-        return bus.InvokeAsync<GetPostResponse>(new GetPostQuery(pageId, blogPostId));
+        return bus.InvokeAsync<GetPostResponse>(new GetPostQuery(pageId, blogPostId, lastCommentDate, amount));
     }
 }

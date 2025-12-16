@@ -38,7 +38,7 @@ public class GetThreadHandler
                 ForumPosts = x.ForumPosts
                     .OrderBy(fp => fp.ThreadSequence)
                     .Where(fp => fp.ThreadSequence > query.LastThreadSequence)
-                    .Take(query.Amount)
+                    .Take(query.Amount ?? 50)
                     .Select(fp => new ForumPostDto(
                         x.ForumId,
                         fp.Id,

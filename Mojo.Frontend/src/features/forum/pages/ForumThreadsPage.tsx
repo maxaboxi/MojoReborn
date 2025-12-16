@@ -17,7 +17,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useForumPageContext } from '../hooks/useForumPageContext';
 import { useForumThreadsQuery } from '../hooks/useForumThreadsQuery';
 import { LoadingState, StatusMessage } from '@shared/ui';
-import type { ForumThreadSummary } from '../types/forum.types';
+import type { ForumThreadSummary, GetThreadsResponseDto } from '../types/forum.types';
 import './ForumThreadsPage.css';
 
 const formatDate = (value?: string | null) =>
@@ -28,10 +28,15 @@ export const ForumThreadsPage = () => {
   const location = useLocation();
   const { forumPageId, forumPageUrl, forumPageTitle, menuLoading, menuError } = useForumPageContext();
   const {
-    data: threads = [],
+    data,
     isLoading: threadsLoading,
     error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useForumThreadsQuery({ pageId: forumPageId });
+  const threads: ForumThreadSummary[] =
+    data?.pages.flatMap((page: GetThreadsResponseDto) => page.threads) ?? [];
   const normalizedListPath = forumPageUrl ?? location.pathname ?? '/forum';
 
   const handleThreadNavigation = (thread: ForumThreadSummary) => {
@@ -148,6 +153,21 @@ export const ForumThreadsPage = () => {
           );
         })}
       </Stack>
+
+      {hasNextPage && (
+        <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Button
+            variant="outlined"
+            size="large"
+            onClick={() => {
+              void fetchNextPage();
+            }}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? 'Loading more threads…' : 'Load more threads'}
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };

@@ -10,7 +10,7 @@ public class GetThreadsEndpoint
         int pageId,
         DateTime? lastThreadDate,
         int? lastThreadId,
-        int amount,
+        int? amount,
         IMessageBus bus)
     {
         return bus.InvokeAsync<GetThreadsResponse>(new GetThreadsQuery(pageId, lastThreadDate, lastThreadId, amount));
