@@ -62,12 +62,12 @@ export const AuthLoginPage = () => {
     if (redirectParam) {
       savePostLoginRedirect(redirectParam);
     }
-    window.location.href = buildExternalLoginUrl(provider);
+    window.location.assign(buildExternalLoginUrl(provider));
   };
 
   const handleDevLogin = () => {
     savePostLoginRedirect(redirectParam ?? '/');
-    window.location.href = buildDevLoginUrl(devEmail.trim());
+    window.location.assign(buildDevLoginUrl(devEmail.trim()));
   };
 
   return (

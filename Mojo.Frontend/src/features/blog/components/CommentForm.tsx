@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Stack, TextField, Button, Alert } from '@mui/material';
 
 export type CommentFormValues = {
@@ -44,13 +44,6 @@ export const CommentForm = ({
     ...defaultValues,
     ...initialData,
   });
-
-  useEffect(() => {
-    setValues({
-      ...defaultValues,
-      ...initialData,
-    });
-  }, [initialData]);
 
   const isFormValid = useMemo(() => {
     const hasTitle = values.title.trim().length > 0;

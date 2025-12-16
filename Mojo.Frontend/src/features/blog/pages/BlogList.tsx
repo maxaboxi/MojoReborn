@@ -5,7 +5,7 @@ import { useBlogPostsQuery } from '../hooks/useBlogPostsQuery';
 import { BlogCard } from '../components/BlogCard';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { useBlogPageContext } from '../hooks/useBlogPageContext';
-import { useAuth } from '@features/auth/providers/AuthProvider';
+import { useAuth } from '@features/auth/providers/useAuth';
 import { savePostLoginRedirect } from '@features/auth/utils/postLoginRedirect';
 import './BlogList.css';
 

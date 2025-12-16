@@ -8,7 +8,7 @@ import { useUpdateBlogPostMutation } from '../hooks/useUpdateBlogPostMutation';
 import type { EditPostRequest, Category } from '../types/blog.types';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { useBlogPageContext } from '../hooks/useBlogPageContext';
-import { useAuth } from '@features/auth/providers/AuthProvider';
+import { useAuth } from '@features/auth/providers/useAuth';
 
 export const EditBlogPost = () => {
   const { id } = useParams<{ id: string }>();

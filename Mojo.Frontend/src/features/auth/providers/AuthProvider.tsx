@@ -1,6 +1,7 @@
-import { createContext, useContext, useMemo, useCallback, type ReactNode } from 'react';
+import { useMemo, useCallback, type ReactNode } from 'react';
 import type { CurrentUser } from '@shared/types/auth.types';
 import { useCurrentUserQuery } from '../hooks/useCurrentUserQuery';
+import { AuthContext } from './AuthContext';
 
 export type AuthContextValue = {
   user: CurrentUser | null;
@@ -11,8 +12,6 @@ export type AuthContextValue = {
   refetchUser: () => Promise<CurrentUser | null>;
   hasRole: (role: string) => boolean;
 };
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { data, error, isLoading, isFetching, refetch } = useCurrentUserQuery();
@@ -61,12 +60,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

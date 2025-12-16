@@ -64,18 +64,24 @@ export const blogApi = {
       params: { pageId, amount, lastCommentDate },
     });
 
-    if (!response.data.isSuccess) {
-      throw new Error(response.data.message || 'Failed to load blog post.');
-    }
-
     const {
-      isSuccess: _isSuccess,
-      message: _message,
-      isNotAuthorized: _isNotAuthorized,
-      isNotFound: _isNotFound,
+      isSuccess,
+      message,
+      isNotAuthorized,
+      isNotFound,
       comments = [],
       ...rest
     } = response.data;
+
+    if (!isSuccess) {
+      if (isNotAuthorized) {
+        throw new Error(message || 'You are not authorized to view this post.');
+      }
+      if (isNotFound) {
+        throw new Error(message || 'Post not found.');
+      }
+      throw new Error(message || 'Failed to load blog post.');
+    }
 
     return {
       ...(rest as Omit<BlogPostDetail, 'comments'>),

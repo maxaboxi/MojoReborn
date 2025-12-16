@@ -4,7 +4,7 @@ import ArticleIcon from '@mui/icons-material/Article';
 import GroupsIcon from '@mui/icons-material/Groups';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@features/auth/providers/AuthProvider';
+import { useAuth } from '@features/auth/providers/useAuth';
 import './HomePage.css';
 
 const highlights = [

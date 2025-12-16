@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Stack, Typography, Button } from '@mui/material';
 import { LoadingState, StatusMessage } from '@shared/ui';
-import { useAuth } from '../providers/AuthProvider';
+import { useAuth } from '../providers/useAuth';
 import { savePostLoginRedirect } from '../utils/postLoginRedirect';
 
 interface RequireAuthProps {

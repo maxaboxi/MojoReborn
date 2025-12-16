@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { IconButton, Menu, MenuItem, ListItemIcon, Divider, Avatar, Button } from '@mui/material';
 import { Person, Settings, Logout } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@features/auth/providers/AuthProvider';
+import { useAuth } from '@features/auth/providers/useAuth';
 import { useLogoutMutation } from '@features/auth/hooks/useLogoutMutation';
 import { savePostLoginRedirect } from '@features/auth/utils/postLoginRedirect';
 import './UserMenu.css';

@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import { Add, Close, Delete, Edit, Save } from '@mui/icons-material';
 import { LoadingState, StatusMessage } from '@shared/ui';
-import { useAuth } from '@features/auth/providers/AuthProvider';
+import { useAuth } from '@features/auth/providers/useAuth';
 import { useBlogPageContext } from '../hooks/useBlogPageContext';
 import { useBlogCategoriesQuery } from '../hooks/useBlogCategoriesQuery';
 import { useCreateCategoryMutation } from '../hooks/useCreateCategoryMutation';

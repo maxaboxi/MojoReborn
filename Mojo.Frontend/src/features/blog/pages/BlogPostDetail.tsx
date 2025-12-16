@@ -30,7 +30,7 @@ import { BlogCommentsList } from '../components/BlogCommentsList';
 import { BlogCommentFormPanel } from '../components/BlogCommentFormPanel';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { useBlogPageContext } from '../hooks/useBlogPageContext';
-import { useAuth } from '@features/auth/providers/AuthProvider';
+import { useAuth } from '@features/auth/providers/useAuth';
 import { savePostLoginRedirect } from '@features/auth/utils/postLoginRedirect';
 import { blogApi } from '../api/blogApi';
 import type { BlogComment } from '../types/blog.types';
@@ -75,7 +75,7 @@ export const BlogPostDetail = () => {
       title: '',
       content: '',
     }),
-    [commentFormKey, user?.email]
+    [user?.email]
   );
 
   useEffect(() => {

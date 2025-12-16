@@ -7,7 +7,7 @@ import { useBlogPageContext } from '../hooks/useBlogPageContext';
 import type { CreatePostRequest } from '../types/blog.types';
 import { useCreateBlogPostMutation } from '../hooks/useCreateBlogPostMutation';
 import { LoadingState, StatusMessage } from '@shared/ui';
-import { useAuth } from '@features/auth/providers/AuthProvider';
+import { useAuth } from '@features/auth/providers/useAuth';
 
 export const CreateBlogPost = () => {
   const navigate = useNavigate();

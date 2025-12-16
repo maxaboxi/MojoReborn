@@ -3,7 +3,7 @@ import { Settings, Layers, Category } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NavMenuItem } from '../NavMenuItem/NavMenuItem';
 import { useMenuQuery } from '@shared/hooks/useMenuQuery';
-import { useAuth } from '@features/auth/providers/AuthProvider';
+import { useAuth } from '@features/auth/providers/useAuth';
 import './Sidebar.css';
 
 const DRAWER_WIDTH = 260;

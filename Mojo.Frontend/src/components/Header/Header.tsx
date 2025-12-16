@@ -1,6 +1,6 @@
 import { AppBar, Toolbar, IconButton, Box, Badge, useMediaQuery, useTheme } from '@mui/material';
 import { Notifications, Mail, Brightness4, Brightness7, Menu } from '@mui/icons-material';
-import { useTheme as useAppTheme } from '@shared/theme/ThemeContext';
+import { useTheme as useAppTheme } from '@shared/theme/useTheme';
 import { UserMenu } from '../UserMenu/UserMenu';
 import './Header.css';
 

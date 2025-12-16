@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type SyntheticEvent } from 'react';
 import {
   Box,
   TextField,
@@ -53,7 +53,10 @@ export const BlogPostForm = ({
     initialData?.categories || []
   );
 
-  const handleCategoriesChange = (_event: any, newValue: (CategoryDto | string)[]) => {
+  const handleCategoriesChange = (
+    _event: SyntheticEvent,
+    newValue: Array<CategoryDto | string>
+  ) => {
     const selectedCategories: CreatePostCategoryDto[] = newValue.map((item) => {
       if (typeof item === 'string') {
         // New category typed by user
