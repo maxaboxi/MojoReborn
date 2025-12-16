@@ -20,5 +20,7 @@ public class LegacyUserRoleConfiguration : IEntityTypeConfiguration<LegacyUserRo
             .WithMany(e => e.UserRoles)
             .HasForeignKey(e => e.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.Metadata.SetIsTableExcludedFromMigrations(true);
     }
 }

@@ -13,7 +13,6 @@ public class FeatureContextResolver(SiteStructureDbContext db) : IFeatureContext
             .AsNoTracking()
             .Where(x => x.PageId == id)
             .Where(x => x.Module.ModuleDefinition.FeatureName == featureName)
-            .Include(x => x.Page)
             .Select(x => 
                 new FeatureContextDto(
                         x.ModuleId, 

@@ -17,5 +17,7 @@ public class LegacyRoleConfiguration : IEntityTypeConfiguration<LegacyRole>
         builder.Property(e => e.DisplayName).HasMaxLength(50);
         builder.Property(e => e.RoleName).HasMaxLength(50);
         builder.Property(e => e.SiteId).HasColumnName("SiteID");
+        
+        builder.Metadata.SetIsTableExcludedFromMigrations(true);
     }
 }

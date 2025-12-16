@@ -12,7 +12,7 @@ using Mojo.Modules.Identity.Data;
 namespace Mojo.Modules.Identity.Data.Migrations
 {
     [DbContext(typeof(IdentityDbContext))]
-    [Migration("20251212091102_IdentityDbContext_Initial_Migration")]
+    [Migration("20251216115008_IdentityDbContext_Initial_Migration")]
     partial class IdentityDbContext_Initial_Migration
     {
         /// <inheritdoc />
@@ -209,6 +209,9 @@ namespace Mojo.Modules.Identity.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("LegacyId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -297,7 +300,10 @@ namespace Mojo.Modules.Identity.Data.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("mp_Roles", (string)null);
+                    b.ToTable("mp_Roles", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Mojo.Modules.Identity.Domain.Entities.LegacyUser", b =>
@@ -336,6 +342,11 @@ namespace Mojo.Modules.Identity.Data.Migrations
                     b.Property<string>("LoginName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Name");
+
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
@@ -363,7 +374,10 @@ namespace Mojo.Modules.Identity.Data.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("mp_Users", (string)null);
+                    b.ToTable("mp_Users", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Mojo.Modules.Identity.Domain.Entities.LegacyUserRole", b =>
@@ -395,7 +409,10 @@ namespace Mojo.Modules.Identity.Data.Migrations
 
                     b.HasIndex(new[] { "RoleId" }, "IX_UserRolesRoleID");
 
-                    b.ToTable("mp_UserRoles", (string)null);
+                    b.ToTable("mp_UserRoles", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Mojo.Modules.Identity.Domain.Entities.SiteRole", b =>

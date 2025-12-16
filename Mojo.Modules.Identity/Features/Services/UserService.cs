@@ -1,14 +1,13 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Mojo.Modules.Identity.Data;
 using Mojo.Modules.Identity.Domain.Entities;
 using Mojo.Shared.Dtos.Identity;
 using Mojo.Shared.Interfaces.Identity;
 
 namespace Mojo.Modules.Identity.Features.Services;
 
-public class UserService(UserManager<ApplicationUser> userManager, IdentityDbContext db) : IUserService
+public class UserService(UserManager<ApplicationUser> userManager) : IUserService
 {
     public async Task<ApplicationUserDto?> GetUserAsync(ClaimsPrincipal principal, CancellationToken ct = default)
     {
@@ -37,6 +36,7 @@ public class UserService(UserManager<ApplicationUser> userManager, IdentityDbCon
             user.DisplayName,
             user.Bio,
             user.Signature,
+            user.LegacyId,
             user.AvatarUrl,
             user.TimeZoneId,
             user.UserSiteProfiles.Select(x => new UserSiteProfileDto(x.UserId, x.SiteId, x.SiteGuid)).ToList(),

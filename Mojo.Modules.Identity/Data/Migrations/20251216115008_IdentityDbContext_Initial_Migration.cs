@@ -36,6 +36,7 @@ namespace Mojo.Modules.Identity.Data.Migrations
                     AvatarUrl = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Bio = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Signature = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    LegacyId = table.Column<int>(type: "int", nullable: true),
                     TimeZoneId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastLoginDate = table.Column<DateTime>(type: "datetime2", nullable: true),

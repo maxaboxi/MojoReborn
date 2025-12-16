@@ -11,6 +11,8 @@ public class ApplicationUser : IdentityUser<Guid>
     public string? Bio { get; set; }
     public string? Signature { get; set; }
     
+    public int? LegacyId { get; set; }
+    
     public string? TimeZoneId { get; set; }
     
     public DateTime CreatedAt { get; set; }

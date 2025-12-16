@@ -86,6 +86,7 @@ public class MigrateLegacyUserHandler
             FirstName = legacyUser.FirstName ?? string.Empty,
             LastName = legacyUser.LastName ?? string.Empty,
             Signature = legacyUser.Signature,
+            LegacyId = legacyUser.UserId,
             Bio = legacyUser.AuthorBio
         };
         
