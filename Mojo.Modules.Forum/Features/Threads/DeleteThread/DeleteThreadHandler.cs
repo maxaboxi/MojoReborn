@@ -39,7 +39,8 @@ public class DeleteThreadHandler
             x => 
                 x.Forum.ModuleId == featureContextDto.ModuleId &&
                 x.Id == command.ThreadId && 
-                x.ForumId == command.ForumId, ct);
+                x.ForumId == command.ForumId &&
+                x.StartedByUserId == user.LegacyId, ct);
 
         if (existingThread == null)
         {
