@@ -13,12 +13,15 @@ This project is currently under active development and is subject to rapid itera
 ### Modular Monolith
 The backend is structured as a Modular Monolith.
 *   **Host:** `Mojo.Web` (ASP.NET Core Web API)
-*   **Modules:** `Mojo.Modules.*` (e.g., Blog, Core, Forum)
+*   **Modules:** `Mojo.Modules.*` (e.g., Blog, Identity, Forum)
 *   **Shared Kernel:** `Mojo.Shared`
 
 ### Vertical Slice Architecture (VSA)
 Each module organizes code by **Feature** rather than technical layer.
-*   Example: `Features/Posts/CreatePost` contains the Endpoint, Command, Handler, and Validator for that specific feature.
+*   Example: `Mojo.Modules.Blog/Features/Posts/CreatePost` contains the Endpoint, Command, Handler, and Validator for that specific feature.
+
+### AI Assisted Development
+The frontend is built entirely with AI-generated code. This serves multiple goals: accelerating delivery, running a learning exercise on how far we can push AI-led implementation, showcasing the backend as a headless CMS with the React app as just one possible consumer, and providing a fast feedback loop to validate that the end-to-end experience continues to work.
 
 ### Legacy Compatibility
 *   **Database:** The system runs on existing MojoPortal SQL Server databases.
