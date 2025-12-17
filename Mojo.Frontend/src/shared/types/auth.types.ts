@@ -4,6 +4,7 @@ export type CurrentUser = {
   firstName: string;
   lastName: string;
   displayName: string;
+  legacyId?: number | null;
   avatarUrl?: string | null;
   bio?: string | null;
   signature?: string | null;

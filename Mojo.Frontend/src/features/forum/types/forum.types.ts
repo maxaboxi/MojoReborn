@@ -67,3 +67,39 @@ export type GetThreadRequest = {
 };
 
 export type ForumViewMode = 'classic' | 'nested';
+
+export type ForumThreadMutationMetadata = {
+  isSuccess: boolean;
+  message?: string;
+  isNotFound?: boolean;
+  isNotAuthorized?: boolean;
+};
+
+export type CreateThreadRequest = {
+  pageId: number;
+  forumId: number;
+  subject: string;
+};
+
+export type CreateThreadResponse = ForumThreadMutationMetadata & {
+  threadId: number;
+};
+
+export type EditThreadRequest = {
+  pageId: number;
+  forumId: number;
+  threadId: number;
+  subject: string;
+};
+
+export type EditThreadResponse = ForumThreadMutationMetadata & {
+  threadId: number;
+};
+
+export type DeleteThreadRequest = {
+  pageId: number;
+  forumId: number;
+  threadId: number;
+};
+
+export type DeleteThreadResponse = ForumThreadMutationMetadata;

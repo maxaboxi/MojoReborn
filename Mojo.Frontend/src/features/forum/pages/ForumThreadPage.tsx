@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   Box,
   Typography,
@@ -6,11 +6,20 @@ import {
   Button,
   Chip,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  TextField,
+  Alert,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ForumIcon from '@mui/icons-material/Forum';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
 import { useForumThreadQuery } from '../hooks/useForumThreadQuery';
 import { useForumPageContext } from '../hooks/useForumPageContext';
@@ -20,6 +29,9 @@ import type { ForumPost, ForumViewMode } from '../types/forum.types';
 import { ForumPostCard } from '../components/ForumPostCard';
 import { ForumViewToggle } from '../components/ForumViewToggle';
 import { forumApi } from '../api/forumApi';
+import { useAuth } from '@features/auth/providers/useAuth';
+import { useEditThreadMutation } from '../hooks/useEditThreadMutation';
+import { useDeleteThreadMutation } from '../hooks/useDeleteThreadMutation';
 import './ForumThreadPage.css';
 
 interface ForumThreadPageProps {
@@ -89,15 +101,24 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
   const forumId = overrideForumId ?? derivedForumId;
   const threadId = overrideThreadId ?? derivedThreadId;
   const { forumPageId, forumPageUrl, forumPageTitle, menuLoading, menuError } = useForumPageContext();
+  const { user } = useAuth();
   const [viewMode, setViewMode] = useState<ForumViewMode>('classic');
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [isFetchingMorePosts, setIsFetchingMorePosts] = useState(false);
   const [postPaginationError, setPostPaginationError] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editSubject, setEditSubject] = useState('');
+  const [editError, setEditError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const editThreadMutation = useEditThreadMutation();
+  const deleteThreadMutation = useDeleteThreadMutation();
   const {
     data: thread,
     isLoading,
     error,
+    refetch: refetchThread,
   } = useForumThreadQuery({ pageId: forumPageId, forumId, threadId, amount: THREAD_POSTS_PAGE_SIZE });
 
   useEffect(() => {
@@ -122,6 +143,97 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
       params.set('pageId', String(forumPageId));
     }
     return params.size > 0 ? `${listPath}?${params.toString()}` : listPath;
+  };
+
+  const handleOpenEditDialog = () => {
+    if (!thread) {
+      return;
+    }
+    setEditSubject(thread.subject);
+    setEditError(null);
+    setEditDialogOpen(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    if (editThreadMutation.isPending) {
+      return;
+    }
+    setEditDialogOpen(false);
+    setEditError(null);
+  };
+
+  const handleEditThreadSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (forumPageId == null || forumId == null || threadId == null || !thread) {
+      setEditError('Unable to determine the forum context. Please return to the listing and try again.');
+      return;
+    }
+
+    const trimmedSubject = editSubject.trim();
+    if (!trimmedSubject) {
+      setEditError('Thread subject is required.');
+      return;
+    }
+
+    setEditError(null);
+
+    try {
+      const response = await editThreadMutation.mutateAsync({
+        pageId: forumPageId,
+        forumId,
+        threadId,
+        subject: trimmedSubject,
+      });
+
+      if (response.isSuccess) {
+        setEditDialogOpen(false);
+        await refetchThread();
+      } else {
+        setEditError(response.message ?? 'Failed to update this thread.');
+      }
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : 'Failed to update this thread.');
+    }
+  };
+
+  const handleOpenDeleteDialog = () => {
+    setDeleteError(null);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    if (deleteThreadMutation.isPending) {
+      return;
+    }
+    setDeleteDialogOpen(false);
+    setDeleteError(null);
+  };
+
+  const handleDeleteThreadConfirm = async () => {
+    if (forumPageId == null || forumId == null || threadId == null) {
+      setDeleteError('Unable to determine the forum context.');
+      return;
+    }
+
+    setDeleteError(null);
+
+    try {
+      const response = await deleteThreadMutation.mutateAsync({
+        pageId: forumPageId,
+        forumId,
+        threadId,
+      });
+
+      if (response.isSuccess) {
+        setDeleteDialogOpen(false);
+        navigate(buildListUrl());
+      } else {
+        setDeleteError(response.message ?? 'Failed to delete this thread.');
+      }
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete this thread.');
+    }
   };
 
   const handleLoadMorePosts = async () => {
@@ -191,6 +303,8 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
     return <StatusMessage>Thread not found.</StatusMessage>;
   }
 
+  const canManageThread = Boolean(user?.legacyId != null && thread.userId === user.legacyId);
+
   return (
     <Box className="forum-thread-page">
       <Box className="forum-thread-hero">
@@ -209,11 +323,37 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
               </span>
             </Stack>
           </Box>
-          <Stack direction={{ xs: 'column', sm: 'row' }} gap={1} alignItems="flex-start">
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            gap={1}
+            alignItems="flex-start"
+            flexWrap="wrap"
+          >
             <ForumViewToggle value={viewMode} onChange={setViewMode} />
             <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(buildListUrl())} size="small">
               Back to threads
             </Button>
+            {canManageThread && (
+              <>
+                <Button
+                  variant="outlined"
+                  startIcon={<EditIcon />}
+                  size="small"
+                  onClick={handleOpenEditDialog}
+                >
+                  Edit subject
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  size="small"
+                  onClick={handleOpenDeleteDialog}
+                >
+                  Delete thread
+                </Button>
+              </>
+            )}
           </Stack>
         </Stack>
       </Box>
@@ -251,6 +391,62 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
           </Button>
         </Box>
       )}
+
+      <Dialog open={editDialogOpen} onClose={handleCloseEditDialog} fullWidth maxWidth="sm">
+        <Box component="form" onSubmit={handleEditThreadSubmit} sx={{ width: '100%' }}>
+          <DialogTitle>Edit thread subject</DialogTitle>
+          <DialogContent sx={{ pt: 1 }}>
+            <TextField
+              label="Thread subject"
+              value={editSubject}
+              onChange={(event) => setEditSubject(event.target.value)}
+              fullWidth
+              disabled={editThreadMutation.isPending}
+              autoFocus
+            />
+            {editError && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {editError}
+              </Alert>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseEditDialog} disabled={editThreadMutation.isPending}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" disabled={editThreadMutation.isPending}>
+              {editThreadMutation.isPending ? 'Saving…' : 'Save changes'}
+            </Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
+
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Delete this thread?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete "{thread.subject}"? This action cannot be undone.
+          </DialogContentText>
+          {deleteError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {deleteError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} disabled={deleteThreadMutation.isPending}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteThreadConfirm}
+            color="error"
+            variant="contained"
+            disabled={deleteThreadMutation.isPending}
+          >
+            {deleteThreadMutation.isPending ? 'Deleting…' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

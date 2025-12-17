@@ -6,7 +6,7 @@ namespace Mojo.Modules.Forum.Features.Threads.EditThread;
 public class EditThreadEndpoint
 {
     [WolverinePut("/api/forums/threads/")]
-    public static Task<EditThreadResponse> Get(
+    public static Task<EditThreadResponse> Put(
         EditThreadCommand command,
         IMessageBus bus)
     {
