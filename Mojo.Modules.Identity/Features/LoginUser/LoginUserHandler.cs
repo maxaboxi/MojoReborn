@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Mojo.Modules.Identity.Data;
 using Mojo.Modules.Identity.Domain.Entities;
 using Mojo.Modules.Identity.Features.GetLegacyUser;
@@ -21,6 +22,7 @@ public class LoginUserHandler
         IConfiguration configuration,
         ISiteResolver siteResolver,
         IdentityDbContext db,
+        ILogger<LoginUserHandler> logger,
         CancellationToken ct)
     {
         var baseUrl = configuration["Frontend:Url"];
@@ -34,6 +36,7 @@ public class LoginUserHandler
         
         if (info == null)
         {
+            logger.LogError("Error loading external login information.");
             return Results.Redirect($"{baseUrl}/auth/login?error=session_expired");
         }
 
@@ -51,6 +54,7 @@ public class LoginUserHandler
 
         if (string.IsNullOrEmpty(email))
         {
+            logger.LogError("Email missing from external login information.");
             return Results.Redirect($"{baseUrl}/auth/login?error=email_not_found");
         }
         
@@ -77,12 +81,14 @@ public class LoginUserHandler
         if (!createResult.Succeeded)
         {
             var errors = string.Join(",", createResult.Errors.Select(e => e.Description));
+            logger.LogError("Creating the user failed: {errors}", errors);
             return Results.Redirect($"{baseUrl}/auth/login?error=creation_failed&details={errors}");
         }
 
         var linkResult = await userManager.AddLoginAsync(newUser, info);
         if (!linkResult.Succeeded)
         {
+            logger.LogError("Linking external login info to user failed: {@Errors}", linkResult.Errors.Select(e => e.Description));
             return Results.Redirect($"{baseUrl}/auth/login?error=linking_failed");
         }
         
@@ -129,6 +135,7 @@ public class LoginUserHandler
         if (!updateResult.Succeeded)
         {
             var errors = string.Join(",", updateResult.Errors.Select(e => e.Description));
+            logger.LogError("Updating the user account failed: {errors}", errors);
             return Results.Redirect($"{baseUrl}/auth/login?error=legacy_creation_failed&details={errors}");
         }
 

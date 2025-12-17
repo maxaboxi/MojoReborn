@@ -12,6 +12,8 @@ using Mojo.Modules.SiteStructure.Features.GetSite;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
 using Mojo.Web.Extensions;
+using Mojo.Web.Middleware;
+using Serilog;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
 using Wolverine.FluentValidation;
@@ -21,6 +23,13 @@ using Wolverine.Persistence.Durability;
 using Wolverine.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()
+    .WriteTo.Console());
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -81,6 +90,9 @@ builder.Host.UseWolverine(opts =>
     opts.Discovery.IncludeAssembly(typeof(IdentityDbContext).Assembly);
     opts.Discovery.IncludeAssembly(typeof(SiteStructureDbContext).Assembly);
     opts.Discovery.IncludeAssembly(typeof(ForumDbContext).Assembly);
+    
+    // Register Audit Logging Middleware for all handlers
+    opts.Policies.AddMiddleware<AuditLoggingBehavior>();
     
     opts.Durability.MessageStorageSchemaName = "wolverine";
     

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.SiteStructure.Data;
-using Mojo.Modules.SiteStructure.Features.GetSite;
+using Mojo.Shared.Interfaces.SiteStructure;
 
 namespace Mojo.Modules.SiteStructure.Features.GetMenu;
 
@@ -9,7 +9,7 @@ public class GetMenuHandler
     public static async Task<List<PageDto>> Handle(
         GetMenuQuery query, 
         SiteStructureDbContext db,
-        SiteResolver siteResolver,
+        ISiteResolver siteResolver,
         CancellationToken ct)
     {
         var site = await siteResolver.GetSite(ct);

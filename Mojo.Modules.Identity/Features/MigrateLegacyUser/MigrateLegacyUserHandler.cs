@@ -68,7 +68,7 @@ public class MigrateLegacyUserHandler
             return Results.Redirect($"{baseUrl}/auth/migrate-legacy?error=account_too_old");
         }
 
-        var passwordIsMatch = VerifyPassword(configuration, command.OldPassword, legacyUser);
+        var passwordIsMatch = VerifyPassword(configuration, command.OldPassword, legacyUser, logger);
 
         if (!passwordIsMatch)
         {
@@ -94,13 +94,14 @@ public class MigrateLegacyUserHandler
         if (!createResult.Succeeded)
         {
             var errors = string.Join(",", createResult.Errors.Select(e => e.Description));
-            logger.LogError(errors);
+            logger.LogError("Creating the user failed: {errors}", errors);
             return Results.Redirect($"{baseUrl}/auth/migrate-legacy?error=creation_failed&details={errors}");
         }
 
         var linkResult = await userManager.AddLoginAsync(newUser, info);
         if (!linkResult.Succeeded)
         {
+            logger.LogError("Linking external login info to user failed: {@Errors}", linkResult.Errors.Select(e => e.Description));
             return Results.Redirect($"{baseUrl}/auth/migrate-legacy?error=linking_failed");
         }
         
@@ -116,7 +117,7 @@ public class MigrateLegacyUserHandler
         return Results.Redirect($"{baseUrl}");
     }
 
-    private static bool VerifyPassword(IConfiguration configuration, string providedPassword, LegacyUser legacyUser)
+    private static bool VerifyPassword(IConfiguration configuration, string providedPassword, LegacyUser legacyUser, ILogger<MigrateLegacyUserHandler> logger)
     {
         if (legacyUser.PwdFormat == 0)
         {
@@ -125,6 +126,7 @@ public class MigrateLegacyUserHandler
         
         if (string.IsNullOrEmpty(legacyUser.PasswordHash) || string.IsNullOrEmpty(legacyUser.PasswordSalt))
         {
+            logger.LogError("Password hash {passwordHash} or password salt {passwordSalt} is missing.", legacyUser.PasswordHash, legacyUser.PasswordSalt);
             return false;
         }
         
