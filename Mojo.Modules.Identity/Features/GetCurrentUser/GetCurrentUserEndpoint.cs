@@ -36,6 +36,7 @@ public class GetCurrentUserEndpoint
         var response =  new GetCurrentUserResponse
         {
             Id = user.Id,
+            LegacyId = user.LegacyId ?? 0,
             Email = user.Email ?? "",
             FirstName = user.FirstName,
             LastName = user.LastName,
