@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Mojo.Modules.Forum.Data;
 using Mojo.Modules.Forum.Domain.Entities;
 using Mojo.Shared.Interfaces.Identity;
@@ -17,12 +18,14 @@ public class CreateThreadHandler
         IUserService userService,
         IFeatureContextResolver featureContextResolver,
         IPermissionService permissionService,
+        ILogger<CreateThreadHandler> logger,
         CancellationToken ct)
     {
         var user = await userService.GetUserAsync(claimsPrincipal, ct);
         
         if (user?.LegacyId == null)
         {
+            logger.LogError("User missing or user has no legacy id: {user}", user);
             return BaseResponse.Unauthorized<CreateThreadResponse>(user == null ? "User not found." : "Legacy account missing.");
         }
         
