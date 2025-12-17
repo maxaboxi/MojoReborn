@@ -9,8 +9,7 @@ type UseForumThreadsQueryArgs = {
 };
 
 type ThreadCursor = {
-  lastThreadDate: string;
-  lastThreadId: number;
+  lastThreadSequence: number;
 };
 
 type ThreadsQueryKey = ReturnType<typeof forumQueryKeys.threads>;
@@ -30,8 +29,7 @@ export const useForumThreadsQuery = ({ pageId, amount = 20 }: UseForumThreadsQue
       forumApi.getThreads({
         pageId: pageId as number,
         amount,
-        lastThreadDate: pageParam?.lastThreadDate,
-        lastThreadId: pageParam?.lastThreadId,
+        lastThreadSequence: pageParam?.lastThreadSequence ?? null,
       }),
     getNextPageParam: (lastPage) => {
       const threads = lastPage.threads;
@@ -40,13 +38,12 @@ export const useForumThreadsQuery = ({ pageId, amount = 20 }: UseForumThreadsQue
       }
 
       const lastThread = threads[threads.length - 1];
-      if (!lastThread?.mostRecentPostDate) {
+      if (typeof lastThread?.forumSequence !== 'number') {
         return null;
       }
 
       return {
-        lastThreadDate: lastThread.mostRecentPostDate,
-        lastThreadId: lastThread.id,
+        lastThreadSequence: lastThread.forumSequence,
       } satisfies ThreadCursor;
     },
     staleTime: 30 * 1000,

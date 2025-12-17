@@ -1,6 +1,7 @@
 export type ForumThreadSummary = {
   id: number;
   forumId: number;
+  forumSequence: number;
   subject: string;
   createdAt: string;
   totalViews: number;
@@ -54,8 +55,7 @@ export type GetThreadResponseDto = {
 export type GetThreadsRequest = {
   pageId: number;
   amount?: number;
-  lastThreadDate?: string | null;
-  lastThreadId?: number | null;
+  lastThreadSequence?: number | null;
 };
 
 export type GetThreadRequest = {

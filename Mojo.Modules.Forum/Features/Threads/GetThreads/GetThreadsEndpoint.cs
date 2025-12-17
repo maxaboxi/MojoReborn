@@ -8,11 +8,10 @@ public class GetThreadsEndpoint
     [WolverineGet("/api/{pageId}/forums/threads")]
     public static Task<GetThreadsResponse> Get(
         int pageId,
-        DateTime? lastThreadDate,
-        int? lastThreadId,
+        int? lastThreadSequence,
         int? amount,
         IMessageBus bus)
     {
-        return bus.InvokeAsync<GetThreadsResponse>(new GetThreadsQuery(pageId, lastThreadDate, lastThreadId, amount));
+        return bus.InvokeAsync<GetThreadsResponse>(new GetThreadsQuery(pageId, lastThreadSequence, amount));
     }
 }

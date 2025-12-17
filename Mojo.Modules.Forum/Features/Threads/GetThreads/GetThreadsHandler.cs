@@ -19,21 +19,11 @@ public class GetThreadsHandler
         {
             return BaseResponse.NotFound<GetThreadsResponse>("Module not found.");
         }
-
-        var queryable = db.ForumThreads.AsNoTracking()
-            .Where(x => x.Forum.ModuleId == featureContextDto.ModuleId);
-
-        if (query is { LastThreadDate: not null, LastThreadId: not null })
-        {
-            queryable = queryable.Where(x => 
-                x.MostRecentPostDate < query.LastThreadDate.Value ||
-                (x.MostRecentPostDate == query.LastThreadDate.Value && x.Id < query.LastThreadId.Value)
-            );
-        }
         
-        var threads = await queryable
-            .OrderByDescending(x => x.MostRecentPostDate)
-            .ThenByDescending(x => x.Id)
+        var threads = await db.ForumThreads.AsNoTracking()
+            .Where(x => x.Forum.ModuleId == featureContextDto.ModuleId)
+            .Where(x => query.LastThreadSequence == null || x.ForumSequence > query.LastThreadSequence)
+            .OrderBy(x => x.ForumSequence)
             .Take(query.Amount ?? 20)
             .Select(x => new ThreadDto(
                 x.Id,

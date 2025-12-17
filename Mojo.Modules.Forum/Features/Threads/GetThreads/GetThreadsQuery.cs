@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Mojo.Modules.Forum.Features.Threads.GetThreads;
 
-public record GetThreadsQuery(int PageId, DateTime? LastThreadDate, int? LastThreadId, int? Amount)
+public record GetThreadsQuery(int PageId, int? LastThreadSequence, int? Amount)
 {
     public class GetThreadsQueryValidator : AbstractValidator<GetThreadsQuery>
     {

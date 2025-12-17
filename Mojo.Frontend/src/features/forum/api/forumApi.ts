@@ -10,14 +10,12 @@ export const forumApi = {
   getThreads: async ({
     pageId,
     amount = 20,
-    lastThreadDate,
-    lastThreadId,
+    lastThreadSequence,
   }: GetThreadsRequest): Promise<GetThreadsResponseDto> => {
     const response = await apiClient.get<GetThreadsResponseDto>(`/${pageId}/forums/threads`, {
       params: {
         amount,
-        lastThreadDate,
-        lastThreadId,
+        lastThreadSequence,
       },
     });
 
