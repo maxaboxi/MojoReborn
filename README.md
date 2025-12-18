@@ -39,9 +39,3 @@ The frontend is built entirely with AI-generated code. This serves multiple goal
 1.  **Prerequisites:** Node.js 20+.
 2.  **Install:** `cd Mojo.Frontend && npm install`
 3.  **Run:** `npm run dev`
-
-## Development Guidelines
-
-*   **Async/Await:** Avoid `.Result` or `.Wait()`. Always use `await`.
-*   **Pagination:** All list endpoints MUST implement pagination.
-*   **Projections:** Use `Select` to project to DTOs. Avoid returning Entities directly.
