@@ -16,7 +16,7 @@ public class ForumPostReplyLinkConfiguration : IEntityTypeConfiguration<ForumPos
             .WithOne()
             .HasForeignKey<ForumPostReplyLink>(x => x.PostId)
             .HasPrincipalKey<ForumPost>(x => x.PostGuid)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
         
         builder.HasOne(x => x.ParentPost)
             .WithMany(x => x.Replies)

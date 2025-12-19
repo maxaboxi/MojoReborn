@@ -8,8 +8,6 @@ import type {
   CreateThreadResponse,
   EditThreadRequest,
   EditThreadResponse,
-  DeleteThreadRequest,
-  DeleteThreadResponse,
 } from '../types/forum.types';
 
 export const forumApi = {
@@ -60,12 +58,6 @@ export const forumApi = {
   },
   editThread: async (request: EditThreadRequest): Promise<EditThreadResponse> => {
     const response = await apiClient.put<EditThreadResponse>('/forums/threads', request);
-    return response.data;
-  },
-  deleteThread: async ({ pageId, forumId, threadId }: DeleteThreadRequest): Promise<DeleteThreadResponse> => {
-    const response = await apiClient.delete<DeleteThreadResponse>('/forums/threads', {
-      params: { pageId, forumId, threadId },
-    });
     return response.data;
   },
 };

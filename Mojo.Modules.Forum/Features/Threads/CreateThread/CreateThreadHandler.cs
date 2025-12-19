@@ -40,19 +40,11 @@ public class CreateThreadHandler
             .Where(x => x.ForumId == command.ForumId)
             .MaxAsync(t => (int?)t.ForumSequence, ct) ?? 0) + 1;
 
-        var forumUser = new ForumUser
-        {
-            Id = user.LegacyId ?? 0,
-            DisplayName = user.DisplayName,
-            UserGuid = user.Id
-        };
-
         var thread = new ForumThread
         {
             ForumId =  command.ForumId,
             ThreadSubject = command.Subject,
             StartedByUserId = user.LegacyId ?? 0,
-            Author = forumUser,
             ForumSequence = currentMaxSequence,
         };
         

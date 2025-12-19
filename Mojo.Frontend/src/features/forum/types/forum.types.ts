@@ -95,11 +95,3 @@ export type EditThreadRequest = {
 export type EditThreadResponse = ForumThreadMutationMetadata & {
   threadId: number;
 };
-
-export type DeleteThreadRequest = {
-  pageId: number;
-  forumId: number;
-  threadId: number;
-};
-
-export type DeleteThreadResponse = ForumThreadMutationMetadata;

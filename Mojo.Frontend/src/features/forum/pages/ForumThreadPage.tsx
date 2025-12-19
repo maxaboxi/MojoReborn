@@ -10,7 +10,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  DialogContentText,
   TextField,
   Alert,
 } from '@mui/material';
@@ -19,7 +18,6 @@ import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ForumIcon from '@mui/icons-material/Forum';
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
 import { useForumThreadQuery } from '../hooks/useForumThreadQuery';
 import { useForumPageContext } from '../hooks/useForumPageContext';
@@ -31,7 +29,6 @@ import { ForumViewToggle } from '../components/ForumViewToggle';
 import { forumApi } from '../api/forumApi';
 import { useAuth } from '@features/auth/providers/useAuth';
 import { useEditThreadMutation } from '../hooks/useEditThreadMutation';
-import { useDeleteThreadMutation } from '../hooks/useDeleteThreadMutation';
 import './ForumThreadPage.css';
 
 interface ForumThreadPageProps {
@@ -110,10 +107,7 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editSubject, setEditSubject] = useState('');
   const [editError, setEditError] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const editThreadMutation = useEditThreadMutation();
-  const deleteThreadMutation = useDeleteThreadMutation();
   const {
     data: thread,
     isLoading,
@@ -194,45 +188,6 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
       }
     } catch (err) {
       setEditError(err instanceof Error ? err.message : 'Failed to update this thread.');
-    }
-  };
-
-  const handleOpenDeleteDialog = () => {
-    setDeleteError(null);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleCloseDeleteDialog = () => {
-    if (deleteThreadMutation.isPending) {
-      return;
-    }
-    setDeleteDialogOpen(false);
-    setDeleteError(null);
-  };
-
-  const handleDeleteThreadConfirm = async () => {
-    if (forumPageId == null || forumId == null || threadId == null) {
-      setDeleteError('Unable to determine the forum context.');
-      return;
-    }
-
-    setDeleteError(null);
-
-    try {
-      const response = await deleteThreadMutation.mutateAsync({
-        pageId: forumPageId,
-        forumId,
-        threadId,
-      });
-
-      if (response.isSuccess) {
-        setDeleteDialogOpen(false);
-        navigate(buildListUrl());
-      } else {
-        setDeleteError(response.message ?? 'Failed to delete this thread.');
-      }
-    } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Failed to delete this thread.');
     }
   };
 
@@ -343,15 +298,6 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
                 >
                   Edit subject
                 </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  startIcon={<DeleteIcon />}
-                  size="small"
-                  onClick={handleOpenDeleteDialog}
-                >
-                  Delete thread
-                </Button>
               </>
             )}
           </Stack>
@@ -419,33 +365,6 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
             </Button>
           </DialogActions>
         </Box>
-      </Dialog>
-
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Delete this thread?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete "{thread.subject}"? This action cannot be undone.
-          </DialogContentText>
-          {deleteError && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {deleteError}
-            </Alert>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} disabled={deleteThreadMutation.isPending}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleDeleteThreadConfirm}
-            color="error"
-            variant="contained"
-            disabled={deleteThreadMutation.isPending}
-          >
-            {deleteThreadMutation.isPending ? 'Deleting…' : 'Delete'}
-          </Button>
-        </DialogActions>
       </Dialog>
     </Box>
   );

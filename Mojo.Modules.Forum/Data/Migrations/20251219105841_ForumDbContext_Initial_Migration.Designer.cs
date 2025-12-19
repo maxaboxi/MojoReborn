@@ -12,7 +12,7 @@ using Mojo.Modules.Forum.Data;
 namespace Mojo.Modules.Forum.Data.Migrations
 {
     [DbContext(typeof(ForumDbContext))]
-    [Migration("20251215090942_ForumDbContext_Initial_Migration")]
+    [Migration("20251219105841_ForumDbContext_Initial_Migration")]
     partial class ForumDbContext_Initial_Migration
     {
         /// <inheritdoc />
@@ -485,7 +485,7 @@ namespace Mojo.Modules.Forum.Data.Migrations
                         .WithOne()
                         .HasForeignKey("Mojo.Modules.Forum.Domain.Entities.ForumPostReplyLink", "PostId")
                         .HasPrincipalKey("Mojo.Modules.Forum.Domain.Entities.ForumPost", "PostGuid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("ParentPost");

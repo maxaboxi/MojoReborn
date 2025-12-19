@@ -8,6 +8,7 @@ public class ForumDbContext(DbContextOptions<ForumDbContext> options) : DbContex
     public DbSet<ForumEntity> Forums { get; set; }
     public DbSet<ForumThread> ForumThreads { get; set; }
     public DbSet<ForumPost> ForumPosts { get; set; }
+    public DbSet<ForumPostReplyLink> ForumPostReplyLinks { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

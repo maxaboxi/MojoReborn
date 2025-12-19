@@ -27,7 +27,7 @@ namespace Mojo.Modules.Forum.Data.Migrations
                 name: "IX_ForumPostReplyLinks_ParentPostId",
                 table: "ForumPostReplyLinks",
                 column: "ParentPostId");
-            
+
             migrationBuilder.CreateIndex(
                 name: "IX_mp_ForumThreads_ForumID",
                 table: "mp_ForumThreads",

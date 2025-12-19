@@ -36,4 +36,17 @@ public class PermissionService(ILogger<PermissionService> logger) : IPermissionS
 
         return hasAccess;
     }
+
+    public bool HasAdministratorRights(ApplicationUserDto user, FeatureContextDto featureContextDto, string roleToCheck)
+    {
+        if (user.UserSiteRoles.FirstOrDefault(x => x.SiteId == featureContextDto.SiteId) == null)
+        {
+            logger.LogInformation("User with id {UserId} has no access to site id {SiteId}", user.Id, featureContextDto.SiteId);
+            return false;
+        }
+        
+        var userRoles = user.UserSiteRoles.Select(x => x.Name).ToList();
+
+        return userRoles.Contains(roleToCheck);
+    }
 }

@@ -1,8 +1,0 @@
-using Mojo.Shared.Responses;
-
-namespace Mojo.Modules.Forum.Features.Threads.DeleteThread;
-
-public class DeleteThreadResponse : BaseResponse
-{
-    
-}
