@@ -6,5 +6,5 @@ namespace Mojo.Shared.Interfaces.Identity;
 public interface IPermissionService
 {
     bool CanEdit(ApplicationUserDto user, FeatureContextDto context);
-    bool HasAdministratorRights(ApplicationUserDto user, FeatureContextDto context, string roleToCheck);
+    bool HasAdministratorRightsToThePage(ApplicationUserDto user, FeatureContextDto context);
 }

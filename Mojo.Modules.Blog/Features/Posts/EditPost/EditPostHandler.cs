@@ -28,7 +28,7 @@ public static class EditPostHandler
         
         var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
         
-        if (featureContextDto == null || !permissionService.CanEdit(user, featureContextDto))
+        if (featureContextDto == null)
         {
             return BaseResponse.Unauthorized<EditPostResponse>();
         }
@@ -37,18 +37,23 @@ public static class EditPostHandler
             .Include(b => b.Categories)
             .FirstOrDefaultAsync(x => 
                 x.ModuleId == featureContextDto.ModuleId &&
-                x.BlogPostId == command.BlogPostId && 
-                x.Author == user.Email, ct);
+                x.BlogPostId == command.BlogPostId, ct);
 
         if (original == null)
         {
             return BaseResponse.NotFound<EditPostResponse>("Blog post not found.");
+        }
+
+        if (original.Author != user.Email || !permissionService.CanEdit(user, featureContextDto))
+        {
+            return BaseResponse.Unauthorized<EditPostResponse>();
         }
         
         original.Content = command.Content;
         original.Title = command.Title;
         original.SubTitle = command.SubTitle;
         original.ModifiedAt = DateTime.UtcNow;
+        original.LastModifiedBy = user.Id;
         
         var currentIds = original.Categories.Select(c => c.Id).ToHashSet();
         var incomingIds = command.Categories.Select(c => c.Id).ToHashSet();

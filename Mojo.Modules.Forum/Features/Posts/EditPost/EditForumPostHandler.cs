@@ -16,6 +16,7 @@ public class EditForumPostHandler
         ClaimsPrincipal claimsPrincipal,
         IUserService userService,
         IFeatureContextResolver featureContextResolver,
+        IPermissionService permissionService,
         ILogger<EditForumPostHandler> logger,
         CancellationToken ct)
     {
@@ -34,20 +35,26 @@ public class EditForumPostHandler
             return BaseResponse.Unauthorized<EditForumPostResponse>();
         }
 
-        var existingPost = await db.ForumPosts.FirstOrDefaultAsync(
+        var existingPost = await db.ForumPosts.Include(x => x.Author).FirstOrDefaultAsync(
             x => 
                 x.Thread.Forum.ModuleId == featureContextDto.ModuleId &&
                 x.Thread.ForumId == command.ForumId &&
                 x.ThreadId == command.ThreadId &&
-                x.Id == command.PostId && 
-                x.UserId == user.LegacyId, ct);
+                x.Id == command.PostId, ct);
 
         if (existingPost == null)
         {
             return BaseResponse.NotFound<EditForumPostResponse>($"Post with id {command.PostId} not found.");
         }
         
-        existingPost.Post = command.Content;
+        var hasAdminRights = permissionService.HasAdministratorRightsToThePage(user, featureContextDto);
+
+        if (existingPost.Author.Id != user.LegacyId || !hasAdminRights)
+        {
+            return BaseResponse.Unauthorized<EditForumPostResponse>();
+        }
+        
+        existingPost.Post = !hasAdminRights ? command.Content : command.Content + "<p><em>[edited by Moderator]</em></p>";
         
         await db.SaveChangesAsync(ct);
 

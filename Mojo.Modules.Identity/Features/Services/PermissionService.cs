@@ -21,6 +21,24 @@ public class PermissionService(ILogger<PermissionService> logger) : IPermissionS
             return true;
         }
         
+        return CheckAdminRightsToThePage(user, featureContextDto);
+    }
+
+    public bool HasAdministratorRightsToThePage(ApplicationUserDto user, FeatureContextDto featureContextDto)
+    {
+        if (user.UserSiteRoles.FirstOrDefault(x => x.SiteId == featureContextDto.SiteId) != null)
+        {
+            return CheckAdminRightsToThePage(user, featureContextDto);
+        }
+            
+        logger.LogInformation("User with id {UserId} has no access to site id {SiteId}", user.Id, featureContextDto.SiteId);
+        
+        return false;
+
+    }
+
+    private static bool CheckAdminRightsToThePage(ApplicationUserDto user, FeatureContextDto featureContextDto)
+    {
         var userRoles = user.UserSiteRoles.Select(x => x.Name).ToList();
 
         if (userRoles.Contains("Admins"))
@@ -35,18 +53,5 @@ public class PermissionService(ILogger<PermissionService> logger) : IPermissionS
         var hasAccess = editRoles.Intersect(userRoles).Any();
 
         return hasAccess;
-    }
-
-    public bool HasAdministratorRights(ApplicationUserDto user, FeatureContextDto featureContextDto, string roleToCheck)
-    {
-        if (user.UserSiteRoles.FirstOrDefault(x => x.SiteId == featureContextDto.SiteId) == null)
-        {
-            logger.LogInformation("User with id {UserId} has no access to site id {SiteId}", user.Id, featureContextDto.SiteId);
-            return false;
-        }
-        
-        var userRoles = user.UserSiteRoles.Select(x => x.Name).ToList();
-
-        return userRoles.Contains(roleToCheck);
     }
 }

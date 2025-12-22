@@ -15,6 +15,7 @@ public class EditBlogCommentHandler
         ClaimsPrincipal claimsPrincipal,
         IUserService userService,
         IFeatureContextResolver featureContextResolver,
+        IPermissionService permissionService,
         CancellationToken ct)
     {
         var user = await userService.GetUserAsync(claimsPrincipal, ct);
@@ -35,8 +36,7 @@ public class EditBlogCommentHandler
             .Where(x => 
                 x.BlogPost.ModuleId == featureContextDto.ModuleId &&
                 x.BlogPost.BlogPostId == command.BlogPostId && 
-                x.Id == command.BlogCommentId && 
-                x.UserGuid == user.Id)
+                x.Id == command.BlogCommentId)
             .FirstOrDefaultAsync(ct);
 
         if (comment == null)
@@ -44,9 +44,23 @@ public class EditBlogCommentHandler
             return BaseResponse.NotFound<EditBlogCommentResponse>("Comment not found");
         }
         
+        var hasAdminRights = permissionService.HasAdministratorRightsToThePage(user, featureContextDto);
+
+        if (comment.UserGuid != user.Id || !hasAdminRights)
+        {
+            return BaseResponse.Unauthorized<EditBlogCommentResponse>();
+        }
+        
         comment.Title = command.Title;
         comment.Content = command.Content;
         comment.ModifiedAt = DateTime.UtcNow;
+
+        if (comment.UserGuid != user.Id && hasAdminRights)
+        {
+            comment.ModeratedBy = user.Id;
+            comment.ModerationStatus = 1;
+            comment.ModerationReason = comment.ModerationReason;
+        }
         
         await db.SaveChangesAsync(ct);
         
