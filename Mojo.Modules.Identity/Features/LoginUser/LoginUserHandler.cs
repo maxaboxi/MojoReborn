@@ -78,6 +78,7 @@ public class LoginUserHandler
         };
 
         var createResult = await userManager.CreateAsync(newUser);
+        
         if (!createResult.Succeeded)
         {
             var errors = string.Join(",", createResult.Errors.Select(e => e.Description));
@@ -86,13 +87,27 @@ public class LoginUserHandler
         }
 
         var linkResult = await userManager.AddLoginAsync(newUser, info);
+        
         if (!linkResult.Succeeded)
         {
             logger.LogError("Linking external login info to user failed: {@Errors}", linkResult.Errors.Select(e => e.Description));
             return Results.Redirect($"{baseUrl}/auth/login?error=linking_failed");
         }
         
-        var role = await db.SiteRoles.FirstAsync(x => x.SiteGuid == site.SiteGuid && x.Name == "Authenticated Users", ct);
+        var roleName = configuration["Authentication:AuthenticatedUsersRoleName"];
+
+        if (roleName == null)
+        {
+            throw new Exception("AuthenticatedUsersRoleName is not configured");
+        }
+        
+        var role = await db.SiteRoles.FirstOrDefaultAsync(x => x.SiteGuid == site.SiteGuid && x.Name == roleName, ct);
+
+        if (role == null)
+        {
+            logger.LogError("AuthenticatedUsersRoleName {Role} missing from database for Site: Id {Id}, Guid {Guid}", roleName, site.SiteId, site.SiteGuid);
+            return Results.Redirect($"{baseUrl}/auth/login?error=legacy_creation_failed_role_missing");
+        }
 
         var userSiteProfiles = new List<UserSiteProfile>
         {

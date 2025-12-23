@@ -138,6 +138,7 @@ app.UseCors(opt => opt.WithOrigins("http://localhost:5173").AllowAnyMethod().All
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapWolverineEndpoints(opts =>

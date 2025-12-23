@@ -49,7 +49,7 @@ public class EditForumPostHandler
         
         var hasAdminRights = permissionService.HasAdministratorRightsToThePage(user, featureContextDto);
 
-        if (existingPost.Author.Id != user.LegacyId || !hasAdminRights)
+        if (existingPost.Author.Id != user.LegacyId && !hasAdminRights)
         {
             return BaseResponse.Unauthorized<EditForumPostResponse>();
         }

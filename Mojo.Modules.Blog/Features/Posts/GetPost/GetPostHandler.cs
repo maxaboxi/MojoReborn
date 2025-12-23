@@ -20,7 +20,7 @@ public static class GetPostHandler
             return BaseResponse.NotFound<GetPostResponse>("Module not found.");
         }
         
-        return await db.BlogPosts.AsNoTracking()
+        var postResponse = await db.BlogPosts.AsNoTracking()
             .Where(x => x.BlogPostId == query.BlogPostId && x.ModuleId == featureContextDto.ModuleId)
             .Select(bp => new GetPostResponse
             {
@@ -42,7 +42,7 @@ public static class GetPostHandler
                         bpc.UserGuid, 
                         bpc.UserName, 
                         bpc.Title, 
-                        bpc.Content.Substring(0, 200), 
+                        bpc.Content.Length > 200 ? bpc.Content.Substring(0, 200) : bpc.Content, 
                         bpc.CreatedAt, 
                         bpc.ModifiedAt, 
                         bpc.ModeratedBy, 
@@ -50,6 +50,8 @@ public static class GetPostHandler
                     .ToList(),
                 
             })
-            .FirstAsync(ct);
+            .FirstOrDefaultAsync(ct);
+        
+        return postResponse ?? BaseResponse.NotFound<GetPostResponse>("Post not found.");
     }
 }

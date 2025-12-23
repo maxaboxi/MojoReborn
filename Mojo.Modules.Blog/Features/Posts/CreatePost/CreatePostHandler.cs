@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Collections.Concurrent;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
@@ -94,7 +95,7 @@ public static partial class CreatePostHandler
 
         if (similarSlugs.Count <= 0) return finalSlug;
         
-        var suffixRegex = new Regex($@"^{Regex.Escape(baseSlug)}-(\d+)$");
+        var suffixRegex = GetSuffixRegex(baseSlug);
             
         var maxSuffix = similarSlugs
             .Select(s => suffixRegex.Match(s))
@@ -104,7 +105,7 @@ public static partial class CreatePostHandler
             .Max();
 
         finalSlug = $"{baseSlug}-{maxSuffix + 1}";
-
+        
         return finalSlug;
     }
 
@@ -139,6 +140,13 @@ public static partial class CreatePostHandler
             newPost.Categories.Add(match ?? new BlogCategory { CategoryName = dto.CategoryName, ModuleId = newPost.ModuleId });
         }
     }
+    
+    private static readonly ConcurrentDictionary<string, Regex> SlugSuffixRegexCache = new();
+
+    private static Regex GetSuffixRegex(string baseSlug) =>
+        SlugSuffixRegexCache.GetOrAdd(
+            baseSlug,
+            slug => new Regex($"^{Regex.Escape(slug)}-(\\d+)$", RegexOptions.Compiled));
 
     [GeneratedRegex(@"[^a-z0-9\s-]")]
     private static partial Regex RemoveInvalidChars();

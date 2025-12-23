@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Forum.Data;
 using Mojo.Modules.Identity.Data;
 using Mojo.Modules.Identity.Data.Seeding;
+using Mojo.Modules.SiteStructure.Data;
 
 namespace Mojo.Web.Extensions;
 
@@ -24,6 +26,14 @@ public static class DatabaseExtensions
         var forumDb = services.GetRequiredService<ForumDbContext>();
         await forumDb.Database.MigrateAsync();
         logger.LogInformation("ForumDbContext migrations applied successfully.");
+        
+        var blogDb = services.GetRequiredService<BlogDbContext>();
+        await blogDb.Database.MigrateAsync();
+        logger.LogInformation("BlogDbContext migrations applied successfully.");
+        
+        var siteDb = services.GetRequiredService<SiteStructureDbContext>();
+        await siteDb.Database.MigrateAsync();
+        logger.LogInformation("SiteStructureDbContext migrations applied successfully.");
         
         logger.LogInformation("All database migrations applied successfully.");
     }

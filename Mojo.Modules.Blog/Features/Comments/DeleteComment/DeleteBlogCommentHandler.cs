@@ -15,6 +15,7 @@ public class DeleteBlogCommentHandler
         ClaimsPrincipal claimsPrincipal,
         IUserService userService,
         IFeatureContextResolver featureContextResolver,
+        IPermissionService permissionService,
         CancellationToken ct)
     {
         var user = await userService.GetUserAsync(claimsPrincipal, ct);
@@ -35,8 +36,7 @@ public class DeleteBlogCommentHandler
             .Where(x => 
                 x.ModuleGuid == featureContextDto.ModuleGuid &&
                 x.BlogPost.BlogPostId == command.BlogPostId && 
-                x.Id == command.BlogPostCommentId && 
-                x.UserGuid == user.Id)
+                x.Id == command.BlogPostCommentId)
             .FirstOrDefaultAsync(ct);
 
         if (comment == null)
@@ -44,7 +44,25 @@ public class DeleteBlogCommentHandler
             return BaseResponse.NotFound<DeleteBlogCommentResponse>("Comment not found.");
         }
         
-        db.BlogComments.Remove(comment);
+        var hasAdminRights = permissionService.HasAdministratorRightsToThePage(user, featureContextDto);
+
+        if (comment.UserGuid != user.Id || !hasAdminRights)
+        {
+            return BaseResponse.Unauthorized<DeleteBlogCommentResponse>();
+        }
+
+        if (hasAdminRights)
+        {
+            comment.Content = "[Deleted by Moderator]";
+            comment.ModeratedBy = user.Id;
+            comment.ModerationStatus = 1;
+            comment.ModifiedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            db.BlogComments.Remove(comment);
+        }
+        
         await db.SaveChangesAsync(ct);
         
         return new DeleteBlogCommentResponse { IsSuccess = true, Message = "Comment deleted successfully." };

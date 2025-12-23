@@ -109,7 +109,7 @@ public class MigrateLegacyUserHandler
 
         if (!isSuccess)
         {
-            Results.Redirect($"{baseUrl}/auth/migrate-legacy?error=role_migration_failed");
+            return Results.Redirect($"{baseUrl}/auth/migrate-legacy?error=role_migration_failed");
         }
 
         await signInManager.SignInAsync(newUser, isPersistent: false);
