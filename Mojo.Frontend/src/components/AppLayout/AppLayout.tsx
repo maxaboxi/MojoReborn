@@ -21,13 +21,6 @@ export const AppLayout = () => {
       <Box
         component="main"
         className="main-content"
-        sx={{
-          flexGrow: 1,
-          p: { xs: 2, sm: 3 },
-          maxWidth: { xs: '100%', md: '80%'},
-          margin: 'auto',
-          minHeight: '100vh',
-        }}
       >
         <Toolbar />
         <Outlet />

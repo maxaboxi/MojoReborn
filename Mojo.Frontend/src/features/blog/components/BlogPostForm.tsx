@@ -12,6 +12,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import type { CreatePostCategoryDto, CategoryDto } from '../types/blog.types';
+import './BlogPostForm.css';
 
 interface BlogPostFormProps {
   initialData?: {
@@ -79,13 +80,13 @@ export const BlogPostForm = ({
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, maxWidth: 900, mx: 'auto' }}>
+    <Paper elevation={3} className="blog-post-form">
       <Typography variant="h4" component="h1" gutterBottom>
         {isEdit ? 'Edit Blog Post' : 'Create New Blog Post'}
       </Typography>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+        <Alert severity="error" className="blog-post-form-alert">
           {error}
         </Alert>
       )}
@@ -199,7 +200,7 @@ export const BlogPostForm = ({
             />
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+          <Box className="blog-post-form-actions">
             <Button
               variant="outlined"
               onClick={onCancel}

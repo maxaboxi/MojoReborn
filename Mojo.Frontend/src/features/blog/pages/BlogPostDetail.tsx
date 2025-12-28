@@ -440,7 +440,7 @@ export const BlogPostDetail = () => {
         >
           Back to Blog
         </Button>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box className="blog-post-action-buttons">
           {isAuthenticated && user?.email && post.author &&
             post.author.toLowerCase() === user.email.toLowerCase() && (
               <>
@@ -483,7 +483,7 @@ export const BlogPostDetail = () => {
             Are you sure you want to delete "{post?.title}"? This action cannot be undone.
           </DialogContentText>
           {deleteError && (
-            <Alert severity="error" sx={{ mt: 2 }}>
+            <Alert severity="error" className="blog-post-delete-alert">
               {deleteError}
             </Alert>
           )}
@@ -516,7 +516,7 @@ export const BlogPostDetail = () => {
             onClose={handleToastClose}
             severity={toastState.severity}
             variant="filled"
-            sx={{ width: '100%' }}
+            className="blog-post-toast"
           >
             {toastState.message}
           </Alert>

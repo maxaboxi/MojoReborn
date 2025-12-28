@@ -7,8 +7,12 @@
 .forum-thread-hero {
   padding: 2rem;
   border-radius: 1.5rem;
-  background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.2), rgba(14, 165, 233, 0.1));
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: radial-gradient(
+    circle at top left,
+    color-mix(in srgb, var(--mui-palette-primary-main) 18%, transparent),
+    color-mix(in srgb, var(--mui-palette-info-main) 12%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--mui-palette-divider) 50%, transparent);
 }
 
 .forum-thread-title {
@@ -40,10 +44,27 @@
 
 .forum-nested-children {
   margin-left: 1.5rem;
-  border-left: 2px dashed rgba(99, 102, 241, 0.3);
+  border-left: 2px dashed color-mix(in srgb, var(--mui-palette-primary-main) 30%, transparent);
   padding-left: 1.5rem;
   margin-top: 0.75rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.forum-thread-load-more {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.forum-thread-edit-form {
+  width: 100%;
+}
+
+.forum-thread-edit-content {
+  padding-top: 8px !important;
+}
+
+.forum-thread-edit-error {
+  margin-top: 16px;
 }

@@ -9,6 +9,7 @@ import type { EditPostRequest, Category } from '../types/blog.types';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { useBlogPageContext } from '../hooks/useBlogPageContext';
 import { useAuth } from '@features/auth/providers/useAuth';
+import './BlogPostFormPage.css';
 
 export const EditBlogPost = () => {
   const { id } = useParams<{ id: string }>();
@@ -107,8 +108,8 @@ export const EditBlogPost = () => {
 
   return (
     <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Box className="blog-post-form-page">
+        <Typography variant="body2" color="text.secondary" className="blog-post-form-breadcrumb">
           Home / Blog / {post.title} / Edit
         </Typography>
         

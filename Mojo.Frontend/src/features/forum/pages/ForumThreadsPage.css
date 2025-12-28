@@ -7,8 +7,12 @@
 .forum-threads-hero {
   padding: 2rem;
   border-radius: 1.5rem;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 51, 234, 0.15));
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--mui-palette-primary-main) 16%, transparent),
+    color-mix(in srgb, var(--mui-palette-secondary-main) 16%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--mui-palette-divider) 50%, transparent);
 }
 
 .forum-thread-list {
@@ -50,4 +54,25 @@
   gap: 0.5rem;
   padding: 0.5rem 0;
   color: var(--mui-palette-text-secondary);
+}
+
+.forum-threads-load-more {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.forum-thread-create-form {
+  width: 100%;
+}
+
+.forum-thread-create-content {
+  padding-top: 8px !important;
+}
+
+.forum-thread-create-helper {
+  margin-bottom: 16px;
+}
+
+.forum-thread-create-error {
+  margin-top: 16px;
 }

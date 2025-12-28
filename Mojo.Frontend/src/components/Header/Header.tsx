@@ -18,10 +18,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
   return (
     <AppBar
       position="fixed"
-      sx={{
-        width: { xs: '100%', md: `calc(100% - ${DRAWER_WIDTH}px)` },
-        ml: { xs: 0, md: `${DRAWER_WIDTH}px` },
-      }}
+      className="app-header"
       color="default"
       elevation={1}
     >
@@ -31,13 +28,13 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
             color="inherit"
             edge="start"
             onClick={onMenuClick}
-            sx={{ mr: 2 }}
+            className="menu-button"
           >
             <Menu />
           </IconButton>
         )}
         
-        <Box sx={{ flexGrow: 1 }} />
+        <Box className="header-spacer" />
         
         <Box className="header-actions">
           <IconButton color="inherit" size="small">

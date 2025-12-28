@@ -1,5 +1,6 @@
 import { Box, CircularProgress, Typography } from '@mui/material';
 import type { ReactNode } from 'react';
+import './LoadingState.css';
 
 interface LoadingStateProps {
   message?: string;
@@ -17,16 +18,8 @@ export const LoadingState = ({
   children,
 }: LoadingStateProps) => (
   <Box
-    className={className}
-    sx={{
-      minHeight,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 2,
-      textAlign: 'center',
-    }}
+    className={['loading-state', className].filter(Boolean).join(' ')}
+    style={{ minHeight }}
   >
     <CircularProgress size={size} />
     {message && (

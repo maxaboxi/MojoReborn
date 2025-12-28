@@ -1,0 +1,15 @@
+.blog-post-form {
+  padding: 32px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.blog-post-form-alert {
+  margin-bottom: 24px;
+}
+
+.blog-post-form-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+}

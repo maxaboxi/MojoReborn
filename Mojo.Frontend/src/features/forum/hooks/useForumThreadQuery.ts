@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, type InfiniteData } from '@tanstack/react-query';
 import { forumApi } from '../api/forumApi';
 import type { GetThreadResponseDto } from '../types/forum.types';
 import { forumQueryKeys } from './forumQueryKeys';
+import { THREAD_POSTS_PAGE_SIZE } from '../constants';
 
 type UseForumThreadQueryArgs = {
   pageId?: number | null;
@@ -15,21 +16,37 @@ export const useForumThreadQuery = ({
   pageId,
   forumId,
   threadId,
-  amount = 100,
+  amount = THREAD_POSTS_PAGE_SIZE,
   lastThreadSequence = 0,
 }: UseForumThreadQueryArgs) =>
-  useQuery<GetThreadResponseDto, Error>({
+  useInfiniteQuery<
+    GetThreadResponseDto,
+    Error,
+    InfiniteData<GetThreadResponseDto>,
+    ReturnType<typeof forumQueryKeys.thread>,
+    { lastThreadSequence: number }
+  >({
     queryKey: forumQueryKeys.thread(pageId, forumId, threadId, amount),
-    queryFn: () =>
+    enabled:
+      typeof pageId === 'number' &&
+      typeof forumId === 'number' &&
+      typeof threadId === 'number',
+    initialPageParam: { lastThreadSequence },
+    queryFn: ({ pageParam }) =>
       forumApi.getThread({
         pageId: pageId as number,
         forumId: forumId as number,
         threadId: threadId as number,
         amount,
-        lastThreadSequence,
+        lastThreadSequence: pageParam.lastThreadSequence,
       }),
-    enabled:
-      typeof pageId === 'number' &&
-      typeof forumId === 'number' &&
-      typeof threadId === 'number',
+    getNextPageParam: (lastPage) => {
+      const posts = lastPage.forumPosts ?? [];
+      if (posts.length < amount) {
+        return null;
+      }
+      const lastPost = posts[posts.length - 1];
+      return { lastThreadSequence: lastPost.threadSequence };
+    },
+    staleTime: 30 * 1000,
   });

@@ -1,18 +1,5 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import {
-  Box,
-  Typography,
-  Stack,
-  Button,
-  Chip,
-  Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Alert,
-} from '@mui/material';
+import { useState, type FormEvent } from 'react';
+import { Box, Typography, Stack, Button, Chip, Divider } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -23,52 +10,20 @@ import { useForumThreadQuery } from '../hooks/useForumThreadQuery';
 import { useForumPageContext } from '../hooks/useForumPageContext';
 import { useForumIdentifiers } from '../hooks/useForumIdentifiers';
 import { LoadingState, StatusMessage } from '@shared/ui';
-import type { ForumPost, ForumViewMode } from '../types/forum.types';
+import type { ForumViewMode } from '../types/forum.types';
 import { ForumPostCard } from '../components/ForumPostCard';
 import { ForumViewToggle } from '../components/ForumViewToggle';
-import { forumApi } from '../api/forumApi';
 import { useAuth } from '@features/auth/providers/useAuth';
 import { useEditThreadMutation } from '../hooks/useEditThreadMutation';
+import { ThreadSubjectDialog } from '../components/ThreadSubjectDialog';
+import { ForumPostTree } from '../components/ForumPostTree';
+import { THREAD_POSTS_PAGE_SIZE } from '../constants';
 import './ForumThreadPage.css';
 
 interface ForumThreadPageProps {
   forumId?: number | null;
   threadId?: number | null;
 }
-
-type ForumPostNode = ForumPost & { replies: ForumPostNode[] };
-
-const THREAD_POSTS_PAGE_SIZE = 50;
-
-const buildPostTree = (posts: ForumPost[]): ForumPostNode[] => {
-  const sorted = [...posts].sort((a, b) => a.threadSequence - b.threadSequence);
-  const lookup = new Map<string, ForumPostNode>();
-  const roots: ForumPostNode[] = [];
-
-  sorted.forEach((post) => {
-    lookup.set(post.postGuid.toLowerCase(), { ...post, replies: [] });
-  });
-
-  sorted.forEach((post) => {
-    const node = lookup.get(post.postGuid.toLowerCase());
-    if (!node) {
-      return;
-    }
-
-    const parentKey = post.replyToPostId?.toLowerCase();
-    if (parentKey) {
-      const parentNode = lookup.get(parentKey);
-      if (parentNode) {
-        parentNode.replies.push(node);
-        return;
-      }
-    }
-
-    roots.push(node);
-  });
-
-  return roots;
-};
 
 const formatTimestamp = (value: string) =>
   new Date(value).toLocaleString(undefined, {
@@ -79,19 +34,6 @@ const formatTimestamp = (value: string) =>
     minute: '2-digit',
   });
 
-const ForumNestedPost = ({ node, depth }: { node: ForumPostNode; depth: number }) => (
-  <Box className="forum-nested-post">
-    <ForumPostCard post={node} depth={depth} variant="nested" />
-    {node.replies.length > 0 && (
-      <Box className="forum-nested-children">
-        {node.replies.map((child) => (
-          <ForumNestedPost key={child.postGuid} node={child} depth={depth + 1} />
-        ))}
-      </Box>
-    )}
-  </Box>
-);
-
 export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideThreadId }: ForumThreadPageProps = {}) => {
   const navigate = useNavigate();
   const { forumId: derivedForumId, threadId: derivedThreadId, currentPath } = useForumIdentifiers();
@@ -100,29 +42,22 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
   const { forumPageId, forumPageUrl, forumPageTitle, menuLoading, menuError } = useForumPageContext();
   const { user } = useAuth();
   const [viewMode, setViewMode] = useState<ForumViewMode>('classic');
-  const [posts, setPosts] = useState<ForumPost[]>([]);
-  const [hasMorePosts, setHasMorePosts] = useState(true);
-  const [isFetchingMorePosts, setIsFetchingMorePosts] = useState(false);
   const [postPaginationError, setPostPaginationError] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editSubject, setEditSubject] = useState('');
   const [editError, setEditError] = useState<string | null>(null);
   const editThreadMutation = useEditThreadMutation();
   const {
-    data: thread,
+    data,
     isLoading,
     error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     refetch: refetchThread,
   } = useForumThreadQuery({ pageId: forumPageId, forumId, threadId, amount: THREAD_POSTS_PAGE_SIZE });
-
-  useEffect(() => {
-    const initialPosts = thread?.forumPosts ?? [];
-    setPosts(initialPosts);
-    setPostPaginationError(null);
-    setHasMorePosts(initialPosts.length === THREAD_POSTS_PAGE_SIZE);
-  }, [thread]);
-
-  const nestedPosts = useMemo(() => buildPostTree(posts), [posts]);
+  const thread = data?.pages[0];
+  const posts = data?.pages.flatMap((page) => page.forumPosts ?? []) ?? [];
 
   const listPath = forumPageUrl ?? (currentPath?.split('/thread')[0] ?? '/forum');
   const buildListUrl = () => {
@@ -192,37 +127,16 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
   };
 
   const handleLoadMorePosts = async () => {
-    if (isFetchingMorePosts || !forumPageId || !forumId || !threadId) {
+    if (!hasNextPage || isFetchingNextPage) {
       return;
     }
-
-    const lastSequence = posts[posts.length - 1]?.threadSequence ?? 0;
-    setIsFetchingMorePosts(true);
     setPostPaginationError(null);
     try {
-      const response = await forumApi.getThread({
-        pageId: forumPageId,
-        forumId,
-        threadId,
-        amount: THREAD_POSTS_PAGE_SIZE,
-        lastThreadSequence: lastSequence,
-      });
-
-      setPosts((prev) => {
-        const filtered = response.forumPosts.filter(
-          (post) => !prev.some((existing) => existing.postGuid === post.postGuid)
-        );
-        return [...prev, ...filtered];
-      });
-      if (response.forumPosts.length < THREAD_POSTS_PAGE_SIZE) {
-        setHasMorePosts(false);
-      }
+      await fetchNextPage();
     } catch (err) {
       setPostPaginationError(
         err instanceof Error ? err.message : 'Failed to load additional replies.'
       );
-    } finally {
-      setIsFetchingMorePosts(false);
     }
   };
 
@@ -313,11 +227,7 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
           ))}
         </Stack>
       ) : (
-        <Box className="forum-thread-nested">
-          {nestedPosts.map((node) => (
-            <ForumNestedPost key={node.postGuid} node={node} depth={0} />
-          ))}
-        </Box>
+        <ForumPostTree posts={posts} />
       )}
 
       {postPaginationError && (
@@ -326,46 +236,30 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
         </Typography>
       )}
 
-      {hasMorePosts && (
-        <Box sx={{ textAlign: 'center', mt: 2 }}>
+      {hasNextPage && (
+        <Box className="forum-thread-load-more">
           <Button
             variant="outlined"
             onClick={handleLoadMorePosts}
-            disabled={isFetchingMorePosts}
+            disabled={isFetchingNextPage}
           >
-            {isFetchingMorePosts ? 'Loading more replies…' : 'Load more replies'}
+            {isFetchingNextPage ? 'Loading more replies…' : 'Load more replies'}
           </Button>
         </Box>
       )}
 
-      <Dialog open={editDialogOpen} onClose={handleCloseEditDialog} fullWidth maxWidth="sm">
-        <Box component="form" onSubmit={handleEditThreadSubmit} sx={{ width: '100%' }}>
-          <DialogTitle>Edit thread subject</DialogTitle>
-          <DialogContent sx={{ pt: 1 }}>
-            <TextField
-              label="Thread subject"
-              value={editSubject}
-              onChange={(event) => setEditSubject(event.target.value)}
-              fullWidth
-              disabled={editThreadMutation.isPending}
-              autoFocus
-            />
-            {editError && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {editError}
-              </Alert>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseEditDialog} disabled={editThreadMutation.isPending}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="contained" disabled={editThreadMutation.isPending}>
-              {editThreadMutation.isPending ? 'Saving…' : 'Save changes'}
-            </Button>
-          </DialogActions>
-        </Box>
-      </Dialog>
+      <ThreadSubjectDialog
+        open={editDialogOpen}
+        title="Edit thread subject"
+        subject={editSubject}
+        onSubjectChange={setEditSubject}
+        onClose={handleCloseEditDialog}
+        onSubmit={handleEditThreadSubmit}
+        isSubmitting={editThreadMutation.isPending}
+        error={editError}
+        submitLabel="Save changes"
+        cancelLabel="Cancel"
+      />
     </Box>
   );
 };

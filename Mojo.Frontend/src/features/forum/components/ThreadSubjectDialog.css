@@ -1,0 +1,17 @@
+.thread-subject-dialog-form {
+  width: 100%;
+}
+
+.thread-subject-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.thread-subject-dialog-helper {
+  margin-bottom: 4px;
+}
+
+.thread-subject-dialog-error {
+  margin-top: 4px;
+}

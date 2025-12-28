@@ -84,6 +84,19 @@
   align-items: center;
 }
 
+.blog-post-action-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+.blog-post-delete-alert {
+  margin-top: 16px;
+}
+
+.blog-post-toast {
+  width: 100%;
+}
+
 .blog-comments-header {
   display: flex;
   justify-content: space-between;

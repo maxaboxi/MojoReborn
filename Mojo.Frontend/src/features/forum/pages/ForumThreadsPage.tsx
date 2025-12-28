@@ -1,20 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Stack,
-  Chip,
-  Button,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Alert,
-} from '@mui/material';
+import { Box, Typography, Card, CardContent, Stack, Chip, Button, Tooltip } from '@mui/material';
 import ForumIcon from '@mui/icons-material/Forum';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -29,6 +14,7 @@ import type { ForumThreadSummary, GetThreadsResponseDto } from '../types/forum.t
 import { useAuth } from '@features/auth/providers/useAuth';
 import { useCreateThreadMutation } from '../hooks/useCreateThreadMutation';
 import { useForumIdentifiers } from '../hooks/useForumIdentifiers';
+import { ThreadSubjectDialog } from '../components/ThreadSubjectDialog';
 import './ForumThreadsPage.css';
 
 const formatDate = (value?: string | null) =>
@@ -257,7 +243,7 @@ export const ForumThreadsPage = () => {
           </Stack>
 
           {hasNextPage && (
-            <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <Box className="forum-threads-load-more">
               <Button
                 variant="outlined"
                 size="large"
@@ -273,38 +259,19 @@ export const ForumThreadsPage = () => {
         </>
       )}
 
-      <Dialog open={createDialogOpen} onClose={handleCloseCreateDialog} fullWidth maxWidth="sm">
-        <Box component="form" onSubmit={handleCreateThreadSubmit} sx={{ width: '100%' }}>
-          <DialogTitle>Create a new thread</DialogTitle>
-          <DialogContent sx={{ pt: 1 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Provide a concise subject to kick off the conversation.
-            </Typography>
-            <TextField
-              label="Thread subject"
-              value={newThreadSubject}
-              onChange={(event) => setNewThreadSubject(event.target.value)}
-              autoFocus
-              fullWidth
-              disabled={createThreadMutation.isPending}
-              placeholder="What would you like to discuss?"
-            />
-            {createError && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {createError}
-              </Alert>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseCreateDialog} disabled={createThreadMutation.isPending}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="contained" disabled={createThreadMutation.isPending}>
-              {createThreadMutation.isPending ? 'Creating…' : 'Create thread'}
-            </Button>
-          </DialogActions>
-        </Box>
-      </Dialog>
+      <ThreadSubjectDialog
+        open={createDialogOpen}
+        title="Create a new thread"
+        helperText="Provide a concise subject to kick off the conversation."
+        subject={newThreadSubject}
+        onSubjectChange={setNewThreadSubject}
+        onClose={handleCloseCreateDialog}
+        onSubmit={handleCreateThreadSubmit}
+        isSubmitting={createThreadMutation.isPending}
+        error={createError}
+        submitLabel="Create thread"
+        cancelLabel="Cancel"
+      />
     </Box>
   );
 };

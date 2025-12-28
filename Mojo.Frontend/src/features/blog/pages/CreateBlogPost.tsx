@@ -8,6 +8,7 @@ import type { CreatePostRequest } from '../types/blog.types';
 import { useCreateBlogPostMutation } from '../hooks/useCreateBlogPostMutation';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { useAuth } from '@features/auth/providers/useAuth';
+import './BlogPostFormPage.css';
 
 export const CreateBlogPost = () => {
   const navigate = useNavigate();
@@ -82,8 +83,8 @@ export const CreateBlogPost = () => {
 
   return (
     <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Box className="blog-post-form-page">
+        <Typography variant="body2" color="text.secondary" className="blog-post-form-breadcrumb">
           Home / Blog / Create New Post
         </Typography>
         
