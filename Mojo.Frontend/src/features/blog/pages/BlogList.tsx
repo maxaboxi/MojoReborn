@@ -45,14 +45,6 @@ export const BlogList = () => {
     return <StatusMessage>{error.message}</StatusMessage>;
   }
 
-  if (posts.length === 0) {
-    return (
-      <StatusMessage severity="info">
-        No posts found. The blog is empty. Check back soon for new content!
-      </StatusMessage>
-    );
-  }
-
   return (
     <>
       <Box className="blog-list-header">
@@ -82,22 +74,30 @@ export const BlogList = () => {
         </Button>
       </Box>
 
-      <Stack spacing={3}>
-        {posts.map((post) => (
-          <BlogCard key={post.blogPostGuid} post={post} basePath={normalizedBlogPath} />
-        ))}
-      </Stack>
+      {posts.length === 0 ? (
+        <StatusMessage severity="info">
+          No posts found. The blog is empty. Check back soon for new content!
+        </StatusMessage>
+      ) : (
+        <>
+          <Stack spacing={3}>
+            {posts.map((post) => (
+              <BlogCard key={post.blogPostGuid} post={post} basePath={normalizedBlogPath} />
+            ))}
+          </Stack>
 
-      {hasNextPage && (
-        <Box className="blog-list-load-more">
-          <Button
-            variant="outlined"
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-          >
-            {isFetchingNextPage ? 'Loading...' : 'Load More Posts'}
-          </Button>
-        </Box>
+          {hasNextPage && (
+            <Box className="blog-list-load-more">
+              <Button
+                variant="outlined"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? 'Loading...' : 'Load More Posts'}
+              </Button>
+            </Box>
+          )}
+        </>
       )}
     </>
   );

@@ -20,6 +20,7 @@ import {
 import type { AlertColor } from '@mui/material';
 import type { SnackbarCloseReason } from '@mui/material/Snackbar';
 import { CalendarToday, Person, Chat, ArrowBack, Share, Edit, Delete } from '@mui/icons-material';
+import DOMPurify from 'dompurify';
 import { useBlogPostQuery } from '../hooks/useBlogPostQuery';
 import { useDeleteBlogPostMutation } from '../hooks/useDeleteBlogPostMutation';
 import { useCreateCommentMutation } from '../hooks/useCreateCommentMutation';
@@ -43,7 +44,7 @@ export const BlogPostDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated } = useAuth();
-  const { blogPageId, blogPageUrl, menuLoading, menuError } = useBlogPageContext();
+  const { blogPageId, blogPageUrl, blogPageTitle, menuLoading, menuError } = useBlogPageContext();
   const pageUrlQuery = blogPageUrl ? `?pageUrl=${encodeURIComponent(blogPageUrl)}` : '';
   const {
     data: post,
@@ -346,12 +347,14 @@ export const BlogPostDetail = () => {
 
   const commentCount = post.commentCount ?? comments.length;
   const canLoadMoreComments = comments.length < commentCount;
+  const sanitizedContent = useMemo(() => DOMPurify.sanitize(post.content ?? ''), [post.content]);
+  const blogBreadcrumbTitle = blogPageTitle ?? 'Blog';
 
   return (
     <>
       <Box className="blog-post-breadcrumb">
         <Typography variant="body2" color="text.secondary">
-          Home / Blog / {post.title}
+          Home / {blogBreadcrumbTitle} / {post.title}
         </Typography>
       </Box>
 
@@ -396,10 +399,7 @@ export const BlogPostDetail = () => {
 
           <Divider className="blog-post-divider" />
 
-          <Box 
-            className="blog-post-body"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+          <Box className="blog-post-body" dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
         </CardContent>
       </Card>
 

@@ -1,7 +1,6 @@
 import type { PageMenuItem } from '@shared/types/menu.types';
 import { findMenuItemByPath } from '@shared/utils/menuUtils';
-
-const BLOG_FEATURE_NAME = 'BlogFeatureName';
+import { BLOG_FEATURE_NAME } from '../constants';
 
 export const isBlogMenuItem = (item: PageMenuItem): boolean => {
   if (item.featureName === BLOG_FEATURE_NAME) {

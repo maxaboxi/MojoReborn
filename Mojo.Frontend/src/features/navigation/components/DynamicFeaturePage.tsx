@@ -4,10 +4,9 @@ import { useMenuQuery } from '@shared/hooks/useMenuQuery';
 import { findMenuItemByPath } from '@shared/utils/menuUtils';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { BlogList } from '@features/blog/pages/BlogList';
+import { BLOG_FEATURE_NAME } from '@features/blog/constants';
 import type { PageMenuItem } from '@shared/types/menu.types';
 import { ForumFeaturePage } from '@features/forum/pages/ForumFeaturePage';
-
-const BLOG_FEATURE_NAME = 'BlogFeatureName';
 
 const renderFeaturePage = (page: PageMenuItem) => {
   switch (page.featureName) {
