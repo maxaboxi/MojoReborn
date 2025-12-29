@@ -5,14 +5,16 @@ using Mojo.Shared.Interfaces.SiteStructure;
 
 namespace Mojo.Modules.SiteStructure.Features.GetFeatureContext;
 
-public class FeatureContextResolver(SiteStructureDbContext db) : IFeatureContextResolver
+public class FeatureContextResolver(SiteStructureDbContext db, ISiteResolver siteResolver) : IFeatureContextResolver
 {
     public async Task<FeatureContextDto?> ResolveModule(int id, string featureName, CancellationToken ct = default)
     {
+        var site = await siteResolver.GetSite(ct);
         return await db.PageModules
             .AsNoTracking()
-            .Where(x => x.PageId == id)
-            .Where(x => x.Module.ModuleDefinition.FeatureName == featureName)
+            .Where(x => x.PageId == id &&
+                        x.Module.SiteId == site.SiteId &&
+                        x.Module.ModuleDefinition.FeatureName == featureName)
             .Select(x => 
                 new FeatureContextDto(
                         x.ModuleId, 
