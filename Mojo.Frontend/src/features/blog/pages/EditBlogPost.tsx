@@ -55,14 +55,8 @@ export const EditBlogPost = () => {
         categories: data.categories,
       };
 
-      const response = await updatePostMutation.mutateAsync(request);
-      
-      if (response.isSuccess) {
-        // Navigate back to the post
-        navigate(`/blog/post/${id}${pageUrlQuery}`);
-      } else {
-        setError(response.message || 'Failed to update post');
-      }
+      await updatePostMutation.mutateAsync(request);
+      navigate(`/blog/post/${id}${pageUrlQuery}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred while updating the post');
     }

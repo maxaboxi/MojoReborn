@@ -139,16 +139,12 @@ export const BlogPostDetail = () => {
     setDeleteError(null);
 
     try {
-      const response = await deleteMutation.mutateAsync({
+      await deleteMutation.mutateAsync({
         pageId: blogPageId,
         blogPostId: id,
       });
 
-      if (response.isSuccess) {
-        navigate(blogPageUrl ?? '/blog');
-      } else {
-        setDeleteError(response.message || 'Failed to delete post');
-      }
+      navigate(blogPageUrl ?? '/blog');
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : 'An error occurred while deleting the post');
     }
@@ -179,7 +175,7 @@ export const BlogPostDetail = () => {
     setCommentSuccess(null);
 
     try {
-      const response = await commentMutation.mutateAsync({
+      await commentMutation.mutateAsync({
         pageId: blogPageId,
         blogPostId: id,
         author: values.author,
@@ -187,16 +183,10 @@ export const BlogPostDetail = () => {
         content: values.content,
       });
 
-      if (response.isSuccess) {
-        setCommentSuccess('Comment posted successfully.');
-        setCommentFormKey((prev) => prev + 1);
-        refetch();
-        showToast('Comment posted successfully.', 'success');
-      } else {
-        const message = response.message || 'Failed to post comment.';
-        setCommentError(message);
-        showToast(message, 'error');
-      }
+      setCommentSuccess('Comment posted successfully.');
+      setCommentFormKey((prev) => prev + 1);
+      await refetch();
+      showToast('Comment posted successfully.', 'success');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred while posting the comment.';
       setCommentError(message);
@@ -225,17 +215,13 @@ export const BlogPostDetail = () => {
     }
 
     try {
-      const response = await editCommentMutation.mutateAsync({
+      await editCommentMutation.mutateAsync({
         pageId: blogPageId,
         blogPostId: id,
         blogCommentId: commentId,
         title: values.title,
         content: values.content,
       });
-
-      if (!response.isSuccess) {
-        throw new Error(response.message || 'Failed to update comment.');
-      }
 
       await refetch();
       showToast('Comment updated successfully.', 'success');
@@ -267,15 +253,11 @@ export const BlogPostDetail = () => {
     }
 
     try {
-      const response = await deleteCommentMutation.mutateAsync({
+      await deleteCommentMutation.mutateAsync({
         pageId: blogPageId,
         blogPostId: id,
         blogCommentId: commentId,
       });
-
-      if (!response.isSuccess) {
-        throw new Error(response.message || 'Failed to delete comment.');
-      }
 
       await refetch();
       showToast('Comment deleted successfully.', 'success');

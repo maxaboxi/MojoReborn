@@ -114,13 +114,14 @@ export const ForumThreadsPage = () => {
         subject: trimmedSubject,
       });
 
-      if (response.isSuccess && response.threadId) {
-        setCreateDialogOpen(false);
-        setNewThreadSubject('');
-        navigate(buildThreadUrl(response.threadId, targetForumId));
-      } else {
-        setCreateError(response.message ?? 'Failed to create thread.');
+      const createdThreadId = response?.threadId;
+      if (!createdThreadId) {
+        throw new Error('The server did not return the new thread identifier.');
       }
+
+      setCreateDialogOpen(false);
+      setNewThreadSubject('');
+      navigate(buildThreadUrl(createdThreadId, targetForumId));
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : 'Failed to create thread.');
     }

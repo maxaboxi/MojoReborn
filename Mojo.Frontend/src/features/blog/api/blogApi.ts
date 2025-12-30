@@ -1,14 +1,14 @@
+import { isAxiosError } from 'axios';
 import apiClient from '@shared/api/axiosClient';
 import type {
   BlogComment,
   BlogPostDetail,
+  BlogPostDetailDto,
   EditPostRequest,
   EditPostResponse,
   CreatePostRequest,
   CreatePostResponse,
   GetPostsResponse,
-  GetPostApiResponse,
-  GetCategoriesResponse,
   CategoryDto,
   CategoryMutationResponse,
   CreateCategoryRequest,
@@ -38,7 +38,7 @@ type GetPostParams = {
   lastCommentDate?: string;
 };
 
-const mapCommentDto = (comment: GetPostApiResponse['comments'][number]): BlogComment => ({
+const mapCommentDto = (comment: BlogPostDetailDto['comments'][number]): BlogComment => ({
   id: comment.id,
   author: comment.userName,
   userGuid: comment.userGuid,
@@ -52,52 +52,38 @@ export const blogApi = {
     const response = await apiClient.get<GetPostsResponse>('/blog/posts', {
       params: { pageId, amount, lastPostDate, lastPostId },
     });
-
-    if (!response.data.isSuccess) {
-      throw new Error(response.data.message || 'Failed to load blog posts.');
-    }
-
     return response.data;
   },
   getPost: async ({ id, pageId, amount, lastCommentDate }: GetPostParams): Promise<BlogPostDetail> => {
-    const response = await apiClient.get<GetPostApiResponse>(`/blog/posts/${id}`, {
-      params: { pageId, amount, lastCommentDate },
-    });
+    try {
+      const response = await apiClient.get<BlogPostDetailDto>(`/blog/posts/${id}`, {
+        params: { pageId, amount, lastCommentDate },
+      });
 
-    const {
-      isSuccess,
-      message,
-      isNotAuthorized,
-      isNotFound,
-      comments = [],
-      ...rest
-    } = response.data;
+      const { comments = [], ...rest } = response.data;
 
-    if (!isSuccess) {
-      if (isNotAuthorized) {
-        throw new Error(message || 'You are not authorized to view this post.');
+      return {
+        ...(rest as Omit<BlogPostDetail, 'comments'>),
+        comments: comments.map(mapCommentDto),
+      } satisfies BlogPostDetail;
+    } catch (error) {
+      if (isAxiosError(error)) {
+        if (error.response?.status === 403) {
+          throw new Error('You are not authorized to view this post.');
+        }
+        if (error.response?.status === 404) {
+          throw new Error('Post not found.');
+        }
       }
-      if (isNotFound) {
-        throw new Error(message || 'Post not found.');
-      }
-      throw new Error(message || 'Failed to load blog post.');
+      throw error;
     }
-
-    return {
-      ...(rest as Omit<BlogPostDetail, 'comments'>),
-      comments: comments.map(mapCommentDto),
-    } satisfies BlogPostDetail;
   },
   getCategories: async (pageId: number): Promise<CategoryDto[]> => {
-    const response = await apiClient.get<GetCategoriesResponse>('/blog/categories', {
+    const response = await apiClient.get<CategoryDto[]>('/blog/categories', {
       params: { pageId },
     });
 
-    if (!response.data.isSuccess) {
-      throw new Error(response.data.message || 'Failed to load categories.');
-    }
-
-    return response.data.categories;
+    return response.data;
   },
   createCategory: async (request: CreateCategoryRequest): Promise<CategoryMutationResponse> => {
     const response = await apiClient.post<CategoryMutationResponse>('/blog/category', request);

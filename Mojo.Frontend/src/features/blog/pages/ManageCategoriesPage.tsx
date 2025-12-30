@@ -89,17 +89,13 @@ export const ManageCategoriesPage = () => {
     setFeedback(null);
 
     try {
-      const response = await createCategoryMutation.mutateAsync({
+      await createCategoryMutation.mutateAsync({
         pageId: blogPageId,
         categoryName: trimmedName,
       });
 
-      if (response.isSuccess) {
-        setFeedback({ severity: 'success', message: 'Category created successfully.' });
-        setNewCategoryName('');
-      } else {
-        setFeedback({ severity: 'error', message: response.message || 'Failed to create category.' });
-      }
+      setFeedback({ severity: 'success', message: 'Category created successfully.' });
+      setNewCategoryName('');
     } catch (error) {
       setFeedback({
         severity: 'error',
@@ -135,18 +131,14 @@ export const ManageCategoriesPage = () => {
     setPendingEditId(editingCategoryId);
 
     try {
-      const response = await editCategoryMutation.mutateAsync({
+      await editCategoryMutation.mutateAsync({
         pageId: blogPageId,
         categoryId: editingCategoryId,
         categoryName: trimmedName,
       });
 
-      if (response.isSuccess) {
-        setFeedback({ severity: 'success', message: 'Category updated successfully.' });
-        resetEditing();
-      } else {
-        setFeedback({ severity: 'error', message: response.message || 'Failed to update category.' });
-      }
+      setFeedback({ severity: 'success', message: 'Category updated successfully.' });
+      resetEditing();
     } catch (error) {
       setFeedback({
         severity: 'error',
@@ -176,18 +168,14 @@ export const ManageCategoriesPage = () => {
     setPendingDeleteId(category.id);
 
     try {
-      const response = await deleteCategoryMutation.mutateAsync({
+      await deleteCategoryMutation.mutateAsync({
         pageId: blogPageId,
         categoryId: category.id,
       });
 
-      if (response.isSuccess) {
-        setFeedback({ severity: 'success', message: 'Category deleted successfully.' });
-        if (editingCategoryId === category.id) {
-          resetEditing();
-        }
-      } else {
-        setFeedback({ severity: 'error', message: response.message || 'Failed to delete category.' });
+      setFeedback({ severity: 'success', message: 'Category deleted successfully.' });
+      if (editingCategoryId === category.id) {
+        resetEditing();
       }
     } catch (error) {
       setFeedback({

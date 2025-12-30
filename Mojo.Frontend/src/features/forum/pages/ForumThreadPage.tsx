@@ -108,19 +108,15 @@ export const ForumThreadPage = ({ forumId: overrideForumId, threadId: overrideTh
     setEditError(null);
 
     try {
-      const response = await editThreadMutation.mutateAsync({
+      await editThreadMutation.mutateAsync({
         pageId: forumPageId,
         forumId,
         threadId,
         subject: trimmedSubject,
       });
 
-      if (response.isSuccess) {
-        setEditDialogOpen(false);
-        await refetchThread();
-      } else {
-        setEditError(response.message ?? 'Failed to update this thread.');
-      }
+      setEditDialogOpen(false);
+      await refetchThread();
     } catch (err) {
       setEditError(err instanceof Error ? err.message : 'Failed to update this thread.');
     }

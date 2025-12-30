@@ -41,13 +41,6 @@ export type BlogPostDetail = BlogPostSummary & {
   comments: BlogComment[];
 };
 
-export type BlogApiResponseMetadata = {
-  isSuccess: boolean;
-  message?: string;
-  isNotFound?: boolean;
-  isNotAuthorized?: boolean;
-};
-
 export type CreatePostCategoryDto = {
   id: number;
   categoryName: string;
@@ -62,9 +55,7 @@ export type CreatePostRequest = {
 };
 
 export type CreatePostResponse = {
-  isSuccess: boolean;
   blogPostId: string;
-  message: string;
 };
 
 export type EditPostRequest = {
@@ -81,20 +72,15 @@ export type DeletePostRequest = {
   blogPostId: string;
 };
 
-export type EditPostResponse = {
-  isSuccess: boolean;
-  blogPostId: string;
-  message: string;
-};
+export type EditPostResponse = void;
 
-export type GetPostsResponse = BlogApiResponseMetadata & {
+export type GetPostsResponse = {
   blogPosts: BlogPostSummary[];
 };
 
-export type GetPostApiResponse = BlogApiResponseMetadata &
-  Omit<BlogPostDetail, 'comments'> & {
-    comments: RawBlogCommentDto[];
-  };
+export type BlogPostDetailDto = Omit<BlogPostDetail, 'comments'> & {
+  comments: RawBlogCommentDto[];
+};
 
 export type CategoryDto = {
   id: number;
@@ -102,18 +88,7 @@ export type CategoryDto = {
   categoryName: string;
 };
 
-export type GetCategoriesResponse = {
-  isSuccess: boolean;
-  message?: string;
-  categories: CategoryDto[];
-};
-
-export type CategoryMutationResponse = {
-  isSuccess: boolean;
-  message?: string;
-  isNotFound?: boolean;
-  isNotAuthorized?: boolean;
-};
+export type CategoryMutationResponse = void;
 
 export type CreateCategoryRequest = {
   pageId: number;
@@ -131,10 +106,7 @@ export type DeleteCategoryRequest = {
   categoryId: number;
 };
 
-export type DeletePostResponse = {
-  isSuccess: boolean;
-  message: string;
-};
+export type DeletePostResponse = void;
 
 export type CreateCommentRequest = {
   pageId: number;
@@ -145,9 +117,7 @@ export type CreateCommentRequest = {
 };
 
 export type CreateCommentResponse = {
-  isSuccess: boolean;
   commentId: string;
-  message: string;
 };
 
 export type EditCommentRequest = {
@@ -158,10 +128,7 @@ export type EditCommentRequest = {
   content: string;
 };
 
-export type EditCommentResponse = {
-  isSuccess: boolean;
-  message: string;
-};
+export type EditCommentResponse = void;
 
 export type DeleteCommentRequest = {
   pageId: number;
@@ -169,7 +136,4 @@ export type DeleteCommentRequest = {
   blogCommentId: string;
 };
 
-export type DeleteCommentResponse = {
-  isSuccess: boolean;
-  message: string;
-};
+export type DeleteCommentResponse = void;

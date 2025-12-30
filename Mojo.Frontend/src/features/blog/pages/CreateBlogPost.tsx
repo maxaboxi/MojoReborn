@@ -46,13 +46,14 @@ export const CreateBlogPost = () => {
         pageId: blogPageId,
       };
       const response = await createPostMutation.mutateAsync(request);
-      
-      if (response.isSuccess) {
-        const pageUrlQuery = blogPageUrl ? `?pageUrl=${encodeURIComponent(blogPageUrl)}` : '';
-        navigate(`/blog/post/${response.blogPostId}${pageUrlQuery}`);
-      } else {
-        setError(response.message || 'Failed to create post');
+      const createdPostId = response?.blogPostId;
+
+      if (!createdPostId) {
+        throw new Error('The server did not return the new post identifier.');
       }
+
+      const pageUrlQuery = blogPageUrl ? `?pageUrl=${encodeURIComponent(blogPageUrl)}` : '';
+      navigate(`/blog/post/${createdPostId}${pageUrlQuery}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred while creating the post');
     }

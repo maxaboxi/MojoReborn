@@ -22,11 +22,6 @@ export const forumApi = {
         lastThreadSequence,
       },
     });
-
-    if (!response.data.isSuccess) {
-      throw new Error(response.data.message ?? 'Failed to load forum threads.');
-    }
-
     return response.data;
   },
   getThread: async ({
@@ -45,11 +40,6 @@ export const forumApi = {
         },
       }
     );
-
-    if (!response.data.isSuccess) {
-      throw new Error(response.data.message ?? 'Failed to load the forum thread.');
-    }
-
     return response.data;
   },
   createThread: async (request: CreateThreadRequest): Promise<CreateThreadResponse> => {
