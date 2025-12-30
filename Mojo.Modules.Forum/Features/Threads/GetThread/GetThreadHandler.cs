@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Forum.Data;
+using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.SiteStructure;
-using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Forum.Features.Threads.GetThread;
 
@@ -14,12 +14,8 @@ public class GetThreadHandler
         CancellationToken ct
         )
     {
-        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, "ForumsFeatureName", ct);
-        
-        if (featureContextDto == null)
-        {
-            return BaseResponse.NotFound<GetThreadResponse>("Module not found.");
-        }
+        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, FeatureNames.Forum, ct)
+                                ?? throw new KeyNotFoundException();
 
         var thread = await db.ForumThreads
             .AsNoTracking()
@@ -28,14 +24,14 @@ public class GetThreadHandler
                 x.ForumId == query.ForumId &&
                 x.Forum.ModuleId == featureContextDto.ModuleId)
             .Select(x => new GetThreadResponse
-            {
-                Id = x.Id,
-                ForumId = x.ForumId,
-                Subject = x.ThreadSubject,
-                ThreadGuid = x.ThreadGuid,
-                UserId = x.StartedByUserId,
-                UserName = x.Author.DisplayName,
-                ForumPosts = x.ForumPosts
+            (
+                x.Id,
+                x.ForumId,
+                x.ThreadSubject,
+                x.ThreadGuid,
+                x.StartedByUserId,
+                x.Author.DisplayName,
+                x.ForumPosts
                     .OrderBy(fp => fp.ThreadSequence)
                     .Where(fp => fp.ThreadSequence > query.LastThreadSequence)
                     .Take(query.Amount ?? 50)
@@ -52,9 +48,9 @@ public class GetThreadHandler
                         fp.Author.DisplayName,
                         fp.Replies.FirstOrDefault(reply => fp.PostGuid == reply.ParentPostId)!.ParentPostId,
                         fp.PostDate)).ToList()
-            })
-            .FirstOrDefaultAsync(ct);
+            ))
+            .FirstOrDefaultAsync(ct) ?? throw new KeyNotFoundException();
 
-        return thread ?? BaseResponse.NotFound<GetThreadResponse>("Thread not found.");
+        return thread;
     }
 }

@@ -84,6 +84,28 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<ISiteResolver, SiteResolver>();
 
+builder.Services.AddProblemDetails(opts =>
+{
+    opts.CustomizeProblemDetails = ctx =>
+    {
+        switch (ctx.Exception)
+        {
+            case UnauthorizedAccessException:
+                ctx.ProblemDetails.Status = StatusCodes.Status403Forbidden;
+                ctx.ProblemDetails.Title = "Access denied";
+                break;
+            case KeyNotFoundException:
+                ctx.ProblemDetails.Status = StatusCodes.Status404NotFound;
+                ctx.ProblemDetails.Title = "Resource not found";
+                break;
+            case InvalidOperationException:
+                ctx.ProblemDetails.Status = StatusCodes.Status400BadRequest;
+                ctx.ProblemDetails.Title = ctx.Exception.Message;
+                break;
+        }
+    };
+});
+
 builder.Host.UseWolverine(opts =>
 {
     opts.Discovery.IncludeAssembly(typeof(BlogDbContext).Assembly);
@@ -129,7 +151,6 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -141,6 +162,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseExceptionHandler("/Error", createScopeForErrors: true);
 app.MapWolverineEndpoints(opts =>
 {
     opts.UseFluentValidationProblemDetailMiddleware();

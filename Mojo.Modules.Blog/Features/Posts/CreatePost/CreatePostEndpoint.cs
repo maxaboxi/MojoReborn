@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Mojo.Modules.Blog.Features.Posts.Events.PostCreatedEvent;
 using Wolverine;
 using Wolverine.Http;
 
@@ -8,10 +9,11 @@ public static class CreatePostEndpoint
 {
     [Authorize]
     [WolverinePost("/api/blog/posts")]
-    public static Task<CreatePostResponse> Post(
+    public static async Task<CreationResponse<CreatePostResponse>> Post(
         CreatePostCommand createPostCommand,
         IMessageBus bus)
     {
-        return bus.InvokeAsync<CreatePostResponse>(createPostCommand);
+         var (response, _) = await bus.InvokeAsync<(CreationResponse<CreatePostResponse>, PostCreatedEvent)>(createPostCommand);
+         return response;
     }
 }

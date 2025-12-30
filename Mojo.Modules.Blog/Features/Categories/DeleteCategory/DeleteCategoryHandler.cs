@@ -1,9 +1,9 @@
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
+using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
-using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Blog.Features.Categories.DeleteCategory;
 
@@ -18,33 +18,25 @@ public class DeleteCategoryHandler
         IPermissionService permissionService,
         CancellationToken ct)
     {
-        var user = await userService.GetUserAsync(claimsPrincipal, ct);
+        var user = await userService.GetUserAsync(claimsPrincipal, ct) 
+                   ?? throw new UnauthorizedAccessException();
+
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Blog, ct)
+                                ?? throw new KeyNotFoundException();
         
-        if (user == null)
+        if (!permissionService.CanEdit(user, featureContextDto))
         {
-            return BaseResponse.Unauthorized<DeleteCategoryResponse>("User not found.");
-        }
-        
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
-        
-        if (featureContextDto == null || !permissionService.CanEdit(user, featureContextDto))
-        {
-            return BaseResponse.Unauthorized<DeleteCategoryResponse>();
+            throw new UnauthorizedAccessException();
         }
 
         var existingCategoryInDb = await db.Categories
             .Where(c => c.ModuleId == featureContextDto.ModuleId)
             .Where(c => c.Id == command.CategoryId)
-            .FirstOrDefaultAsync(ct);
-
-        if (existingCategoryInDb == null)
-        {
-            return BaseResponse.NotFound<DeleteCategoryResponse>("Category not found.");
-        }
+            .FirstOrDefaultAsync(ct) ?? throw new KeyNotFoundException();
 
         db.Categories.Remove(existingCategoryInDb);
         await db.SaveChangesAsync(ct);
 
-        return BaseResponse.Success<DeleteCategoryResponse>();
+        return new DeleteCategoryResponse();
     }
 }

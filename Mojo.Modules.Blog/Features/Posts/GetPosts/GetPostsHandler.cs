@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
+using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.SiteStructure;
-using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Blog.Features.Posts.GetPosts;
 
@@ -13,12 +13,8 @@ public static class GetPostsHandler
         IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
-        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, "BlogFeatureName", ct);
-        
-        if (featureContextDto == null)
-        {
-            return BaseResponse.NotFound<GetPostsResponse>("Module not found.");
-        }
+        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, FeatureNames.Blog, ct)
+                                ?? throw new KeyNotFoundException();
         
         var queryable = db.BlogPosts.AsNoTracking()
             .Where(x => x.ModuleId == featureContextDto.ModuleId);
@@ -47,7 +43,7 @@ public static class GetPostsHandler
                     p.Comments.Count 
                 ))
             .ToListAsync(ct);
-        
-        return new GetPostsResponse { IsSuccess = true, BlogPosts = posts };
+
+        return new GetPostsResponse(posts);
     }
 }

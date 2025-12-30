@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Forum.Data;
+using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.SiteStructure;
-using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Forum.Features.Threads.GetThreads;
 
@@ -13,12 +13,8 @@ public class GetThreadsHandler
         IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
-        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, "ForumsFeatureName", ct);
-        
-        if (featureContextDto == null)
-        {
-            return BaseResponse.NotFound<GetThreadsResponse>("Module not found.");
-        }
+        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, FeatureNames.Forum, ct)
+                                ?? throw new KeyNotFoundException();
         
         var threads = await db.ForumThreads.AsNoTracking()
             .Where(x => x.Forum.ModuleId == featureContextDto.ModuleId)
@@ -44,6 +40,6 @@ public class GetThreadsHandler
                 ))
             .ToListAsync(ct);
         
-        return new GetThreadsResponse { IsSuccess = true, Threads = threads };
+        return new GetThreadsResponse(threads);
     }
 }

@@ -10,6 +10,7 @@ public class BlogDbContext(DbContextOptions<BlogDbContext> options) : DbContext(
     public virtual DbSet<BlogCategory> Categories { get; set; }
 
     public virtual DbSet<BlogComment> BlogComments { get; set; }
+    public virtual DbSet<BlogSubscription> BlogSubscriptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,9 +1,9 @@
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
+using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
-using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Blog.Features.Posts.DeletePost;
 
@@ -18,18 +18,15 @@ public class DeletePostHandler
         IPermissionService permissionService,
         CancellationToken ct)
     {
-        var user = await userService.GetUserAsync(claimsPrincipal, ct);
+        var user = await userService.GetUserAsync(claimsPrincipal, ct) 
+                   ?? throw new UnauthorizedAccessException();
+
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Blog, ct)
+                                ?? throw new KeyNotFoundException();
         
-        if (user == null)
+        if (!permissionService.CanEdit(user, featureContextDto))
         {
-            return BaseResponse.Unauthorized<DeletePostResponse>("User not found.");
-        }
-        
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
-        
-        if (featureContextDto == null || !permissionService.CanEdit(user, featureContextDto))
-        {
-            return BaseResponse.Unauthorized<DeletePostResponse>();
+            throw new UnauthorizedAccessException();
         }
         
         var blogPost =  await db.BlogPosts
@@ -38,16 +35,11 @@ public class DeletePostHandler
                 x.BlogPostId == command.Id && 
                 x.Author == user.Email)
             .Include(x => x.Categories)
-            .FirstOrDefaultAsync(ct);
-
-        if (blogPost == null)
-        {
-            return BaseResponse.NotFound<DeletePostResponse>("Blog post not found.");
-        }
+            .FirstOrDefaultAsync(ct) ?? throw new KeyNotFoundException();
 
         db.BlogPosts.Remove(blogPost);
         await db.SaveChangesAsync(ct);
-        
-        return new DeletePostResponse{ IsSuccess = true, Message = "Blog post deleted successfully." };
+
+        return new DeletePostResponse();
     }
 }

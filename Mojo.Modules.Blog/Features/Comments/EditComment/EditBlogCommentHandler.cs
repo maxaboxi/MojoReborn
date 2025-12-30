@@ -1,9 +1,9 @@
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
+using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
-using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Blog.Features.Comments.EditComment;
 
@@ -18,37 +18,24 @@ public class EditBlogCommentHandler
         IPermissionService permissionService,
         CancellationToken ct)
     {
-        var user = await userService.GetUserAsync(claimsPrincipal, ct);
-        
-        if (user == null)
-        {
-            return BaseResponse.Unauthorized<EditBlogCommentResponse>("User not found.");
-        }
-        
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
-        
-        if (featureContextDto == null)
-        {
-            return BaseResponse.Unauthorized<EditBlogCommentResponse>();
-        }
+        var user = await userService.GetUserAsync(claimsPrincipal, ct) 
+                   ?? throw new UnauthorizedAccessException();
+
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Blog, ct)
+                                ?? throw new KeyNotFoundException();
 
         var comment = await db.BlogComments
             .Where(x => 
                 x.BlogPost.ModuleId == featureContextDto.ModuleId &&
                 x.BlogPost.BlogPostId == command.BlogPostId && 
                 x.Id == command.BlogCommentId)
-            .FirstOrDefaultAsync(ct);
-
-        if (comment == null)
-        {
-            return BaseResponse.NotFound<EditBlogCommentResponse>("Comment not found");
-        }
+            .FirstOrDefaultAsync(ct) ?? throw new KeyNotFoundException();
         
         var hasAdminRights = permissionService.HasAdministratorRightsToThePage(user, featureContextDto);
 
         if (comment.UserGuid != user.Id || !hasAdminRights)
         {
-            return BaseResponse.Unauthorized<EditBlogCommentResponse>();
+            throw new UnauthorizedAccessException();
         }
         
         comment.Title = command.Title;
@@ -64,6 +51,6 @@ public class EditBlogCommentHandler
         
         await db.SaveChangesAsync(ct);
         
-        return new EditBlogCommentResponse { IsSuccess = true, BlogPostCommentId = comment.Id, Message = "Comment updated successfully." };
+        return new EditBlogCommentResponse(comment.Id);
     }
 }

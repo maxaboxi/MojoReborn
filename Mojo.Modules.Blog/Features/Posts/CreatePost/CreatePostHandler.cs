@@ -4,15 +4,17 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
+using Mojo.Modules.Blog.Features.Posts.Events.PostCreatedEvent;
+using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
-using Mojo.Shared.Responses;
+using Wolverine.Http;
 
 namespace Mojo.Modules.Blog.Features.Posts.CreatePost;
 
 public static partial class CreatePostHandler
 {
-    public static async Task<CreatePostResponse> Handle(
+    public static async Task<(CreationResponse<CreatePostResponse>, PostCreatedEvent)> Handle(
         CreatePostCommand command,
         BlogDbContext db,
         IFeatureContextResolver featureContextResolver,
@@ -21,18 +23,15 @@ public static partial class CreatePostHandler
         IPermissionService permissionService,
         CancellationToken ct)
     {
-        var user = await userService.GetUserAsync(claimsPrincipal, ct);
+        var user = await userService.GetUserAsync(claimsPrincipal, ct) 
+                   ?? throw new UnauthorizedAccessException();
+
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Blog, ct)
+                                ?? throw new KeyNotFoundException();
         
-        if (user == null)
+        if (!permissionService.CanEdit(user, featureContextDto))
         {
-            return BaseResponse.Unauthorized<CreatePostResponse>("User not found.");
-        }
-        
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
-        
-        if (featureContextDto == null || !permissionService.CanEdit(user, featureContextDto))
-        {
-            return BaseResponse.Unauthorized<CreatePostResponse>();
+            throw new UnauthorizedAccessException();
         }
 
         var baseSlug = GenerateBaseSlug(command.Title);
@@ -56,8 +55,13 @@ public static partial class CreatePostHandler
         
         await db.BlogPosts.AddAsync(newPost, ct);
         await db.SaveChangesAsync(ct);
-        
-        return new CreatePostResponse { IsSuccess = true, BlogPostId = newPost.BlogPostId, Message = "Blog post created successfully." };
+
+        return
+        (
+            new CreationResponse<CreatePostResponse>($"/blog/{newPost.Slug}", new CreatePostResponse(newPost.BlogPostId)),
+            new PostCreatedEvent(newPost.ModuleGuid, newPost.BlogPostId, user.Id, newPost.Title, newPost.Author,
+                newPost.Slug)
+        );
     }
 
     private static string GenerateBaseSlug(string title)

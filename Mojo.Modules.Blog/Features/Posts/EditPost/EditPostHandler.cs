@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
+using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
-using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Blog.Features.Posts.EditPost;
 
@@ -19,34 +19,26 @@ public static class EditPostHandler
         IPermissionService permissionService,
         CancellationToken ct)
     {
-        var user = await userService.GetUserAsync(claimsPrincipal, ct);
+        var user = await userService.GetUserAsync(claimsPrincipal, ct) 
+                   ?? throw new UnauthorizedAccessException();
+
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Blog, ct)
+                                ?? throw new KeyNotFoundException();
         
-        if (user == null)
+        if (!permissionService.CanEdit(user, featureContextDto))
         {
-            return BaseResponse.Unauthorized<EditPostResponse>("User not found.");
-        }
-        
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
-        
-        if (featureContextDto == null)
-        {
-            return BaseResponse.Unauthorized<EditPostResponse>();
+            throw new UnauthorizedAccessException();
         }
         
         var original = await db.BlogPosts
             .Include(b => b.Categories)
             .FirstOrDefaultAsync(x => 
                 x.ModuleId == featureContextDto.ModuleId &&
-                x.BlogPostId == command.BlogPostId, ct);
-
-        if (original == null)
-        {
-            return BaseResponse.NotFound<EditPostResponse>("Blog post not found.");
-        }
+                x.BlogPostId == command.BlogPostId, ct) ?? throw new KeyNotFoundException();
 
         if (original.Author != user.Email || !permissionService.CanEdit(user, featureContextDto))
         {
-            return BaseResponse.Unauthorized<EditPostResponse>();
+            throw new UnauthorizedAccessException();
         }
         
         original.Content = command.Content;
@@ -95,6 +87,6 @@ public static class EditPostHandler
         
         await db.SaveChangesAsync(ct);
         
-        return new EditPostResponse { IsSuccess = true, BlogPostId = original.BlogPostId, Message = "Blog post updated successfully." };
+        return new EditPostResponse(original.BlogPostId);
     }
 }

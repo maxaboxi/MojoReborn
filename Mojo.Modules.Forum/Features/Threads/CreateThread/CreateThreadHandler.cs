@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Mojo.Modules.Forum.Data;
 using Mojo.Modules.Forum.Domain.Entities;
+using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
-using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Forum.Features.Threads.CreateThread;
 
@@ -18,22 +18,21 @@ public class CreateThreadHandler
         IUserService userService,
         IFeatureContextResolver featureContextResolver,
         IPermissionService permissionService,
-        ILogger<CreateThreadHandler> logger,
         CancellationToken ct)
     {
-        var user = await userService.GetUserAsync(claimsPrincipal, ct);
+        var user = await userService.GetUserAsync(claimsPrincipal, ct) ?? throw new UnauthorizedAccessException();
         
-        if (user?.LegacyId == null)
+        if (user.LegacyId == null)
         {
-            logger.LogError("User missing or user has no legacy id: {user}", user);
-            return BaseResponse.Unauthorized<CreateThreadResponse>(user == null ? "User not found." : "Legacy account missing.");
+            throw new InvalidOperationException("LegacyId missing from the user.");
         }
         
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "ForumsFeatureName", ct);
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Forum, ct)
+                                ?? throw new KeyNotFoundException();
         
-        if (featureContextDto == null || !permissionService.CanEdit(user, featureContextDto))
+        if (!permissionService.CanEdit(user, featureContextDto))
         {
-            return BaseResponse.Unauthorized<CreateThreadResponse>();
+            throw new UnauthorizedAccessException();
         }
 
         var currentMaxSequence = (await db.ForumThreads
@@ -51,6 +50,6 @@ public class CreateThreadHandler
         await db.ForumThreads.AddAsync(thread, ct);
         await db.SaveChangesAsync(ct);
 
-        return new CreateThreadResponse { IsSuccess = true, ThreadId = thread.Id, Message = "Forum thread created successfully." };
+        return new CreateThreadResponse(thread.Id);
     }
 }

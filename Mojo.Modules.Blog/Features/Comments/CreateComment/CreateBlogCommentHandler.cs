@@ -2,9 +2,9 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
+using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
-using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Blog.Features.Comments.CreateComment;
 
@@ -20,21 +20,12 @@ public class CreateBlogCommentHandler
     {
         var user = await userService.GetUserAsync(claimsPrincipal, ct);
         
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "BlogFeatureName", ct);
-        
-        if (featureContextDto == null)
-        {
-            return BaseResponse.NotFound<CreateBlogCommentResponse>();
-        }
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Blog, ct)
+                                ?? throw new KeyNotFoundException();
 
         var blogPost = await db.BlogPosts
             .Where(x => x.BlogPostId == command.BlogPostId && x.ModuleGuid == featureContextDto.ModuleGuid)
-            .FirstOrDefaultAsync(ct);
-
-        if (blogPost == null)
-        {
-            return BaseResponse.NotFound<CreateBlogCommentResponse>("BlogPost not found.");
-        }
+            .FirstOrDefaultAsync(ct) ?? throw new KeyNotFoundException();
 
         var comment = new BlogComment
         {
@@ -56,6 +47,6 @@ public class CreateBlogCommentHandler
         await db.BlogComments.AddAsync(comment, ct);
         await db.SaveChangesAsync(ct);
         
-        return new CreateBlogCommentResponse { IsSuccess = true, CommentId = comment.Id, Message = "Comment created successfully." }; 
+        return new CreateBlogCommentResponse(comment.Id); 
     }
 }

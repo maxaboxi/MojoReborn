@@ -19,8 +19,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Features\Posts\" />
       <Folder Include="Features\Comments\" />
+      <Folder Include="Features\Posts\Events\" />
     </ItemGroup>
 
 </Project>

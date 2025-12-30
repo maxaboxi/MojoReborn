@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Mojo.Modules.Forum.Data;
 using Mojo.Modules.Forum.Domain.Entities;
+using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
-using Mojo.Shared.Responses;
 
 namespace Mojo.Modules.Forum.Features.Posts.CreatePost;
 
@@ -18,30 +18,26 @@ public class CreateForumPostHandler
         IUserService userService,
         IFeatureContextResolver featureContextResolver,
         IPermissionService permissionService,
-        ILogger<CreateForumPostHandler> logger,
         CancellationToken ct)
     {
-        var user = await userService.GetUserAsync(claimsPrincipal, ct);
+        var user = await userService.GetUserAsync(claimsPrincipal, ct) ?? throw new UnauthorizedAccessException();
         
-        if (user?.LegacyId == null)
+        if (user.LegacyId == null)
         {
-            logger.LogError("User missing or user has no legacy id: {user}", user);
-            return BaseResponse.Unauthorized<CreateForumPostResponse>(user == null ? "User not found." : "Legacy account missing.");
+            throw new InvalidOperationException("LegacyId missing from the user.");
         }
         
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, "ForumsFeatureName", ct);
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Forum, ct)
+                                ?? throw new KeyNotFoundException();
         
-        if (featureContextDto == null || !permissionService.CanEdit(user, featureContextDto))
+        if (!permissionService.CanEdit(user, featureContextDto))
         {
-            return BaseResponse.Unauthorized<CreateForumPostResponse>();
+            throw new UnauthorizedAccessException();
         }
         
-        var thread = await db.ForumThreads.FirstOrDefaultAsync(t => t.Id == command.ThreadId && t.ForumId == command.ForumId, ct);
-
-        if (thread == null)
-        {
-            return BaseResponse.NotFound<CreateForumPostResponse>("Thread not found.");
-        }
+        var thread = await db.ForumThreads
+            .FirstOrDefaultAsync(t => t.Id == command.ThreadId && t.ForumId == command.ForumId, ct) ??
+                     throw new KeyNotFoundException();
 
         var currentMaxSequence = (await db.ForumPosts.AsNoTracking()
             .Where(x => x.ThreadId == command.ThreadId)
@@ -72,8 +68,7 @@ public class CreateForumPostHandler
         await db.SaveChangesAsync(ct);
 
         if (!command.ReplyToPost.HasValue || originalPost == null)
-            return new CreateForumPostResponse
-                { IsSuccess = true, PostId = post.Id, Message = "Forum post created successfully." };
+            return new CreateForumPostResponse(post.Id);
         
         var reply = new ForumPostReplyLink
         {
@@ -84,6 +79,6 @@ public class CreateForumPostHandler
         await db.ForumPostReplyLinks.AddAsync(reply, ct);
         await db.SaveChangesAsync(ct);
 
-        return new CreateForumPostResponse { IsSuccess = true, PostId = post.Id, Message = "Forum post created successfully." };
+        return new CreateForumPostResponse(post.Id);
     }
 }
