@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Mojo.Modules.Blog.Features.Posts.Events.PostCreatedEvent;
+using Mojo.Modules.Blog.Features.Blog.NotifySubscribers;
 using Wolverine;
 using Wolverine.Http;
 

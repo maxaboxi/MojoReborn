@@ -24,5 +24,7 @@ public class BlogPostCategoryConfiguration : IEntityTypeConfiguration<BlogPostCa
             .WithMany()
             .HasForeignKey(e => e.CategoryId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.Metadata.SetIsTableExcludedFromMigrations(true);
     }
 }

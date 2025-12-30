@@ -6,11 +6,13 @@ using Mojo.Modules.Forum.Data;
 using Mojo.Modules.Identity.Data;
 using Mojo.Modules.Identity.Domain.Entities;
 using Mojo.Modules.Identity.Features.Services;
+using Mojo.Modules.Notifications.Data;
 using Mojo.Modules.SiteStructure.Data;
 using Mojo.Modules.SiteStructure.Features.GetFeatureContext;
 using Mojo.Modules.SiteStructure.Features.GetSite;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
+using Mojo.Shared.Interfaces.WebSocket;
 using Mojo.Web.Extensions;
 using Mojo.Web.Middleware;
 using Serilog;
@@ -20,6 +22,7 @@ using Wolverine.FluentValidation;
 using Wolverine.Http;
 using Wolverine.Http.FluentValidation;
 using Wolverine.Persistence.Durability;
+using Wolverine.SignalR;
 using Wolverine.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -112,6 +115,7 @@ builder.Host.UseWolverine(opts =>
     opts.Discovery.IncludeAssembly(typeof(IdentityDbContext).Assembly);
     opts.Discovery.IncludeAssembly(typeof(SiteStructureDbContext).Assembly);
     opts.Discovery.IncludeAssembly(typeof(ForumDbContext).Assembly);
+    opts.Discovery.IncludeAssembly(typeof(NotificationsDbContext).Assembly);
     
     // Register Audit Logging Middleware for all handlers
     opts.Policies.AddMiddleware<AuditLoggingBehavior>();
@@ -131,7 +135,17 @@ builder.Host.UseWolverine(opts =>
     opts.Services.AddDbContextWithWolverineIntegration<ForumDbContext>(x => x.UseSqlServer(connectionString));
     opts.PersistMessagesWithSqlServer(connectionString, role:MessageStoreRole.Ancillary).Enroll<ForumDbContext>();
     
-    opts.UseFluentValidation(); 
+    opts.Services.AddDbContextWithWolverineIntegration<NotificationsDbContext>(x => x.UseSqlServer(connectionString));
+    opts.PersistMessagesWithSqlServer(connectionString, role:MessageStoreRole.Ancillary).Enroll<NotificationsDbContext>();
+    
+    opts.UseFluentValidation();
+
+    opts.UseSignalR();
+    opts.Publish(x =>
+    {
+        x.MessagesImplementing<ISignalRMessage>();
+        x.ToSignalR();
+    });
 });
 
 builder.Services.AddCors();
@@ -172,5 +186,7 @@ app.MapWolverineEndpoints(opts =>
     // where the runtime code generation can blow up if the first requests come in together.
     opts.WarmUpRoutes = RouteWarmup.Eager;
 });
+
+app.MapWolverineSignalRHub("/hubs/notifications");
 
 app.Run();

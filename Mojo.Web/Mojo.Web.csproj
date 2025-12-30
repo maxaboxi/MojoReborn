@@ -9,17 +9,19 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.1" />
         <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-        <PackageReference Include="WolverineFx" Version="5.7.1" />
-        <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="5.7.1" />
-        <PackageReference Include="WolverineFx.Http" Version="5.7.1" />
-        <PackageReference Include="WolverineFx.Http.FluentValidation" Version="5.7.1" />
-        <PackageReference Include="WolverineFx.SqlServer" Version="5.7.1" />
+        <PackageReference Include="WolverineFx" Version="5.9.2" />
+        <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="5.9.2" />
+        <PackageReference Include="WolverineFx.Http" Version="5.9.2" />
+        <PackageReference Include="WolverineFx.Http.FluentValidation" Version="5.9.2" />
+        <PackageReference Include="WolverineFx.SignalR" Version="5.9.2" />
+        <PackageReference Include="WolverineFx.SqlServer" Version="5.9.2" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Mojo.Modules.Blog\Mojo.Modules.Blog.csproj" />
       <ProjectReference Include="..\Mojo.Modules.Forum\Mojo.Modules.Forum.csproj" />
       <ProjectReference Include="..\Mojo.Modules.Identity\Mojo.Modules.Identity.csproj" />
+      <ProjectReference Include="..\Mojo.Modules.Notifications\Mojo.Modules.Notifications.csproj" />
       <ProjectReference Include="..\Mojo.Modules.SiteStructure\Mojo.Modules.SiteStructure.csproj" />
       <ProjectReference Include="..\Mojo.Shared\Mojo.Shared.csproj" />
     </ItemGroup>

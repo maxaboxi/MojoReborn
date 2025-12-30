@@ -31,5 +31,7 @@ public class BlogCommentConfiguration : IEntityTypeConfiguration<BlogComment>
             .WithMany(b => b.Comments)
             .HasForeignKey(c => c.ContentGuid)
             .HasPrincipalKey(b => b.BlogPostId);
+        
+        builder.Metadata.SetIsTableExcludedFromMigrations(true);
     }
 }

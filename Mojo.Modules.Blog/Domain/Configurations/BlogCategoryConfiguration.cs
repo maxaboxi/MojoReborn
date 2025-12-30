@@ -15,5 +15,7 @@ public class BlogCategoryConfiguration : IEntityTypeConfiguration<BlogCategory>
         builder.Property(e => e.Id).HasColumnName("CategoryID");
         builder.Property(e => e.CategoryName).HasColumnName("Category").HasMaxLength(255);
         builder.Property(e => e.ModuleId).HasColumnName("ModuleID");
+        
+        builder.Metadata.SetIsTableExcludedFromMigrations(true);
     }
 }

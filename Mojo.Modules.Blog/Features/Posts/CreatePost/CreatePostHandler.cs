@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
-using Mojo.Modules.Blog.Features.Posts.Events.PostCreatedEvent;
+using Mojo.Modules.Blog.Features.Blog.NotifySubscribers;
 using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;

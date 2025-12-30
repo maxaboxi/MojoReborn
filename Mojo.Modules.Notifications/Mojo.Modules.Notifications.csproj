@@ -7,9 +7,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Data\" />
-      <Folder Include="Domain\" />
-      <Folder Include="Features\" />
+      <Folder Include="Features\GetNotifications\" />
+      <Folder Include="Features\ModuleDeleted\" />
+      <Folder Include="Features\NotificationRead\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.1" />
+      <PackageReference Include="WolverineFx" Version="5.9.2" />
+      <PackageReference Include="WolverineFx.SignalR" Version="5.9.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Mojo.Shared\Mojo.Shared.csproj" />
     </ItemGroup>
 
 </Project>

@@ -29,5 +29,7 @@ public class BlogPostConfiguration : IEntityTypeConfiguration<BlogPost>
         builder.HasMany(b => b.Categories)
             .WithMany(c => c.BlogPosts)
             .UsingEntity<BlogPostCategory>();
+        
+        builder.Metadata.SetIsTableExcludedFromMigrations(true);
     }
 }
