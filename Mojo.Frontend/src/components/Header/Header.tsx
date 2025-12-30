@@ -4,8 +4,6 @@ import { useTheme as useAppTheme } from '@shared/theme/useTheme';
 import { UserMenu } from '../UserMenu/UserMenu';
 import './Header.css';
 
-const DRAWER_WIDTH = 260;
-
 interface HeaderProps {
   onMenuClick: () => void;
 }

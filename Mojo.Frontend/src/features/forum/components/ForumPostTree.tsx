@@ -35,26 +35,65 @@ const buildPostTree = (posts: ForumPost[]): ForumPostNode[] => {
   return roots;
 };
 
-const ForumNestedPost = ({ node, depth }: { node: ForumPostNode; depth: number }) => (
-  <Box className="forum-nested-post">
-    <ForumPostCard post={node} depth={depth} variant="nested" />
-    {node.replies.length > 0 && (
-      <Box className="forum-nested-children">
-        {node.replies.map((child) => (
-          <ForumNestedPost key={child.postGuid} node={child} depth={depth + 1} />
-        ))}
-      </Box>
-    )}
-  </Box>
-);
+type ForumNestedPostProps = {
+  node: ForumPostNode;
+  depth: number;
+  onReply?: (post: ForumPost) => void;
+  onEdit?: (post: ForumPost) => void;
+  canEdit?: (post: ForumPost) => boolean;
+};
 
-export const ForumPostTree = ({ posts }: { posts: ForumPost[] }) => {
+const ForumNestedPost = ({ node, depth, onReply, onEdit, canEdit }: ForumNestedPostProps) => {
+  const showEdit = Boolean(onEdit && canEdit?.(node));
+
+  return (
+    <Box className="forum-nested-post">
+      <ForumPostCard
+        post={node}
+        depth={depth}
+        variant="nested"
+        onReply={onReply}
+        onEdit={showEdit ? onEdit : undefined}
+      />
+      {node.replies.length > 0 && (
+        <Box className="forum-nested-children">
+          {node.replies.map((child) => (
+            <ForumNestedPost
+              key={child.postGuid}
+              node={child}
+              depth={depth + 1}
+              onReply={onReply}
+              onEdit={onEdit}
+              canEdit={canEdit}
+            />
+          ))}
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+interface ForumPostTreeProps {
+  posts: ForumPost[];
+  onReply?: (post: ForumPost) => void;
+  onEdit?: (post: ForumPost) => void;
+  canEdit?: (post: ForumPost) => boolean;
+}
+
+export const ForumPostTree = ({ posts, onReply, onEdit, canEdit }: ForumPostTreeProps) => {
   const nestedPosts = useMemo(() => buildPostTree(posts), [posts]);
 
   return (
     <Box className="forum-thread-nested">
       {nestedPosts.map((node) => (
-        <ForumNestedPost key={node.postGuid} node={node} depth={0} />
+        <ForumNestedPost
+          key={node.postGuid}
+          node={node}
+          depth={0}
+          onReply={onReply}
+          onEdit={onEdit}
+          canEdit={canEdit}
+        />
       ))}
     </Box>
   );

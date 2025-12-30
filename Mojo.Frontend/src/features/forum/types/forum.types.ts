@@ -80,3 +80,27 @@ export type EditThreadRequest = {
 };
 
 export type EditThreadResponse = void;
+
+export type CreateForumPostRequest = {
+  pageId: number;
+  forumId: number;
+  threadId: number;
+  post: string;
+  replyToPost?: string | null;
+};
+
+export type CreateForumPostResponse = {
+  postId: number;
+};
+
+export type EditForumPostRequest = {
+  pageId: number;
+  forumId: number;
+  threadId: number;
+  postId: number;
+  content: string;
+};
+
+export type EditForumPostResponse = {
+  postId: number;
+};

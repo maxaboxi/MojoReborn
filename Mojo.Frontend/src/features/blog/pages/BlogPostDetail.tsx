@@ -78,6 +78,7 @@ export const BlogPostDetail = () => {
     }),
     [user?.email]
   );
+  const sanitizedContent = useMemo(() => DOMPurify.sanitize(post?.content ?? ''), [post?.content]);
 
   useEffect(() => {
     if (post?.comments) {
@@ -329,7 +330,6 @@ export const BlogPostDetail = () => {
 
   const commentCount = post.commentCount ?? comments.length;
   const canLoadMoreComments = comments.length < commentCount;
-  const sanitizedContent = useMemo(() => DOMPurify.sanitize(post.content ?? ''), [post.content]);
   const blogBreadcrumbTitle = blogPageTitle ?? 'Blog';
 
   return (

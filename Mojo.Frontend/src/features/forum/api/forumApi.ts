@@ -8,6 +8,10 @@ import type {
   CreateThreadResponse,
   EditThreadRequest,
   EditThreadResponse,
+  CreateForumPostRequest,
+  CreateForumPostResponse,
+  EditForumPostRequest,
+  EditForumPostResponse,
 } from '../types/forum.types';
 
 export const forumApi = {
@@ -48,6 +52,14 @@ export const forumApi = {
   },
   editThread: async (request: EditThreadRequest): Promise<EditThreadResponse> => {
     const response = await apiClient.put<EditThreadResponse>('/forums/threads', request);
+    return response.data;
+  },
+  createPost: async (request: CreateForumPostRequest): Promise<CreateForumPostResponse> => {
+    const response = await apiClient.post<CreateForumPostResponse>('/forums/threads/posts', request);
+    return response.data;
+  },
+  editPost: async (request: EditForumPostRequest): Promise<EditForumPostResponse> => {
+    const response = await apiClient.put<EditForumPostResponse>('/forums/threads/posts', request);
     return response.data;
   },
 };
