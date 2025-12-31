@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Shared.Domain;
@@ -12,12 +13,13 @@ public class EditBlogCommentHandler
     public static async Task<EditBlogCommentResponse> Handle(
         EditBlogCommentCommand command,
         BlogDbContext db,
-        ClaimsPrincipal claimsPrincipal,
+        IHttpContextAccessor httpContextAccessor,
         IUserService userService,
         IFeatureContextResolver featureContextResolver,
         IPermissionService permissionService,
         CancellationToken ct)
     {
+        var claimsPrincipal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
         var user = await userService.GetUserAsync(claimsPrincipal, ct) 
                    ?? throw new UnauthorizedAccessException();
 

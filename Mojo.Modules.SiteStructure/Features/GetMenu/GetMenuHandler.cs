@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Mojo.Modules.SiteStructure.Data;
@@ -14,10 +15,12 @@ public class GetMenuHandler
         SiteStructureDbContext db,
         ISiteResolver siteResolver,
         IUserService userService,
-        ClaimsPrincipal claimsPrincipal,
+        IHttpContextAccessor httpContextAccessor,
         IConfiguration configuration,
         CancellationToken ct)
     {
+        var claimsPrincipal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
+
         var roleName = configuration["Authentication:AllUsersRoleName"];
         
         if (roleName == null)

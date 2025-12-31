@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
@@ -14,11 +15,12 @@ public class CreateCategoryHandler
         CreateCategoryCommand command,
         BlogDbContext db,
         IFeatureContextResolver featureContextResolver,
-        ClaimsPrincipal claimsPrincipal,
+        IHttpContextAccessor httpContextAccessor,
         IUserService userService,
         IPermissionService permissionService,
         CancellationToken ct)
     {
+        var claimsPrincipal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
         var user = await userService.GetUserAsync(claimsPrincipal, ct) 
                    ?? throw new UnauthorizedAccessException();
 

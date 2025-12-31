@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
@@ -13,11 +14,12 @@ public class CreateBlogCommentHandler
     public static async Task<CreateBlogCommentResponse> Handle(
         CreateBlogCommentCommand command,
         BlogDbContext db,
-        ClaimsPrincipal claimsPrincipal,
+        IHttpContextAccessor httpContextAccessor,
         IUserService userService,
         IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
+        var claimsPrincipal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
         var user = await userService.GetUserAsync(claimsPrincipal, ct);
         
         var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Blog, ct)

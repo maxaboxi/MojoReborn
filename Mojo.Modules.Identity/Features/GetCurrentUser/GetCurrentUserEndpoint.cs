@@ -11,10 +11,11 @@ public class GetCurrentUserEndpoint
 {
     [WolverineGet("/api/auth/user")]
     public async Task<IResult> Get(
-        ClaimsPrincipal principal,
+        IHttpContextAccessor httpContextAccessor,
         UserManager<ApplicationUser> userManager,
         CancellationToken ct)
     {
+        var principal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
         var userId = userManager.GetUserId(principal);
         
         if (userId == null)

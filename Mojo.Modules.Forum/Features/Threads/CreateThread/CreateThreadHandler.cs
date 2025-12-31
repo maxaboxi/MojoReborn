@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Mojo.Modules.Forum.Data;
@@ -14,12 +15,13 @@ public class CreateThreadHandler
     public static async Task<CreateThreadResponse> Handle(
         CreateThreadCommand command,
         ForumDbContext db,
-        ClaimsPrincipal claimsPrincipal,
+        IHttpContextAccessor httpContextAccessor,
         IUserService userService,
         IFeatureContextResolver featureContextResolver,
         IPermissionService permissionService,
         CancellationToken ct)
     {
+        var claimsPrincipal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
         var user = await userService.GetUserAsync(claimsPrincipal, ct) ?? throw new UnauthorizedAccessException();
         
         if (user.LegacyId == null)

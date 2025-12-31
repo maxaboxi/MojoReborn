@@ -7,12 +7,12 @@ using Mojo.Modules.Identity.Data;
 using Mojo.Modules.Identity.Domain.Entities;
 using Mojo.Modules.Identity.Features.Services;
 using Mojo.Modules.Notifications.Data;
+using Mojo.Modules.Notifications.Domain;
 using Mojo.Modules.SiteStructure.Data;
 using Mojo.Modules.SiteStructure.Features.GetFeatureContext;
 using Mojo.Modules.SiteStructure.Features.GetSite;
 using Mojo.Shared.Interfaces.Identity;
 using Mojo.Shared.Interfaces.SiteStructure;
-using Mojo.Shared.Interfaces.WebSocket;
 using Mojo.Web.Extensions;
 using Mojo.Web.Middleware;
 using Serilog;
@@ -22,7 +22,6 @@ using Wolverine.FluentValidation;
 using Wolverine.Http;
 using Wolverine.Http.FluentValidation;
 using Wolverine.Persistence.Durability;
-using Wolverine.SignalR;
 using Wolverine.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -79,13 +78,13 @@ builder.Services.AddAuthentication()
         opt.ClientSecret = builder.Configuration["Authentication:Facebook:ClientSecret"] ?? "";
     });
 
-builder.Services.AddScoped<ClaimsPrincipal>(s => s.GetService<IHttpContextAccessor>()?.HttpContext?.User ?? new ClaimsPrincipal());
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IFeatureContextResolver, FeatureContextResolver>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<ISiteResolver, SiteResolver>();
+builder.Services.AddSignalR();
 
 builder.Services.AddProblemDetails(opts =>
 {
@@ -139,13 +138,6 @@ builder.Host.UseWolverine(opts =>
     opts.PersistMessagesWithSqlServer(connectionString, role:MessageStoreRole.Ancillary).Enroll<NotificationsDbContext>();
     
     opts.UseFluentValidation();
-
-    opts.UseSignalR();
-    opts.Publish(x =>
-    {
-        x.MessagesImplementing<ISignalRMessage>();
-        x.ToSignalR();
-    });
 });
 
 builder.Services.AddCors();
@@ -169,6 +161,8 @@ else
     app.UseHsts();
 }
 
+app.UseRouting();
+
 app.UseCors(opt => opt.WithOrigins("http://localhost:5173").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 
 app.UseHttpsRedirection();
@@ -187,6 +181,6 @@ app.MapWolverineEndpoints(opts =>
     opts.WarmUpRoutes = RouteWarmup.Eager;
 });
 
-app.MapWolverineSignalRHub("/hubs/notifications");
+app.MapHub<NotificationsHub>("/hubs/notifications").RequireAuthorization();
 
 app.Run();

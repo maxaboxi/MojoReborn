@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Mojo.Modules.Forum.Data;
@@ -13,13 +14,14 @@ public class EditForumPostHandler
     public static async Task<EditForumPostResponse> Handle(
         EditForumPostCommand command,
         ForumDbContext db,
-        ClaimsPrincipal claimsPrincipal,
+        IHttpContextAccessor httpContextAccessor,
         IUserService userService,
         IFeatureContextResolver featureContextResolver,
         IPermissionService permissionService,
         ILogger<EditForumPostHandler> logger,
         CancellationToken ct)
     {
+        var claimsPrincipal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
         var user = await userService.GetUserAsync(claimsPrincipal, ct) ?? throw new UnauthorizedAccessException();
         
         if (user.LegacyId == null)
