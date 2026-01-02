@@ -207,10 +207,10 @@ namespace Mojo.Modules.Blog.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("mp_Blogs", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("mp_Blogs", (string)null);
                 });
 
             modelBuilder.Entity("Mojo.Modules.Blog.Domain.Entities.BlogPostCategory", b =>

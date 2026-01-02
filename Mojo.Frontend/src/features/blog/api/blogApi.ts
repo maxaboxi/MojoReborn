@@ -79,11 +79,11 @@ export const blogApi = {
     }
   },
   getCategories: async (pageId: number): Promise<CategoryDto[]> => {
-    const response = await apiClient.get<CategoryDto[]>('/blog/categories', {
+    const response = await apiClient.get<{ categories: CategoryDto[] }>('/blog/categories', {
       params: { pageId },
     });
 
-    return response.data;
+    return response.data.categories;
   },
   createCategory: async (request: CreateCategoryRequest): Promise<CategoryMutationResponse> => {
     const response = await apiClient.post<CategoryMutationResponse>('/blog/category', request);

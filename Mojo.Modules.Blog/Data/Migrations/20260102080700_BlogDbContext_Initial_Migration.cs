@@ -27,6 +27,12 @@ namespace Mojo.Modules.Blog.Data.Migrations
                 {
                     table.PrimaryKey("PK_BlogSubscriptions", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_mp_Blogs_ItemUrl",
+                table: "mp_Blogs",
+                column: "ItemUrl",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -34,6 +40,10 @@ namespace Mojo.Modules.Blog.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "BlogSubscriptions");
+
+            migrationBuilder.DropIndex(
+                name: "IX_mp_Blogs_ItemUrl",
+                table: "mp_Blogs");
         }
     }
 }

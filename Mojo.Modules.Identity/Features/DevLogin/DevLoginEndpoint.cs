@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Hosting;
 using Wolverine.Http;
 
 namespace Mojo.Modules.Identity.Features.DevLogin;
@@ -9,8 +11,16 @@ namespace Mojo.Modules.Identity.Features.DevLogin;
 public class DevLoginEndpoint
 {
     [WolverineGet("/api/auth/dev-login")]
-    public static async Task<IResult> Get(string? email, HttpContext context)
+    public static async Task<IResult> Get(
+        string? email, 
+        HttpContext context,
+        IWebHostEnvironment env)
     {
+        if (!env.IsDevelopment())
+        {
+            return Results.NotFound();
+        }
+        
         var userEmail = email ?? "dev@user.com";
         
         var claims = new List<Claim>

@@ -34,11 +34,11 @@ public class EditCategoryHandler
 
         var existingCategoryInDb = await db.Categories
             .Where(c => c.ModuleId == featureContextDto.ModuleId)
-            .Where(c => c.CategoryName == command.CategoryName)
+            .Where(c => c.Id == command.CategoryId)
             .FirstOrDefaultAsync(ct) ?? throw new KeyNotFoundException();
-            
-        await db.Categories.AddAsync(new BlogCategory { CategoryName = command.CategoryName, ModuleId = featureContextDto.ModuleId },
-            ct);
+        
+        existingCategoryInDb.CategoryName = command.CategoryName;
+
         await db.SaveChangesAsync(ct);
 
         return new EditCategoryResponse();

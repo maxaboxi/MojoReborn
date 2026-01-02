@@ -35,7 +35,12 @@ public class CreateCategoryHandler
         var existingCategoryInDb = await db.Categories
             .Where(c => c.ModuleId == featureContextDto.ModuleId)
             .Where(c => c.CategoryName == command.CategoryName)
-            .FirstOrDefaultAsync(ct) ?? throw new InvalidOperationException("Category with the given name already exists.");
+            .FirstOrDefaultAsync(ct);
+
+        if (existingCategoryInDb != null)
+        {
+            throw new InvalidOperationException("Category with the given name already exists.");
+        }
             
         await db.Categories.AddAsync(new BlogCategory { CategoryName = command.CategoryName, ModuleId = featureContextDto.ModuleId },
             ct);

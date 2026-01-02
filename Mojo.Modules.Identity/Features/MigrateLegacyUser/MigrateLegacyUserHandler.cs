@@ -119,14 +119,22 @@ public class MigrateLegacyUserHandler
 
     private static bool VerifyPassword(IConfiguration configuration, string providedPassword, LegacyUser legacyUser, ILogger<MigrateLegacyUserHandler> logger)
     {
-        if (legacyUser.PwdFormat == 0)
+        if (legacyUser.PwdFormat == 0 && !string.IsNullOrEmpty(legacyUser.Pwd))
         {
-            return providedPassword == legacyUser.Pwd;
+            return CryptographicOperations.FixedTimeEquals(
+                Encoding.UTF8.GetBytes(providedPassword),
+                Encoding.UTF8.GetBytes(legacyUser.Pwd));
         }
         
-        if (string.IsNullOrEmpty(legacyUser.PasswordHash) || string.IsNullOrEmpty(legacyUser.PasswordSalt))
+        if (string.IsNullOrEmpty(legacyUser.PasswordHash))
         {
-            logger.LogError("Password hash {passwordHash} or password salt {passwordSalt} is missing.", legacyUser.PasswordHash, legacyUser.PasswordSalt);
+            logger.LogError("Password hash is missing.");
+            return false;
+        }
+        
+        if (string.IsNullOrEmpty(legacyUser.PasswordSalt))
+        {
+            logger.LogError("Password salt is missing.");
             return false;
         }
         
@@ -147,8 +155,11 @@ public class MigrateLegacyUserHandler
         using var hashAlgorithm = CreateHashAlgorithm(algorithm, configuration);
         var hashBytes = hashAlgorithm.ComputeHash(combinedBytes);
         var computedHash = Convert.ToBase64String(hashBytes);
-            
-        return computedHash == legacyUser.PasswordHash;
+
+        return CryptographicOperations.FixedTimeEquals(
+            Encoding.UTF8.GetBytes(computedHash),
+            Encoding.UTF8.GetBytes(legacyUser.PasswordHash)
+            );
     }
 
     private static HashAlgorithm CreateHashAlgorithm(string algorithm, IConfiguration configuration)

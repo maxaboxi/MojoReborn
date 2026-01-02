@@ -35,9 +35,9 @@ public class DeleteBlogCommentHandler
         
         var hasAdminRights = permissionService.HasAdministratorRightsToThePage(user, featureContextDto);
 
-        if (comment.UserGuid != user.Id || !hasAdminRights)
+        if (comment.UserGuid != user.Id && !hasAdminRights)
         {
-            throw new KeyNotFoundException();
+            throw new UnauthorizedAccessException();
         }
 
         if (hasAdminRights)
@@ -45,12 +45,13 @@ public class DeleteBlogCommentHandler
             comment.Content = "[Deleted by Moderator]";
             comment.ModeratedBy = user.Id;
             comment.ModerationStatus = 1;
-            comment.ModifiedAt = DateTime.UtcNow;
         }
         else
         {
-            db.BlogComments.Remove(comment);
+            comment.Content = "[Deleted by User]";
         }
+        
+        comment.ModifiedAt = DateTime.UtcNow;
         
         await db.SaveChangesAsync(ct);
         

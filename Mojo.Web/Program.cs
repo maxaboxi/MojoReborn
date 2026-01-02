@@ -94,14 +94,17 @@ builder.Services.AddProblemDetails(opts =>
             case UnauthorizedAccessException:
                 ctx.ProblemDetails.Status = StatusCodes.Status403Forbidden;
                 ctx.ProblemDetails.Title = "Access denied";
+                ctx.HttpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
                 break;
             case KeyNotFoundException:
                 ctx.ProblemDetails.Status = StatusCodes.Status404NotFound;
                 ctx.ProblemDetails.Title = "Resource not found";
+                ctx.HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
                 break;
             case InvalidOperationException:
                 ctx.ProblemDetails.Status = StatusCodes.Status400BadRequest;
                 ctx.ProblemDetails.Title = ctx.Exception.Message;
+                ctx.HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
                 break;
         }
     };
@@ -169,7 +172,9 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseExceptionHandler("/Error", createScopeForErrors: true);
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
 app.MapWolverineEndpoints(opts =>
 {
     opts.UseFluentValidationProblemDetailMiddleware();

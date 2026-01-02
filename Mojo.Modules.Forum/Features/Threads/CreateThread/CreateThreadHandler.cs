@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Mojo.Modules.Forum.Data;
 using Mojo.Modules.Forum.Domain.Entities;
 using Mojo.Shared.Domain;

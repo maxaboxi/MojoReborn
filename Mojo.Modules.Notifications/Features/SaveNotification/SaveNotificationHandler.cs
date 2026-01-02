@@ -22,6 +22,8 @@ public class SaveNotificationHandler
             Message = command.Message,
             Url = command.TargetUrl,
             IsRead = false,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         }, ct);
         
         await db.SaveChangesAsync(ct);

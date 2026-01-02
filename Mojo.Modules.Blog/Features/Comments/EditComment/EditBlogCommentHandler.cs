@@ -35,7 +35,7 @@ public class EditBlogCommentHandler
         
         var hasAdminRights = permissionService.HasAdministratorRightsToThePage(user, featureContextDto);
 
-        if (comment.UserGuid != user.Id || !hasAdminRights)
+        if (comment.UserGuid != user.Id && !hasAdminRights)
         {
             throw new UnauthorizedAccessException();
         }
@@ -48,7 +48,7 @@ public class EditBlogCommentHandler
         {
             comment.ModeratedBy = user.Id;
             comment.ModerationStatus = 1;
-            comment.ModerationReason = comment.ModerationReason;
+            comment.ModerationReason = command.ModerationReason;
         }
         
         await db.SaveChangesAsync(ct);

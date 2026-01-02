@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Mojo.Modules.Forum.Data;
 using Mojo.Modules.Forum.Domain.Entities;
 using Mojo.Shared.Domain;
@@ -38,8 +37,8 @@ public class CreateForumPostHandler
         }
         
         var thread = await db.ForumThreads
-            .FirstOrDefaultAsync(t => t.Id == command.ThreadId && t.ForumId == command.ForumId, ct) ??
-                     throw new KeyNotFoundException();
+                .FromSqlRaw("SELECT * FROM mp_ForumThreads WITH (UPDLOCK) WHERE ThreadId = {0}", command.ThreadId)
+                .FirstOrDefaultAsync(ct) ?? throw new KeyNotFoundException();
 
         var currentMaxSequence = (await db.ForumPosts.AsNoTracking()
             .Where(x => x.ThreadId == command.ThreadId)

@@ -1,7 +1,3 @@
 namespace Mojo.Shared.Dtos.SiteStructure;
 
-public class SiteDto
-{
-    public int SiteId { get; set; }
-    public Guid SiteGuid { get; set; }
-}
+public record SiteDto(int SiteId, Guid SiteGuid);

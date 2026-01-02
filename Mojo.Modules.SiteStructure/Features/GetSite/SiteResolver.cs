@@ -22,11 +22,9 @@ public class SiteResolver(SiteStructureDbContext db, IHttpContextAccessor httpCo
 
       if (!string.IsNullOrEmpty(forcedSiteId))
       {
-         _resolvedSite = await db.Sites.AsNoTracking().Where(x => x.SiteId == int.Parse(forcedSiteId)).Select(x => new SiteDto
-         {
-            SiteId = x.SiteId,
-            SiteGuid =  x.SiteGuid
-         }).FirstOrDefaultAsync(ct);
+         _resolvedSite = await db.Sites.AsNoTracking()
+            .Where(x => x.SiteId == int.Parse(forcedSiteId))
+            .Select(x => new SiteDto(x.SiteId, x.SiteGuid)).FirstOrDefaultAsync(ct);
          
          return _resolvedSite ?? throw new Exception($"No sites configured in database with the forced site id: {forcedSiteId}.");
       }
@@ -41,31 +39,21 @@ public class SiteResolver(SiteStructureDbContext db, IHttpContextAccessor httpCo
       var host = context.Request.Host.Host;
 
       _resolvedSite = await db.SiteHosts.AsNoTracking().Where(x => x.HostName == host)
-         .Select(x => new SiteDto
-         {
-            SiteId = x.SiteId,
-            SiteGuid = x.SiteGuid
-         })
+         .Select(x => new SiteDto(x.SiteId, x.SiteGuid))
          .FirstOrDefaultAsync(ct);
 
       if (_resolvedSite == null)
       {
          _resolvedSite = await db.Sites.AsNoTracking().Where(x => x.SiteName == host || x.SiteAlias == host)
-            .Select(x => new SiteDto
-            {
-               SiteId = x.SiteId,
-               SiteGuid = x.SiteGuid
-            })
+            .Select(x => new SiteDto(x.SiteId, x.SiteGuid))
             .FirstOrDefaultAsync(ct);
       }
 
       if (_resolvedSite == null)
       {
-         _resolvedSite = await db.Sites.AsNoTracking().Where(x => x.SiteId == 1).Select(x => new SiteDto
-         {
-            SiteId = x.SiteId,
-            SiteGuid =  x.SiteGuid
-         }).FirstOrDefaultAsync(ct);
+         _resolvedSite = await db.Sites.AsNoTracking()
+            .Where(x => x.SiteId == 1).Select(x => new SiteDto(x.SiteId, x.SiteGuid))
+            .FirstOrDefaultAsync(ct);
       }
 
       return _resolvedSite ?? throw new Exception("No sites configured in database.");

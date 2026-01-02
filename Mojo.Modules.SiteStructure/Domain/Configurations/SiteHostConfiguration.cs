@@ -15,5 +15,7 @@ public class SiteHostConfiguration : IEntityTypeConfiguration<SiteHost>
         builder.Property(e => e.HostId).HasColumnName("HostID");
         builder.Property(e => e.HostName).HasMaxLength(255);
         builder.Property(e => e.SiteId).HasColumnName("SiteID");
+
+        builder.HasIndex(e => e.HostName);
     }
 }

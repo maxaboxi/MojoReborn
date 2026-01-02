@@ -30,6 +30,5 @@ public class ModuleConfiguration : IEntityTypeConfiguration<Module>
         builder.Property(e => e.AuthorizedEditRoles).HasColumnName("AuthorizedEditRoles");
         builder.Property(e => e.CreatedByUserId).HasColumnName("CreatedByUserID").HasDefaultValue(-1);
             
-        builder.HasIndex(e => e.ModuleGuid, "idxModulesGuid");
     }
 }
