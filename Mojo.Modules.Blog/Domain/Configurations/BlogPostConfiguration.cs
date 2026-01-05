@@ -30,7 +30,7 @@ public class BlogPostConfiguration : IEntityTypeConfiguration<BlogPost>
             .WithMany(c => c.BlogPosts)
             .UsingEntity<BlogPostCategory>();
 
-        builder.HasIndex(e => e.Slug)
+        builder.HasIndex(e => new { e.ModuleGuid, e.Slug })
             .IsUnique();
     }
 }

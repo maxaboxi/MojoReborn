@@ -24,7 +24,7 @@ public class GetNotificationsHandler
             .Where(x => x.UserId == user.Id)
             .OrderByDescending(x => x.CreatedAt)
             .Select(x => new NotificationDto(
-                x.Id, x.Message, x.Url, x.IsRead, x.CreatedAt))
+                x.Id, x.Message, x.Url, x.FeatureName, x.IsRead, x.CreatedAt, x.EntityGuid, x.EntityId))
             .ToListAsync(ct);
 
         return new GetNotificationsResponse { Notifications = notifications };

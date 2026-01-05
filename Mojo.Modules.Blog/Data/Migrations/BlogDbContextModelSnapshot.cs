@@ -207,7 +207,7 @@ namespace Mojo.Modules.Blog.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Slug")
+                    b.HasIndex("ModuleGuid", "Slug")
                         .IsUnique();
 
                     b.ToTable("mp_Blogs", (string)null);

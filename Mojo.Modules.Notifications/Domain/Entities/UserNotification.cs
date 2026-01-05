@@ -6,6 +6,8 @@ public class UserNotification
     public Guid UserId { get; set; }
     public Guid ModuleGuid { get; set; }
     public string FeatureName { get; set; } = string.Empty;
+    public Guid? EntityGuid { get; set; }
+    public int? EntityId { get; set; }
     public string Message { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
     public bool IsRead { get; set; }

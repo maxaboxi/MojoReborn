@@ -12,7 +12,7 @@ using Mojo.Modules.Notifications.Data;
 namespace Mojo.Modules.Notifications.Data.Migrations
 {
     [DbContext(typeof(NotificationsDbContext))]
-    [Migration("20251230204849_NotificationsDbContext_Initial_Migration")]
+    [Migration("20260105182950_NotificationsDbContext_Initial_Migration")]
     partial class NotificationsDbContext_Initial_Migration
     {
         /// <inheritdoc />
@@ -34,6 +34,12 @@ namespace Mojo.Modules.Notifications.Data.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("EntityGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("EntityId")
+                        .HasColumnType("int");
 
                     b.Property<string>("FeatureName")
                         .IsRequired()

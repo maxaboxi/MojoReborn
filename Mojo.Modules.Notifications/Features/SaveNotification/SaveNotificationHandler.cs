@@ -24,7 +24,9 @@ public class SaveNotificationHandler
             Url = command.TargetUrl,
             IsRead = false,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+            EntityGuid = command.EntityGuid,
+            EntityId = command.EntityId
         };
         await db.UserNotifications.AddAsync(notification, ct);
         
@@ -35,9 +37,12 @@ public class SaveNotificationHandler
                 new NotificationDto(
                     notification.Id, 
                     notification.Message, 
-                    notification.Url, 
+                    notification.Url,
+                    notification.FeatureName,
                     false, 
-                    notification.CreatedAt)
+                    notification.CreatedAt,
+                    command.EntityGuid,
+                    command.EntityId)
                 ,ct);
     }
 }

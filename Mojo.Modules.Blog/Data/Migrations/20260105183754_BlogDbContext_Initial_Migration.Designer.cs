@@ -12,7 +12,7 @@ using Mojo.Modules.Blog.Data;
 namespace Mojo.Modules.Blog.Data.Migrations
 {
     [DbContext(typeof(BlogDbContext))]
-    [Migration("20260102080700_BlogDbContext_Initial_Migration")]
+    [Migration("20260105183754_BlogDbContext_Initial_Migration")]
     partial class BlogDbContext_Initial_Migration
     {
         /// <inheritdoc />
@@ -210,7 +210,7 @@ namespace Mojo.Modules.Blog.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Slug")
+                    b.HasIndex("ModuleGuid", "Slug")
                         .IsUnique();
 
                     b.ToTable("mp_Blogs", (string)null);

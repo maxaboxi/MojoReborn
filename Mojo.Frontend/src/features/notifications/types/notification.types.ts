@@ -11,8 +11,11 @@ export type NotificationDto = {
   notificationId: string;
   message: string;
   url: string;
+  featureName: string;
   isRead: boolean;
   createdAt: string;
+  entityGuid: string | null;
+  entityId: number | null;
 };
 
 export type GetNotificationsResponse = {

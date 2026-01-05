@@ -14,6 +14,7 @@ import {
 import { Notifications as NotificationsIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../providers/useNotifications';
+import { buildNotificationUrl } from '../utils/buildNotificationUrl';
 import type { NotificationDto } from '../types/notification.types';
 import './NotificationsDropdown.css';
 
@@ -60,9 +61,9 @@ export const NotificationsDropdown = () => {
         markAsRead(notification.notificationId);
       }
       handleClose();
-      if (notification.url) {
-        navigate(notification.url);
-      }
+      const targetUrl = buildNotificationUrl(notification);
+      console.log(targetUrl)
+      navigate(targetUrl);
     },
     [markAsRead, handleClose, navigate]
   );

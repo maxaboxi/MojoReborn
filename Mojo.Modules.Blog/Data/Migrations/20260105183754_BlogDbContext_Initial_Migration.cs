@@ -29,9 +29,9 @@ namespace Mojo.Modules.Blog.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_mp_Blogs_ItemUrl",
+                name: "IX_mp_Blogs_ModuleGuid_ItemUrl",
                 table: "mp_Blogs",
-                column: "ItemUrl",
+                columns: new[] { "ModuleGuid", "ItemUrl" },
                 unique: true);
         }
 
@@ -42,7 +42,7 @@ namespace Mojo.Modules.Blog.Data.Migrations
                 name: "BlogSubscriptions");
 
             migrationBuilder.DropIndex(
-                name: "IX_mp_Blogs_ItemUrl",
+                name: "mIX_mp_Blogs_ModuleGuid_ItemUrl",
                 table: "mp_Blogs");
         }
     }

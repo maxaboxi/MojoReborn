@@ -61,7 +61,7 @@ public static partial class CreatePostHandler
         return
         (
             new CreationResponse<CreatePostResponse>($"/blog/{newPost.Slug}", new CreatePostResponse(newPost.BlogPostId)),
-            new PostCreatedEvent(newPost.ModuleGuid, newPost.BlogPostId, user.Id, newPost.Title, newPost.Author,
+            new PostCreatedEvent(newPost.ModuleGuid, newPost.BlogPostId, newPost.Id, user.Id, newPost.Title, newPost.Author,
                 newPost.Slug)
         );
     }

@@ -19,6 +19,8 @@ namespace Mojo.Modules.Notifications.Data.Migrations
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ModuleGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FeatureName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    EntityGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    EntityId = table.Column<int>(type: "int", nullable: true),
                     Message = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
                     Url = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
                     IsRead = table.Column<bool>(type: "bit", nullable: false),

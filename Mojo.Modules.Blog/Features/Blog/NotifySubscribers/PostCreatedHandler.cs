@@ -19,7 +19,9 @@ public class PostCreatedHandler
                         createdEvent.ModuleGuid,
                         $"New blogpost published by {createdEvent.Author}!", 
                         createdEvent.Slug, 
-                        FeatureNames.Blog)
+                        FeatureNames.Blog,
+                        createdEvent.BlogPostGuid,
+                        createdEvent.BlogPostId)
                     )
                 .ToListAsync();
     }

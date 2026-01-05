@@ -32,6 +32,12 @@ namespace Mojo.Modules.Notifications.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("EntityGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("EntityId")
+                        .HasColumnType("int");
+
                     b.Property<string>("FeatureName")
                         .IsRequired()
                         .HasMaxLength(50)
