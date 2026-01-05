@@ -7,6 +7,7 @@ using Mojo.Modules.Identity.Domain.Entities;
 using Mojo.Modules.Identity.Features.Services;
 using Mojo.Modules.Notifications.Data;
 using Mojo.Modules.Notifications.Domain;
+using Mojo.Modules.Notifications.Features.DeleteNotifications;
 using Mojo.Modules.SiteStructure.Data;
 using Mojo.Modules.SiteStructure.Features.GetFeatureContext;
 using Mojo.Modules.SiteStructure.Features.GetSite;
@@ -147,6 +148,7 @@ builder.Services.AddCors();
 
 builder.Services.AddMemoryCache();
 builder.Services.AddWolverineHttp();
+builder.Services.AddHostedService<DeleteNotificationsScheduler>();
 
 var app = builder.Build();
 
