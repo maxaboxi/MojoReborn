@@ -4,6 +4,7 @@ export interface PageMenuItem {
   title: string;
   url: string;
   featureName?: string | null;
+  moduleGuid?: string | null;
   viewRoles: string;
   order: number;
   children: PageMenuItem[];

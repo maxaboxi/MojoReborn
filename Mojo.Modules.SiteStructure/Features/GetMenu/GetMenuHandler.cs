@@ -59,6 +59,7 @@ public class GetMenuHandler
             {
                 Id = p.PageId,
                 ParentId = p.ParentId,
+                ModuleGuid = p.PageModules.Where(pm => pm.PageId == p.PageId).Select(pm => pm.Module.ModuleGuid).FirstOrDefault(),
                 Title = p.PageName,
                 FeatureName = p.PageModules.Where(pm => pm.PageId == p.PageId).Select(pm => pm.Module.ModuleDefinition.FeatureName).FirstOrDefault() ?? "Feature Name Missing",
                 Url = p.Url.Replace("~/", "/"), // Fix legacy ASP.NET paths

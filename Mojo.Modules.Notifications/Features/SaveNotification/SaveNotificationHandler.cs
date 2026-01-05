@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using Mojo.Modules.Notifications.Data;
 using Mojo.Modules.Notifications.Domain;
 using Mojo.Modules.Notifications.Domain.Entities;
+using Mojo.Modules.Notifications.Features.GetNotifications;
 using Mojo.Shared.Contracts.Notifications;
 
 namespace Mojo.Modules.Notifications.Features.SaveNotification;
@@ -14,7 +15,7 @@ public class SaveNotificationHandler
         IHubContext<NotificationsHub> hubContext,
         CancellationToken ct)
     {
-        await db.UserNotifications.AddAsync(new UserNotification
+        var notification = new UserNotification
         {
             UserId = command.UserToNotify,
             ModuleGuid = command.SourceModuleGuid,
@@ -24,16 +25,19 @@ public class SaveNotificationHandler
             IsRead = false,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
-        }, ct);
+        };
+        await db.UserNotifications.AddAsync(notification, ct);
         
         await db.SaveChangesAsync(ct);
         
         await hubContext.Clients.Group($"user:{command.UserToNotify}")
-            .SendAsync("Notification", new {
-                userId = command.UserToNotify.ToString(),
-                message = command.Message,
-                targetUrl = command.TargetUrl,
-                featureName = command.FeatureName
-            }, ct);
+            .SendAsync("Notification", 
+                new NotificationDto(
+                    notification.Id, 
+                    notification.Message, 
+                    notification.Url, 
+                    false, 
+                    notification.CreatedAt)
+                ,ct);
     }
 }

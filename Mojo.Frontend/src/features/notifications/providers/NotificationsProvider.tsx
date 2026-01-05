@@ -1,31 +1,47 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback, type ReactNode } from 'react';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@features/auth/providers/useAuth';
 import { buildHubUrl } from '@shared/config/env';
-import type { NotificationSavedMessage } from '../types/notification.types';
+import { useNotificationsQuery } from '../hooks/useNotificationsQuery';
+import { useMarkNotificationReadMutation } from '../hooks/useMarkNotificationReadMutation';
+import { notificationsQueryKeys } from '../hooks/notificationsQueryKeys';
 import { NotificationsContext, type NotificationsContextValue } from './NotificationsContext';
 
 const NOTIFICATIONS_HUB_PATH = '/hubs/notifications';
 const NOTIFICATION_EVENT = 'Notification';
 const RECONNECT_DELAYS_MS = [0, 2000, 10_000, 30_000];
-const NOTIFICATION_BUFFER_LIMIT = 25;
 const notificationsHubUrl = buildHubUrl(NOTIFICATIONS_HUB_PATH);
 
 export const NotificationsProvider = ({ children }: { children: ReactNode }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [status, setStatus] = useState<'idle' | 'connecting' | 'connected' | 'reconnecting' | 'disconnected' | 'error'>(
     'idle'
   );
-  const [notifications, setNotifications] = useState<NotificationSavedMessage[]>([]);
-  const [lastNotification, setLastNotification] = useState<NotificationSavedMessage | null>(null);
-  const [error, setError] = useState<Error | null>(null);
+  const [connectionError, setConnectionError] = useState<Error | null>(null);
   const connectionRef = useRef<HubConnection | null>(null);
-  const userIdRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    userIdRef.current = user?.id ?? null;
-  }, [user?.id]);
+  const { data, isLoading, error: queryError, refetch } = useNotificationsQuery();
+  const markReadMutation = useMarkNotificationReadMutation();
+
+  const notifications = useMemo(() => data?.notifications ?? [], [data?.notifications]);
+  const unreadCount = useMemo(() => notifications.filter((n) => !n.isRead).length, [notifications]);
+
+  const markAsRead = useCallback(
+    (notificationId: string) => {
+      const notification = notifications.find((n) => n.notificationId === notificationId);
+      if (notification && !notification.isRead) {
+        markReadMutation.mutate({ notificationId });
+      }
+    },
+    [notifications, markReadMutation]
+  );
+
+  const handleRefetch = useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
   useEffect(() => {
     let isActive = true;
@@ -54,9 +70,7 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
     };
 
     if (!isAuthenticated) {
-      setNotifications([]);
-      setLastNotification(null);
-      setError(null);
+      setConnectionError(null);
       setStatus('idle');
       void stopConnection();
       return () => {
@@ -66,7 +80,7 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
 
     const startConnection = async () => {
       setStatus('connecting');
-      setError(null);
+      setConnectionError(null);
 
       const newConnection = new HubConnectionBuilder()
         .withUrl(notificationsHubUrl, { withCredentials: true })
@@ -88,33 +102,20 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
         }
       });
 
-      const applyNotification = (payload: NotificationSavedMessage) => {
-        if (userIdRef.current && payload.userId !== userIdRef.current) {
-          return;
-        }
-
-        setLastNotification(payload);
-        setNotifications((prev) => {
-          const next = [...prev, payload];
-          if (next.length > NOTIFICATION_BUFFER_LIMIT) {
-            next.splice(0, next.length - NOTIFICATION_BUFFER_LIMIT);
-          }
-          return next;
-        });
-      };
-
       newConnection.onreconnected(() => {
         if (isActive) {
           setStatus('connected');
+          // Refetch notifications after reconnection
+          void queryClient.invalidateQueries({ queryKey: notificationsQueryKeys.list() });
         }
       });
 
-      newConnection.on(NOTIFICATION_EVENT, (payload: NotificationSavedMessage) => {
+      newConnection.on(NOTIFICATION_EVENT, () => {
         if (!isActive) {
           return;
         }
-
-        applyNotification(payload);
+        // Refetch notifications when a new one arrives via SignalR
+        void queryClient.invalidateQueries({ queryKey: notificationsQueryKeys.list() });
       });
 
       try {
@@ -130,7 +131,7 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
           return;
         }
         console.error('Failed to connect to notifications hub', startError);
-        setError(startError as Error);
+        setConnectionError(startError as Error);
         setStatus('error');
       }
     };
@@ -141,11 +142,20 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
       isActive = false;
       void stopConnection();
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, queryClient]);
 
   const value = useMemo<NotificationsContextValue>(
-    () => ({ connection, status, notifications, lastNotification, error }),
-    [connection, error, lastNotification, notifications, status]
+    () => ({
+      connection,
+      status,
+      notifications,
+      unreadCount,
+      isLoading,
+      error: connectionError ?? queryError ?? null,
+      markAsRead,
+      refetch: handleRefetch,
+    }),
+    [connection, status, notifications, unreadCount, isLoading, connectionError, queryError, markAsRead, handleRefetch]
   );
 
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;

@@ -29,6 +29,7 @@ import { useDeleteCommentMutation } from '../hooks/useDeleteCommentMutation';
 import type { CommentFormValues } from '../components/CommentForm';
 import { BlogCommentsList } from '../components/BlogCommentsList';
 import { BlogCommentFormPanel } from '../components/BlogCommentFormPanel';
+import { BlogSubscribeButton } from '../components/BlogSubscribeButton';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { useBlogPageContext } from '../hooks/useBlogPageContext';
 import { useAuth } from '@features/auth/providers/useAuth';
@@ -44,7 +45,7 @@ export const BlogPostDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated } = useAuth();
-  const { blogPageId, blogPageUrl, blogPageTitle, menuLoading, menuError } = useBlogPageContext();
+  const { blogPageId, blogPageUrl, blogPageTitle, blogModuleGuid, menuLoading, menuError } = useBlogPageContext();
   const pageUrlQuery = blogPageUrl ? `?pageUrl=${encodeURIComponent(blogPageUrl)}` : '';
   const {
     data: post,
@@ -448,6 +449,7 @@ export const BlogPostDetail = () => {
           <Button variant="outlined" startIcon={<Share />} size="large">
             Share
           </Button>
+          <BlogSubscribeButton pageId={blogPageId} moduleGuid={blogModuleGuid} />
         </Box>
       </Box>
 

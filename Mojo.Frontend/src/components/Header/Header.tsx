@@ -1,6 +1,7 @@
-import { AppBar, Toolbar, IconButton, Box, Badge, useMediaQuery, useTheme } from '@mui/material';
-import { Notifications, Mail, Brightness4, Brightness7, Menu } from '@mui/icons-material';
+import { AppBar, Toolbar, IconButton, Box, useMediaQuery, useTheme } from '@mui/material';
+import { Mail, Brightness4, Brightness7, Menu } from '@mui/icons-material';
 import { useTheme as useAppTheme } from '@shared/theme/useTheme';
+import { NotificationsDropdown } from '@features/notifications/components/NotificationsDropdown';
 import { UserMenu } from '../UserMenu/UserMenu';
 import './Header.css';
 
@@ -35,11 +36,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
         <Box className="header-spacer" />
         
         <Box className="header-actions">
-          <IconButton color="inherit" size="small">
-            <Badge badgeContent={3} color="error">
-              <Notifications />
-            </Badge>
-          </IconButton>
+          <NotificationsDropdown />
 
           <IconButton color="inherit" size="small">
             <Mail />

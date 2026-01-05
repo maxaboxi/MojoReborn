@@ -28,6 +28,7 @@ export const useBlogPageContext = () => {
     blogPageId: blogPage?.id ?? null,
     blogPageUrl: blogPage ? normalizeMenuPath(blogPage.url) : null,
     blogPageTitle: blogPage?.title ?? null,
+    blogModuleGuid: blogPage?.moduleGuid ?? null,
     menuLoading: loading,
     menuError: error,
   } as const;

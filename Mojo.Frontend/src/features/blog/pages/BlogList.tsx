@@ -3,6 +3,7 @@ import { Add } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useBlogPostsQuery } from '../hooks/useBlogPostsQuery';
 import { BlogCard } from '../components/BlogCard';
+import { BlogSubscribeButton } from '../components/BlogSubscribeButton';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { useBlogPageContext } from '../hooks/useBlogPageContext';
 import { useAuth } from '@features/auth/providers/useAuth';
@@ -10,7 +11,7 @@ import { savePostLoginRedirect } from '@features/auth/utils/postLoginRedirect';
 import './BlogList.css';
 
 export const BlogList = () => {
-  const { blogPageId, blogPageUrl, menuLoading, menuError } = useBlogPageContext();
+  const { blogPageId, blogPageUrl, blogModuleGuid, menuLoading, menuError } = useBlogPageContext();
   const {
     data,
     isLoading: loadingPosts,
@@ -56,22 +57,25 @@ export const BlogList = () => {
             Discover our latest articles and insights
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => {
-            const target = `/blog/create${pageUrlQuery}`;
-            if (isAuthenticated) {
-              navigate(target);
-              return;
-            }
-            savePostLoginRedirect(target);
-            navigate(`/auth/login?redirect=${encodeURIComponent(target)}`);
-          }}
-          size="large"
-        >
-          Create New Post
-        </Button>
+        <Stack direction="row" spacing={2}>
+          <BlogSubscribeButton pageId={blogPageId} moduleGuid={blogModuleGuid} />
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => {
+              const target = `/blog/create${pageUrlQuery}`;
+              if (isAuthenticated) {
+                navigate(target);
+                return;
+              }
+              savePostLoginRedirect(target);
+              navigate(`/auth/login?redirect=${encodeURIComponent(target)}`);
+            }}
+            size="large"
+          >
+            Create New Post
+          </Button>
+        </Stack>
       </Box>
 
       {posts.length === 0 ? (

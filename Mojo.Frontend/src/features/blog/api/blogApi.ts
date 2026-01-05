@@ -23,6 +23,13 @@ import type {
   DeleteCommentRequest,
   DeleteCommentResponse,
 } from '../types/blog.types';
+import type {
+  SubscribeToBlogRequest,
+  SubscribeToBlogResponse,
+  UnsubscribeFromBlogRequest,
+  UnsubscribeFromBlogResponse,
+  GetBlogSubscriptionsResponse,
+} from '@shared/types/subscription.types';
 
 type GetPostsParams = {
   pageId: number;
@@ -123,6 +130,16 @@ export const blogApi = {
     const response = await apiClient.delete<DeleteCommentResponse>(
       `/${pageId}/blog/posts/${blogPostId}/comment/${blogCommentId}`
     );
+    return response.data;
+  },
+  subscribe: async (request: SubscribeToBlogRequest): Promise<SubscribeToBlogResponse> => {
+    await apiClient.post('/blog/subscribe', request);
+  },
+  unsubscribe: async ({ pageId, subscriptionId }: UnsubscribeFromBlogRequest): Promise<UnsubscribeFromBlogResponse> => {
+    await apiClient.post('/blog/unsubscribe', { pageId, subscriptionId });
+  },
+  getSubscriptions: async (): Promise<GetBlogSubscriptionsResponse> => {
+    const response = await apiClient.get<GetBlogSubscriptionsResponse>('/blog/subscriptions');
     return response.data;
   },
 };

@@ -1,6 +1,3 @@
 namespace Mojo.Modules.Blog.Features.Blog.Unsubscribe;
 
-public class UnsubscribeFromBlogCommand
-{
-    
-}
+public record UnsubscribeFromBlogCommand(int PageId, Guid SubscriptionId);

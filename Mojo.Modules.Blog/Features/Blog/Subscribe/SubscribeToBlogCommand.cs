@@ -1,3 +1,3 @@
 namespace Mojo.Modules.Blog.Features.Blog.Subscribe;
 
-public record SubscribeToBlogCommand;
+public record SubscribeToBlogCommand(int PageId);
