@@ -24,7 +24,7 @@ public class CreateCategoryHandler
         var user = await userService.GetUserAsync(claimsPrincipal, ct) 
                    ?? throw new UnauthorizedAccessException();
 
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Blog, ct)
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, command.Name, ct)
                                 ?? throw new KeyNotFoundException();
         
         if (!permissionService.CanEdit(user, featureContextDto))

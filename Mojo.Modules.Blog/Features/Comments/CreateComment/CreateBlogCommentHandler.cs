@@ -22,7 +22,7 @@ public class CreateBlogCommentHandler
         var claimsPrincipal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
         var user = await userService.GetUserAsync(claimsPrincipal, ct);
         
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Blog, ct)
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, command.Name, ct)
                                 ?? throw new KeyNotFoundException();
 
         var blogPost = await db.BlogPosts

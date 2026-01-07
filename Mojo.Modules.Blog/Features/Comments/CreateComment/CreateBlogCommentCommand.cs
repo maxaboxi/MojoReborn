@@ -1,9 +1,11 @@
 using FluentValidation;
+using Mojo.Shared.Domain;
 
 namespace Mojo.Modules.Blog.Features.Comments.CreateComment;
 
 public record CreateBlogCommentCommand(int PageId, Guid BlogPostId, string Author, string Title, string Content)
 {
+    public string Name => FeatureNames.Blog;
     public string? UserIpAddress { get; set; }
     public class CreateBlogCommentValidator : AbstractValidator<CreateBlogCommentCommand>
     {

@@ -1,9 +1,12 @@
 ﻿using FluentValidation;
+using Mojo.Shared.Domain;
 
 namespace Mojo.Modules.Blog.Features.Posts.CreatePost;
 
 public record CreatePostCommand(int PageId, string Title, string SubTitle, string Content, List<CreatePostCategoryDto> Categories)
 {
+    public string Name => FeatureNames.Blog;
+
     public class CreatePostValidator : AbstractValidator<CreatePostCommand>
     {
         public CreatePostValidator()

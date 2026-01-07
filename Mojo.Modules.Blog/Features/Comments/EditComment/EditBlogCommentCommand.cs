@@ -1,9 +1,12 @@
 using FluentValidation;
+using Mojo.Shared.Domain;
 
 namespace Mojo.Modules.Blog.Features.Comments.EditComment;
 
 public record EditBlogCommentCommand(int PageId, Guid BlogPostId, Guid BlogCommentId, string Title, string Content, string? ModerationReason)
 {
+    public string Name => FeatureNames.Blog;
+
     public class CreateBlogCommentValidator : AbstractValidator<EditBlogCommentCommand>
     {
         public CreateBlogCommentValidator()

@@ -13,7 +13,7 @@ public class GetCategoriesHandler
         IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
-        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, FeatureNames.Blog, ct)
+        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, query.Name, ct)
                                 ?? throw new KeyNotFoundException();
 
         var categories = await db.Categories

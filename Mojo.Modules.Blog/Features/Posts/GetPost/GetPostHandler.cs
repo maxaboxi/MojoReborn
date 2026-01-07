@@ -13,7 +13,7 @@ public static class GetPostHandler
         IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
-        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, FeatureNames.Blog, ct)
+        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, query.Name, ct)
                                 ?? throw new KeyNotFoundException();
         
         var postResponse = await db.BlogPosts.AsNoTracking()

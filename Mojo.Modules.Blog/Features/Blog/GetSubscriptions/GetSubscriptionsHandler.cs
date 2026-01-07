@@ -23,7 +23,7 @@ public class GetSubscriptionsHandler
 
         var subscriptions = await db.BlogSubscriptions.Where(x =>
                 x.UserId == user.Id)
-            .Select(x => new SubscriptionDto(x.Id, x.ModuleGuid, FeatureNames.Blog, x.CreatedAt))
+            .Select(x => new SubscriptionDto(x.Id, x.ModuleGuid, query.Name, x.CreatedAt))
             .ToListAsync(ct);
 
         return new GetSubscriptionsResponse { Subscriptions = subscriptions };

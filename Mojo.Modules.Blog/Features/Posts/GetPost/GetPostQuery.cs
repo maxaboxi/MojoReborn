@@ -1,9 +1,12 @@
 using FluentValidation;
+using Mojo.Shared.Domain;
 
 namespace Mojo.Modules.Blog.Features.Posts.GetPost;
 
 public record GetPostQuery(int PageId, Guid BlogPostId, DateTime? LastCommentDate, int? Amount)
 {
+    public string Name => FeatureNames.Blog;
+
     public class GetPostQueryValidator : AbstractValidator<GetPostQuery>
     {
         public GetPostQueryValidator()

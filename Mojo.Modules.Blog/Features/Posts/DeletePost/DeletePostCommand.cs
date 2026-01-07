@@ -1,9 +1,12 @@
 using FluentValidation;
+using Mojo.Shared.Domain;
 
 namespace Mojo.Modules.Blog.Features.Posts.DeletePost;
 
 public record DeletePostCommand(int PageId, Guid Id)
 {
+    public string Name => FeatureNames.Blog;
+
     public class DeletePostCommandValidator : AbstractValidator<DeletePostCommand>
     {
         public DeletePostCommandValidator()

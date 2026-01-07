@@ -1,9 +1,12 @@
 ﻿using FluentValidation;
+using Mojo.Shared.Domain;
 
 namespace Mojo.Modules.Blog.Features.Posts.EditPost;
 
 public record EditPostCommand(int PageId, Guid BlogPostId, string Title, string SubTitle, string Content, List<EditPostCategoryDto> Categories)
 {
+    public string Name => FeatureNames.Blog;
+
     public class EditPostValidator : AbstractValidator<EditPostCommand>
     {
         public EditPostValidator()
