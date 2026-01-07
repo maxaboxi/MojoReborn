@@ -12,6 +12,7 @@ using Mojo.Modules.SiteStructure.Data;
 using Mojo.Modules.SiteStructure.Features.GetFeatureContext;
 using Mojo.Modules.SiteStructure.Features.GetSite;
 using Mojo.Shared.Interfaces.Identity;
+using Mojo.Shared.Interfaces.Security;
 using Mojo.Shared.Interfaces.SiteStructure;
 using Mojo.Web.Extensions;
 using Mojo.Web.Middleware;
@@ -121,6 +122,7 @@ builder.Host.UseWolverine(opts =>
     
     // Register Audit Logging Middleware for all handlers
     opts.Policies.AddMiddleware<AuditLoggingBehavior>();
+    opts.Policies.ForMessagesOfType<IFeatureRequest>().AddMiddleware<FeatureSecurityMiddleware>();
     
     opts.Durability.MessageStorageSchemaName = "wolverine";
     

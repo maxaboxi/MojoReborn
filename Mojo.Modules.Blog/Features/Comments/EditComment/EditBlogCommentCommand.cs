@@ -1,11 +1,14 @@
 using FluentValidation;
 using Mojo.Shared.Domain;
+using Mojo.Shared.Interfaces.Security;
 
 namespace Mojo.Modules.Blog.Features.Comments.EditComment;
 
-public record EditBlogCommentCommand(int PageId, Guid BlogPostId, Guid BlogCommentId, string Title, string Content, string? ModerationReason)
+public record EditBlogCommentCommand(int PageId, Guid BlogPostId, Guid BlogCommentId, string Title, string Content, string? ModerationReason) : IFeatureRequest
 {
     public string Name => FeatureNames.Blog;
+    public bool RequiresEditPermission => true;
+    public bool UserCanEdit => true;
 
     public class CreateBlogCommentValidator : AbstractValidator<EditBlogCommentCommand>
     {

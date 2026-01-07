@@ -1,10 +1,6 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Shared.Domain;
-using Mojo.Shared.Interfaces.Identity;
-using Mojo.Shared.Interfaces.SiteStructure;
 
 namespace Mojo.Modules.Blog.Features.Comments.EditComment;
 
@@ -13,29 +9,17 @@ public class EditBlogCommentHandler
     public static async Task<EditBlogCommentResponse> Handle(
         EditBlogCommentCommand command,
         BlogDbContext db,
-        IHttpContextAccessor httpContextAccessor,
-        IUserService userService,
-        IFeatureContextResolver featureContextResolver,
-        IPermissionService permissionService,
+        SecurityContext securityContext,
         CancellationToken ct)
     {
-        var claimsPrincipal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
-        var user = await userService.GetUserAsync(claimsPrincipal, ct) 
-                   ?? throw new UnauthorizedAccessException();
-
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, command.Name, ct)
-                                ?? throw new KeyNotFoundException();
-
         var comment = await db.BlogComments
             .Where(x => 
-                x.BlogPost.ModuleId == featureContextDto.ModuleId &&
+                x.BlogPost.ModuleId == securityContext.FeatureContext.ModuleId &&
                 x.BlogPost.BlogPostId == command.BlogPostId && 
                 x.Id == command.BlogCommentId)
             .FirstOrDefaultAsync(ct) ?? throw new KeyNotFoundException();
         
-        var hasAdminRights = permissionService.HasAdministratorRightsToThePage(user, featureContextDto);
-
-        if (comment.UserGuid != user.Id && !hasAdminRights)
+        if (comment.UserGuid != securityContext.User.Id && !securityContext.IsAdmin)
         {
             throw new UnauthorizedAccessException();
         }
@@ -44,9 +28,9 @@ public class EditBlogCommentHandler
         comment.Content = command.Content;
         comment.ModifiedAt = DateTime.UtcNow;
 
-        if (comment.UserGuid != user.Id && hasAdminRights)
+        if (comment.UserGuid != securityContext.User.Id && securityContext.IsAdmin)
         {
-            comment.ModeratedBy = user.Id;
+            comment.ModeratedBy = securityContext.User.Id;
             comment.ModerationStatus = 1;
             comment.ModerationReason = command.ModerationReason;
         }

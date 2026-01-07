@@ -1,11 +1,14 @@
 ﻿using FluentValidation;
 using Mojo.Shared.Domain;
+using Mojo.Shared.Interfaces.Security;
 
 namespace Mojo.Modules.Blog.Features.Posts.EditPost;
 
-public record EditPostCommand(int PageId, Guid BlogPostId, string Title, string SubTitle, string Content, List<EditPostCategoryDto> Categories)
+public record EditPostCommand(int PageId, Guid BlogPostId, string Title, string SubTitle, string Content, List<EditPostCategoryDto> Categories) : IFeatureRequest
 {
     public string Name => FeatureNames.Blog;
+    public bool RequiresEditPermission => true;
+    public bool UserCanEdit => true;
 
     public class EditPostValidator : AbstractValidator<EditPostCommand>
     {

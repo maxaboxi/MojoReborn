@@ -1,11 +1,14 @@
 using FluentValidation;
 using Mojo.Shared.Domain;
+using Mojo.Shared.Interfaces.Security;
 
 namespace Mojo.Modules.Forum.Features.Posts.CreatePost;
 
-public record CreateForumPostCommand(int PageId, int ForumId, int ThreadId, string Post, Guid? ReplyToPost)
+public record CreateForumPostCommand(int PageId, int ForumId, int ThreadId, string Post, Guid? ReplyToPost) : IFeatureRequest
 {
     public string Name => FeatureNames.Forum;
+    public bool RequiresEditPermission => true;
+    public bool UserCanEdit => false;
     public string? UserIpAddress { get; set; }
     public class CreateForumPostCommandValidator : AbstractValidator<CreateForumPostCommand>
     {

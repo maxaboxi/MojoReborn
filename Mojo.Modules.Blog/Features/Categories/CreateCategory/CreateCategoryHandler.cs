@@ -1,11 +1,7 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
 using Mojo.Shared.Domain;
-using Mojo.Shared.Interfaces.Identity;
-using Mojo.Shared.Interfaces.SiteStructure;
 
 namespace Mojo.Modules.Blog.Features.Categories.CreateCategory;
 
@@ -14,26 +10,11 @@ public class CreateCategoryHandler
     public static async Task<CreateCategoryResponse> Handle(
         CreateCategoryCommand command,
         BlogDbContext db,
-        IFeatureContextResolver featureContextResolver,
-        IHttpContextAccessor httpContextAccessor,
-        IUserService userService,
-        IPermissionService permissionService,
+        SecurityContext securityContext,
         CancellationToken ct)
     {
-        var claimsPrincipal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
-        var user = await userService.GetUserAsync(claimsPrincipal, ct) 
-                   ?? throw new UnauthorizedAccessException();
-
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, command.Name, ct)
-                                ?? throw new KeyNotFoundException();
-        
-        if (!permissionService.CanEdit(user, featureContextDto))
-        {
-            throw new UnauthorizedAccessException();
-        }
-
-        var existingCategoryInDb = await db.Categories
-            .Where(c => c.ModuleId == featureContextDto.ModuleId)
+       var existingCategoryInDb = await db.Categories
+            .Where(c => c.ModuleId == securityContext.FeatureContext.ModuleId)
             .Where(c => c.CategoryName == command.CategoryName)
             .FirstOrDefaultAsync(ct);
 
@@ -42,7 +23,7 @@ public class CreateCategoryHandler
             throw new InvalidOperationException("Category with the given name already exists.");
         }
             
-        await db.Categories.AddAsync(new BlogCategory { CategoryName = command.CategoryName, ModuleId = featureContextDto.ModuleId },
+        await db.Categories.AddAsync(new BlogCategory { CategoryName = command.CategoryName, ModuleId = securityContext.FeatureContext.ModuleId },
             ct);
         await db.SaveChangesAsync(ct);
 

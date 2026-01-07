@@ -1,14 +1,10 @@
 ﻿using System.Collections.Concurrent;
-using System.Security.Claims;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
 using Mojo.Modules.Blog.Features.Blog.NotifySubscribers;
 using Mojo.Shared.Domain;
-using Mojo.Shared.Interfaces.Identity;
-using Mojo.Shared.Interfaces.SiteStructure;
 using Wolverine.Http;
 
 namespace Mojo.Modules.Blog.Features.Posts.CreatePost;
@@ -18,24 +14,9 @@ public static partial class CreatePostHandler
     public static async Task<(CreationResponse<CreatePostResponse>, PostCreatedEvent)> Handle(
         CreatePostCommand command,
         BlogDbContext db,
-        IFeatureContextResolver featureContextResolver,
-        IHttpContextAccessor httpContextAccessor,
-        IUserService userService,
-        IPermissionService permissionService,
+        SecurityContext securityContext,
         CancellationToken ct)
     {
-        var claimsPrincipal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
-        var user = await userService.GetUserAsync(claimsPrincipal, ct) 
-                   ?? throw new UnauthorizedAccessException();
-
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, command.Name, ct)
-                                ?? throw new KeyNotFoundException();
-        
-        if (!permissionService.CanEdit(user, featureContextDto))
-        {
-            throw new UnauthorizedAccessException();
-        }
-
         var baseSlug = GenerateBaseSlug(command.Title);
 
         var finalSlug = await GenerateFinalSlug(baseSlug, db, ct);
@@ -44,13 +25,13 @@ public static partial class CreatePostHandler
         {
             Title = command.Title,
             SubTitle = command.SubTitle,
-            Author = user.Email,
+            Author = securityContext.User.Email,
             Content = command.Content,
             Slug = finalSlug,
             CreatedAt = DateTime.UtcNow,
             ModifiedAt = DateTime.UtcNow,
-            ModuleGuid =  featureContextDto.ModuleGuid,
-            ModuleId = featureContextDto.ModuleId
+            ModuleGuid = securityContext.FeatureContext.ModuleGuid,
+            ModuleId = securityContext.FeatureContext.ModuleId
         };
 
         await AddCategoriesToBlogPost(newPost, command, db, ct);
@@ -61,7 +42,7 @@ public static partial class CreatePostHandler
         return
         (
             new CreationResponse<CreatePostResponse>($"/blog/{newPost.Slug}", new CreatePostResponse(newPost.BlogPostId)),
-            new PostCreatedEvent(newPost.ModuleGuid, newPost.BlogPostId, newPost.Id, user.Id, newPost.Title, newPost.Author,
+            new PostCreatedEvent(newPost.ModuleGuid, newPost.BlogPostId, newPost.Id, securityContext.User.Id, newPost.Title, newPost.Author,
                 newPost.Slug)
         );
     }

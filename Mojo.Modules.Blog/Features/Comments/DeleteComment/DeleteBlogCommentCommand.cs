@@ -1,11 +1,14 @@
 using FluentValidation;
 using Mojo.Shared.Domain;
+using Mojo.Shared.Interfaces.Security;
 
 namespace Mojo.Modules.Blog.Features.Comments.DeleteComment;
 
-public record DeleteBlogCommentCommand(int PageId, Guid BlogPostId, Guid BlogPostCommentId)
+public record DeleteBlogCommentCommand(int PageId, Guid BlogPostId, Guid BlogPostCommentId) : IFeatureRequest
 {
     public string Name => FeatureNames.Blog;
+    public bool RequiresEditPermission => true;
+    public bool UserCanEdit => true;
 
     public class DeleteBlogCommentCommandValidator : AbstractValidator<DeleteBlogCommentCommand>
     {

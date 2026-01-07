@@ -1,11 +1,14 @@
 using FluentValidation;
 using Mojo.Shared.Domain;
+using Mojo.Shared.Interfaces.Security;
 
 namespace Mojo.Modules.Forum.Features.Threads.CreateThread;
 
-public record CreateThreadCommand(int PageId, int ForumId, string Subject)
+public record CreateThreadCommand(int PageId, int ForumId, string Subject) : IFeatureRequest
 {
     public string Name => FeatureNames.Forum;
+    public bool RequiresEditPermission => true;
+    public bool UserCanEdit => false;
 
     public class CreateThreadCommandValidator : AbstractValidator<CreateThreadCommand>
     {

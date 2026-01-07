@@ -19,7 +19,7 @@ public class PostCreatedHandler
                         createdEvent.ModuleGuid,
                         $"New blogpost published by {createdEvent.Author}!", 
                         createdEvent.Slug, 
-                        FeatureNames.Blog,
+                        createdEvent.Name,
                         createdEvent.BlogPostGuid,
                         createdEvent.BlogPostId)
                     )
