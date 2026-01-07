@@ -13,7 +13,7 @@ public class GetThreadsHandler
         IFeatureContextResolver featureContextResolver,
         CancellationToken ct)
     {
-        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, FeatureNames.Forum, ct)
+        var featureContextDto = await featureContextResolver.ResolveModule(query.PageId, query.Name, ct)
                                 ?? throw new KeyNotFoundException();
         
         var threads = await db.ForumThreads.AsNoTracking()

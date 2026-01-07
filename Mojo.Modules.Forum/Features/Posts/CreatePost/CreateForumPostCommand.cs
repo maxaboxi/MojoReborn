@@ -1,9 +1,11 @@
 using FluentValidation;
+using Mojo.Shared.Domain;
 
 namespace Mojo.Modules.Forum.Features.Posts.CreatePost;
 
 public record CreateForumPostCommand(int PageId, int ForumId, int ThreadId, string Post, Guid? ReplyToPost)
 {
+    public string Name => FeatureNames.Forum;
     public string? UserIpAddress { get; set; }
     public class CreateForumPostCommandValidator : AbstractValidator<CreateForumPostCommand>
     {

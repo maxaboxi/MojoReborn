@@ -28,7 +28,7 @@ public class CreateThreadHandler
             throw new InvalidOperationException("LegacyId missing from the user.");
         }
         
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Forum, ct)
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, command.Name, ct)
                                 ?? throw new KeyNotFoundException();
         
         if (!permissionService.CanEdit(user, featureContextDto))

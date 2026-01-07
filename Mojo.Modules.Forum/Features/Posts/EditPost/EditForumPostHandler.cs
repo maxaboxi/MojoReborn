@@ -29,7 +29,7 @@ public class EditForumPostHandler
             throw new InvalidOperationException("LegacyId missing from the user.");
         }
         
-        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, FeatureNames.Forum, ct)
+        var featureContextDto = await featureContextResolver.ResolveModule(command.PageId, command.Name, ct)
                                 ?? throw new KeyNotFoundException();
 
         var existingPost = await db.ForumPosts.Include(x => x.Author).FirstOrDefaultAsync(
