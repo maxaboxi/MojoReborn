@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
-using Mojo.Shared.Domain;
 using Mojo.Shared.Dtos.Subscriptions;
 using Mojo.Shared.Interfaces.Identity;
 

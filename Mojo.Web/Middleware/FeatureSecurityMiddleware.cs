@@ -6,6 +6,12 @@ using Mojo.Shared.Interfaces.SiteStructure;
 
 namespace Mojo.Web.Middleware;
 
+/// <summary>
+/// Wolverine middleware that intercepts all messages implementing <see cref="IFeatureRequest"/>
+/// to enforce feature-level security. Resolves the module context from the page and feature name,
+/// then verifies the current user has the required permissions before the handler executes.
+/// Returns a <see cref="SecurityContext"/> on success or throws <see cref="UnauthorizedAccessException"/>.
+/// </summary>
 public class FeatureSecurityMiddleware
 {
     public static async Task<SecurityContext> LoadAsync(

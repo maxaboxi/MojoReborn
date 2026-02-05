@@ -9,6 +9,8 @@ public class ForumDbContext(DbContextOptions<ForumDbContext> options) : DbContex
     public DbSet<ForumThread> ForumThreads { get; set; }
     public DbSet<ForumPost> ForumPosts { get; set; }
     public DbSet<ForumPostReplyLink> ForumPostReplyLinks { get; set; }
+    public DbSet<ForumSubscription> ForumSubscriptions { get; set; }
+    public DbSet<ForumThreadSubscription> ForumThreadSubscriptions { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -42,4 +42,5 @@ public class ForumThread
 
     public virtual ICollection<ForumPost> ForumPosts { get; set; } = new List<ForumPost>();
     public virtual ForumUser Author { get; set; }
+    public virtual ICollection<ForumThreadSubscription>  ForumThreadSubscriptions { get; set; } = new List<ForumThreadSubscription>();
 }
