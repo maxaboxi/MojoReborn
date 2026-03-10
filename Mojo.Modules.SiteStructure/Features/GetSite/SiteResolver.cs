@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Mojo.Modules.SiteStructure.Data;
 using Mojo.Shared.Dtos.SiteStructure;
@@ -7,26 +8,24 @@ using Mojo.Shared.Interfaces.SiteStructure;
 
 namespace Mojo.Modules.SiteStructure.Features.GetSite;
 
-public class SiteResolver(SiteStructureDbContext db, IHttpContextAccessor httpContextAccessor, IConfiguration configuration) : ISiteResolver
+public class SiteResolver(SiteStructureDbContext db, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, IMemoryCache cache) : ISiteResolver
 {
-   private SiteDto? _resolvedSite;
-   
+   private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
+
    public async Task<SiteDto> GetSite(CancellationToken ct)
    {
-      if (_resolvedSite != null)
-      {
-         return _resolvedSite;
-      }
-
       var forcedSiteId = configuration["ForceSiteId"];
 
       if (!string.IsNullOrEmpty(forcedSiteId))
       {
-         _resolvedSite = await db.Sites.AsNoTracking()
-            .Where(x => x.SiteId == int.Parse(forcedSiteId))
-            .Select(x => new SiteDto(x.SiteId, x.SiteGuid)).FirstOrDefaultAsync(ct);
-         
-         return _resolvedSite ?? throw new InvalidOperationException($"No sites configured in database with the forced site id: {forcedSiteId}.");
+         return await cache.GetOrCreateAsync($"site:forced:{forcedSiteId}", async entry =>
+         {
+            entry.SlidingExpiration = CacheDuration;
+            return await db.Sites.AsNoTracking()
+               .Where(x => x.SiteId == int.Parse(forcedSiteId))
+               .Select(x => new SiteDto(x.SiteId, x.SiteGuid)).FirstOrDefaultAsync(ct)
+               ?? throw new InvalidOperationException($"No sites configured in database with the forced site id: {forcedSiteId}.");
+         }) ?? throw new InvalidOperationException($"No sites configured in database with the forced site id: {forcedSiteId}.");
       }
       
       var context = httpContextAccessor.HttpContext;
@@ -38,24 +37,23 @@ public class SiteResolver(SiteStructureDbContext db, IHttpContextAccessor httpCo
       
       var host = context.Request.Host.Host;
 
-      _resolvedSite = await db.SiteHosts.AsNoTracking().Where(x => x.HostName == host)
-         .Select(x => new SiteDto(x.SiteId, x.SiteGuid))
-         .FirstOrDefaultAsync(ct);
-
-      if (_resolvedSite == null)
+      return await cache.GetOrCreateAsync($"site:host:{host}", async entry =>
       {
-         _resolvedSite = await db.Sites.AsNoTracking().Where(x => x.SiteName == host || x.SiteAlias == host)
+         entry.SlidingExpiration = CacheDuration;
+         
+         var site = await db.SiteHosts.AsNoTracking().Where(x => x.HostName == host)
             .Select(x => new SiteDto(x.SiteId, x.SiteGuid))
             .FirstOrDefaultAsync(ct);
-      }
 
-      if (_resolvedSite == null)
-      {
-         _resolvedSite = await db.Sites.AsNoTracking()
+         site ??= await db.Sites.AsNoTracking().Where(x => x.SiteName == host || x.SiteAlias == host)
+            .Select(x => new SiteDto(x.SiteId, x.SiteGuid))
+            .FirstOrDefaultAsync(ct);
+
+         site ??= await db.Sites.AsNoTracking()
             .Where(x => x.SiteId == 1).Select(x => new SiteDto(x.SiteId, x.SiteGuid))
             .FirstOrDefaultAsync(ct);
-      }
 
-      return _resolvedSite ?? throw new InvalidOperationException("No sites configured in database.");
+         return site ?? throw new InvalidOperationException("No sites configured in database.");
+      }) ?? throw new InvalidOperationException("No sites configured in database.");
    }
 }
