@@ -29,7 +29,10 @@ public class EditForumPostHandler
             throw new UnauthorizedAccessException();
         }
         
-        existingPost.Post = !securityContext.IsAdmin ? command.Content : command.Content + "<p><em>[edited by Moderator]</em></p>";
+        var isAdminEditingOtherUserPost = securityContext.IsAdmin && existingPost.Author.Id != securityContext.User.LegacyId;
+        existingPost.Post = isAdminEditingOtherUserPost
+            ? command.Content + "<p><em>[edited by Moderator]</em></p>"
+            : command.Content;
         
         await db.SaveChangesAsync(ct);
 
