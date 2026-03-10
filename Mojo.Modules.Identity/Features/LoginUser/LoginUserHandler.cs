@@ -29,7 +29,7 @@ public class LoginUserHandler
 
         if (baseUrl == null)
         {
-            throw new Exception("Frontend Url is not configured");
+            throw new InvalidOperationException("Frontend Url is not configured");
         }
         
         var info = await signInManager.GetExternalLoginInfoAsync();
@@ -98,7 +98,7 @@ public class LoginUserHandler
 
         if (roleName == null)
         {
-            throw new Exception("AuthenticatedUsersRoleName is not configured");
+            throw new InvalidOperationException("AuthenticatedUsersRoleName is not configured");
         }
         
         var role = await db.SiteRoles.FirstOrDefaultAsync(x => x.SiteGuid == site.SiteGuid && x.Name == roleName, ct);

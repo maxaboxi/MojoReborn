@@ -26,7 +26,7 @@ public class SiteResolver(SiteStructureDbContext db, IHttpContextAccessor httpCo
             .Where(x => x.SiteId == int.Parse(forcedSiteId))
             .Select(x => new SiteDto(x.SiteId, x.SiteGuid)).FirstOrDefaultAsync(ct);
          
-         return _resolvedSite ?? throw new Exception($"No sites configured in database with the forced site id: {forcedSiteId}.");
+         return _resolvedSite ?? throw new InvalidOperationException($"No sites configured in database with the forced site id: {forcedSiteId}.");
       }
       
       var context = httpContextAccessor.HttpContext;
@@ -56,6 +56,6 @@ public class SiteResolver(SiteStructureDbContext db, IHttpContextAccessor httpCo
             .FirstOrDefaultAsync(ct);
       }
 
-      return _resolvedSite ?? throw new Exception("No sites configured in database.");
+      return _resolvedSite ?? throw new InvalidOperationException("No sites configured in database.");
    }
 }

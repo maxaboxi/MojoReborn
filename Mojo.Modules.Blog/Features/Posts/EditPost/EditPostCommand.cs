@@ -14,7 +14,7 @@ public record EditPostCommand(int PageId, Guid BlogPostId, string Title, string 
     {
         public EditPostValidator()
         {
-            RuleFor(x => x.PageId).NotNull().WithMessage("PageId cannot be empty.");
+            RuleFor(x => x.PageId).GreaterThan(0).WithMessage("PageId must be greater than zero.");
             RuleFor(x => x.BlogPostId).NotNull().WithMessage("BlogPostId cannot be empty.");
             RuleFor(x => x.Title).NotNull().WithMessage("Title cannot be empty.")
                 .MaximumLength(255).WithMessage("Title cannot exceed 255 characters.");

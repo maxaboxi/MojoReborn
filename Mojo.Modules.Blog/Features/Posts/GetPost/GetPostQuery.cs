@@ -11,8 +11,9 @@ public record GetPostQuery(int PageId, Guid BlogPostId, DateTime? LastCommentDat
     {
         public GetPostQueryValidator()
         {
-            RuleFor(x => x.PageId).NotNull().WithMessage("PageId cannot be empty.");
+            RuleFor(x => x.PageId).GreaterThan(0).WithMessage("PageId must be greater than zero.");
             RuleFor(x => x.BlogPostId).NotNull().WithMessage("BlogPostId cannot be empty.");
+            RuleFor(x => x.Amount).LessThanOrEqualTo(100).When(x => x.Amount.HasValue);
         }
     }
 }

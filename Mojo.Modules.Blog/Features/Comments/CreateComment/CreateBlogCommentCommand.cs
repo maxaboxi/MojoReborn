@@ -16,7 +16,7 @@ public record CreateBlogCommentCommand(int PageId, Guid BlogPostId, string Autho
     {
         public CreateBlogCommentValidator()
         {
-            RuleFor(x => x.PageId).NotNull().WithMessage("PageId cannot be empty.");
+            RuleFor(x => x.PageId).GreaterThan(0).WithMessage("PageId must be greater than zero.");
             RuleFor(x => x.BlogPostId).NotNull().WithMessage("BlogPostId cannot be empty.");
             RuleFor(x => x.Author).NotNull().WithMessage("Author cannot be empty.");
             RuleFor(x => x.Title).NotNull().WithMessage("Title cannot be empty.")

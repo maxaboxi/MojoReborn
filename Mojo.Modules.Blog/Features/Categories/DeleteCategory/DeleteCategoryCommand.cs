@@ -14,8 +14,8 @@ public record DeleteCategoryCommand(int PageId, int CategoryId) : IFeatureReques
     {
         public DeleteCategoryCommandValidator()
         {
-            RuleFor(x => x.PageId).NotNull().WithMessage("PageId cannot be null");
-            RuleFor(x => x.CategoryId).NotNull().WithMessage("CategoryId cannot be null");
+            RuleFor(x => x.PageId).GreaterThan(0).WithMessage("PageId must be greater than zero.");
+            RuleFor(x => x.CategoryId).GreaterThan(0).WithMessage("CategoryId must be greater than zero.");
         }
     }
 }

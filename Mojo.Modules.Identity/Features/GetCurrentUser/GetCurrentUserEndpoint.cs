@@ -23,11 +23,16 @@ public class GetCurrentUserEndpoint
              return Results.Unauthorized();;
         }
         
+        if (!Guid.TryParse(userId, out var parsedId))
+        {
+             return Results.Unauthorized();
+        }
+
         var user = await userManager.Users.AsNoTracking()
             .Include(u => u.UserSiteProfiles)
             .Include(u => u.UserSiteRoleAssignments)
                 .ThenInclude(us => us.Role)
-            .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId), ct);
+            .FirstOrDefaultAsync(u => u.Id == parsedId, ct);
         
         if (user == null)
         {

@@ -19,11 +19,17 @@ public class UserService(UserManager<ApplicationUser> userManager, ILogger<UserS
             return null;
         }
         
+        if (!Guid.TryParse(userId, out var parsedId))
+        {
+            logger.LogError("Invalid user id format.");
+            return null;
+        }
+
         var user = await userManager.Users.AsNoTracking()
             .Include(u => u.UserSiteProfiles)
             .Include(u => u.UserSiteRoleAssignments)
                 .ThenInclude(us => us.Role)
-            .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId), ct);
+            .FirstOrDefaultAsync(u => u.Id == parsedId, ct);
 
         if (user != null)
             return new ApplicationUserDto(
