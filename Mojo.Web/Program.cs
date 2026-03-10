@@ -37,23 +37,6 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-builder.Services.AddDbContext<BlogDbContext>(options =>
-    options.UseSqlServer(connectionString),
-    // Significant performance gain as per Wolverine docs
-    optionsLifetime: ServiceLifetime.Singleton);
-
-builder.Services.AddDbContext<IdentityDbContext>(options =>
-    options.UseSqlServer(connectionString),
-    optionsLifetime: ServiceLifetime.Singleton);
-
-builder.Services.AddDbContext<SiteStructureDbContext>(options =>
-        options.UseSqlServer(connectionString),
-    optionsLifetime: ServiceLifetime.Singleton);
-
-builder.Services.AddDbContext<ForumDbContext>(options =>
-        options.UseSqlServer(connectionString),
-    optionsLifetime: ServiceLifetime.Singleton);
-
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(opt =>
 {
     opt.User.RequireUniqueEmail = true;
@@ -169,15 +152,16 @@ else
 
 app.UseRouting();
 
-app.UseCors(opt => opt.WithOrigins("http://localhost:5173").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
+var frontendUrl = builder.Configuration["Frontend:Url"] ?? "http://localhost:5173";
+app.UseCors(opt => opt.WithOrigins(frontendUrl).AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseExceptionHandler();
-app.UseStatusCodePages();
 
 app.MapWolverineEndpoints(opts =>
 {
