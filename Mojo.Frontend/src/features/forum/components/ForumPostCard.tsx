@@ -4,6 +4,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import ReplyIcon from '@mui/icons-material/Reply';
 import EditIcon from '@mui/icons-material/EditOutlined';
+import DOMPurify from 'dompurify';
 import type { ForumPost } from '../types/forum.types';
 import './ForumPostCard.css';
 
@@ -62,7 +63,7 @@ export const ForumPostCard = ({ post, depth = 0, variant = 'classic', onReply, o
 
       <Box
         className="forum-post-content"
-        dangerouslySetInnerHTML={{ __html: post.content }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
       />
       {(onReply || onEdit) && (
         <Box className="forum-post-actions">

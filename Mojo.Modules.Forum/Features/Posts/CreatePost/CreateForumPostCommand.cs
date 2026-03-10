@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using FluentValidation;
 using Mojo.Shared.Domain;
 using Mojo.Shared.Interfaces.Security;
@@ -9,6 +10,7 @@ public record CreateForumPostCommand(int PageId, int ForumId, int ThreadId, stri
     public string Name => FeatureNames.Forum;
     public bool RequiresEditPermission => true;
     public bool UserCanEdit => false;
+    [JsonIgnore]
     public string? UserIpAddress { get; set; }
     public class CreateForumPostCommandValidator : AbstractValidator<CreateForumPostCommand>
     {

@@ -37,5 +37,7 @@ public class ForumPostConfiguration : IEntityTypeConfiguration<ForumPost>
             .HasConstraintName("FK_mp_ForumPosts_mp_ForumThreads");
 
         builder.HasOne(x => x.Author).WithMany().HasForeignKey(x => x.UserId);
+
+        builder.HasQueryFilter(p => p.Approved);
     }
 }

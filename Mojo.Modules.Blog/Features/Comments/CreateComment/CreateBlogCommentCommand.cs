@@ -1,11 +1,16 @@
+using System.Text.Json.Serialization;
 using FluentValidation;
 using Mojo.Shared.Domain;
+using Mojo.Shared.Interfaces.Security;
 
 namespace Mojo.Modules.Blog.Features.Comments.CreateComment;
 
-public record CreateBlogCommentCommand(int PageId, Guid BlogPostId, string Author, string Title, string Content)
+public record CreateBlogCommentCommand(int PageId, Guid BlogPostId, string Author, string Title, string Content) : IFeatureRequest
 {
     public string Name => FeatureNames.Blog;
+    public bool RequiresEditPermission => true;
+    public bool UserCanEdit => false;
+    [JsonIgnore]
     public string? UserIpAddress { get; set; }
     public class CreateBlogCommentValidator : AbstractValidator<CreateBlogCommentCommand>
     {

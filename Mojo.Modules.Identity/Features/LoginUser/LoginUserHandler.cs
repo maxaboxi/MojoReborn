@@ -83,7 +83,7 @@ public class LoginUserHandler
         {
             var errors = string.Join(",", createResult.Errors.Select(e => e.Description));
             logger.LogError("Creating the user failed: {errors}", errors);
-            return Results.Redirect($"{baseUrl}/auth/login?error=creation_failed&details={errors}");
+            return Results.Redirect($"{baseUrl}/auth/login?error=creation_failed");
         }
 
         var linkResult = await userManager.AddLoginAsync(newUser, info);
@@ -151,7 +151,7 @@ public class LoginUserHandler
         {
             var errors = string.Join(",", updateResult.Errors.Select(e => e.Description));
             logger.LogError("Updating the user account failed: {errors}", errors);
-            return Results.Redirect($"{baseUrl}/auth/login?error=legacy_creation_failed&details={errors}");
+            return Results.Redirect($"{baseUrl}/auth/login?error=legacy_creation_failed");
         }
 
         await signInManager.SignInAsync(newUser, isPersistent: false);
