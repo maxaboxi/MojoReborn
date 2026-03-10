@@ -15,6 +15,7 @@ public class PermissionService(ILogger<PermissionService> logger) : IPermissionS
             return false;
         }
 
+        // Legacy compatibility: empty EditRoles means all authenticated users can edit.
         if (featureContextDto.PageDto.EditRoles.Contains("All Users") ||
             string.IsNullOrWhiteSpace(featureContextDto.PageDto.EditRoles))
         {
