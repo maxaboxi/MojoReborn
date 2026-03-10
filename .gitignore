@@ -377,11 +377,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # VS Code files for those working on multiple tools
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+.vscode/
 *.code-workspace
 
 # Local History for Visual Studio Code
@@ -432,11 +428,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
+.vscode/
 *.swp
 *.swo
 *~
