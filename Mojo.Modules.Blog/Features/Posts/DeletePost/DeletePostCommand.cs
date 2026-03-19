@@ -14,7 +14,7 @@ public record DeletePostCommand(int PageId, Guid Id) : IFeatureRequest
     {
         public DeletePostCommandValidator()
         {
-            RuleFor(x => x.PageId).NotNull().WithMessage("PageId cannot be empty.");
+            RuleFor(x => x.PageId).GreaterThan(0).WithMessage("PageId must be greater than zero.");
             RuleFor(x => x.Id).NotNull().WithMessage("Id cannot be empty.");
         }
     }

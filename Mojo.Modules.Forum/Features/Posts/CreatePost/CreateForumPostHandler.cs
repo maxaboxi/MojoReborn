@@ -48,18 +48,17 @@ public class CreateForumPostHandler
         thread.MostRecentPostUserId = securityContext.User.LegacyId ?? 0;
         
         await db.ForumPosts.AddAsync(post, ct);
-        await db.SaveChangesAsync(ct);
 
-        if (!command.ReplyToPost.HasValue || originalPost == null)
-            return new CreateForumPostResponse(post.Id);
-        
-        var reply = new ForumPostReplyLink
+        if (command.ReplyToPost.HasValue && originalPost != null)
         {
-            PostId = post.PostGuid,
-            ParentPostId = originalPost.PostGuid
-        };
-            
-        await db.ForumPostReplyLinks.AddAsync(reply, ct);
+            var reply = new ForumPostReplyLink
+            {
+                PostId = post.PostGuid,
+                ParentPostId = originalPost.PostGuid
+            };
+            await db.ForumPostReplyLinks.AddAsync(reply, ct);
+        }
+
         await db.SaveChangesAsync(ct);
 
         return new CreateForumPostResponse(post.Id);

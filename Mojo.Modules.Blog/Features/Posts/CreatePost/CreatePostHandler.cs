@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Mojo.Modules.Blog.Data;
 using Mojo.Modules.Blog.Domain.Entities;
@@ -128,12 +127,8 @@ public static partial class CreatePostHandler
         }
     }
     
-    private static readonly ConcurrentDictionary<string, Regex> SlugSuffixRegexCache = new();
-
     private static Regex GetSuffixRegex(string baseSlug) =>
-        SlugSuffixRegexCache.GetOrAdd(
-            baseSlug,
-            slug => new Regex($"^{Regex.Escape(slug)}-(\\d+)$", RegexOptions.Compiled));
+        new($"^{Regex.Escape(baseSlug)}-(\\d+)$");
 
     [GeneratedRegex(@"[^a-z0-9\s-]")]
     private static partial Regex RemoveInvalidChars();

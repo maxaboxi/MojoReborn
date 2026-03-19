@@ -33,6 +33,7 @@ public class DeleteBlogCommentHandler
         else
         {
             comment.Content = "[Deleted by User]";
+            comment.ModerationStatus = 1;
         }
         
         comment.ModifiedAt = DateTime.UtcNow;

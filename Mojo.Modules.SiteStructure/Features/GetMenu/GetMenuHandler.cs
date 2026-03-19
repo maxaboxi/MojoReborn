@@ -25,7 +25,7 @@ public class GetMenuHandler
         
         if (roleName == null)
         {
-            throw new Exception("AllUsersRoleName is not configured");
+            throw new InvalidOperationException("AllUsersRoleName is not configured");
         }
         
         var site = await siteResolver.GetSite(ct);
@@ -40,7 +40,7 @@ public class GetMenuHandler
 
             if (authenticatedRoleName == null)
             {
-                throw new Exception("AuthenticatedUsersRoleName is not configured");
+                throw new InvalidOperationException("AuthenticatedUsersRoleName is not configured");
             }
             
             roles = roles.Concat([authenticatedRoleName]).Concat(user.UserSiteRoles.Select(x => x.Name)).ToArray();

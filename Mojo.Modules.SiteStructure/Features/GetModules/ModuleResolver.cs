@@ -13,7 +13,7 @@ public class ModuleResolver(SiteStructureDbContext db) : IModuleResolver
             .Select(m => m.Id)
             .ToListAsync(ct);
         return await db.Modules
-            .Where(x => moduleDefinitionIds.Contains(x.Id))
+            .Where(x => moduleDefinitionIds.Contains(x.ModuleDefinitionId))
             .Select(x => new ModuleDto(x.Id, x.ModuleGuid)).ToListAsync(ct);
     }
 }

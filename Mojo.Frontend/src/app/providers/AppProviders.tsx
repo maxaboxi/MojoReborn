@@ -3,11 +3,20 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@shared/theme/ThemeProvider';
 import { AppRouter } from '@app/router/AppRouter';
 import { AuthProvider } from '@features/auth/providers/AuthProvider';
+import { useAuth } from '@features/auth/providers/useAuth';
 import { NotificationsProvider } from '@features/notifications/providers/NotificationsProvider';
+import { ErrorBoundary } from '@shared/ui';
 
 interface AppProvidersProps {
   children?: ReactNode;
 }
+
+const AuthGatedNotifications = ({ children }: { children: ReactNode }) => {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) return <>{children}</>;
+  return <NotificationsProvider>{children}</NotificationsProvider>;
+};
 
 export const AppProviders = ({ children }: AppProvidersProps) => {
   const [queryClient] = useState(
@@ -27,12 +36,14 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
   );
 
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <NotificationsProvider>{children ?? <AppRouter />}</NotificationsProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <AuthGatedNotifications>{children ?? <AppRouter />}</AuthGatedNotifications>
+          </AuthProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 };

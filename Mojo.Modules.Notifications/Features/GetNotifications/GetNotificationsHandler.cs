@@ -23,6 +23,7 @@ public class GetNotificationsHandler
             .AsNoTracking()
             .Where(x => x.UserId == user.Id)
             .OrderByDescending(x => x.CreatedAt)
+            .Take(50)
             .Select(x => new NotificationDto(
                 x.Id, x.Message, x.Url, x.FeatureName, x.IsRead, x.CreatedAt, x.EntityGuid, x.EntityId))
             .ToListAsync(ct);

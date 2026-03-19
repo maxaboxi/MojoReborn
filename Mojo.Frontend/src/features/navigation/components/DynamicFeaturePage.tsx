@@ -5,6 +5,7 @@ import { findMenuItemByPath } from '@shared/utils/menuUtils';
 import { LoadingState, StatusMessage } from '@shared/ui';
 import { BlogList } from '@features/blog/pages/BlogList';
 import { BLOG_FEATURE_NAME } from '@features/blog/constants';
+import { FORUM_FEATURE_NAME } from '@features/forum/constants';
 import type { PageMenuItem } from '@shared/types/menu.types';
 import { ForumFeaturePage } from '@features/forum/pages/ForumFeaturePage';
 
@@ -12,7 +13,7 @@ const renderFeaturePage = (page: PageMenuItem) => {
   switch (page.featureName) {
     case BLOG_FEATURE_NAME:
       return <BlogList />;
-    case 'ForumsFeatureName':
+    case FORUM_FEATURE_NAME:
       return <ForumFeaturePage />;
     case 'NewsletterSignUpFeatureName':
     case 'ContactFormFeatureName':

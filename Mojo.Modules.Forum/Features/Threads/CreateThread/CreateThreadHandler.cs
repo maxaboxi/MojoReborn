@@ -18,8 +18,12 @@ public class CreateThreadHandler
             throw new InvalidOperationException("LegacyId missing from the user.");
         }
 
+        var forum = await db.Forums
+            .FromSqlRaw("SELECT * FROM mp_Forums WITH (UPDLOCK) WHERE ItemID = {0}", command.ForumId)
+            .FirstOrDefaultAsync(ct) ?? throw new KeyNotFoundException();
+
         var currentMaxSequence = (await db.ForumThreads
-            .Where(x => x.ForumId == command.ForumId)
+            .Where(x => x.ForumId == forum.Id)
             .MaxAsync(t => (int?)t.ForumSequence, ct) ?? 0) + 1;
 
         var thread = new ForumThread

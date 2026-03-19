@@ -29,7 +29,7 @@ public class LoginUserHandler
 
         if (baseUrl == null)
         {
-            throw new Exception("Frontend Url is not configured");
+            throw new InvalidOperationException("Frontend Url is not configured");
         }
         
         var info = await signInManager.GetExternalLoginInfoAsync();
@@ -83,7 +83,7 @@ public class LoginUserHandler
         {
             var errors = string.Join(",", createResult.Errors.Select(e => e.Description));
             logger.LogError("Creating the user failed: {errors}", errors);
-            return Results.Redirect($"{baseUrl}/auth/login?error=creation_failed&details={errors}");
+            return Results.Redirect($"{baseUrl}/auth/login?error=creation_failed");
         }
 
         var linkResult = await userManager.AddLoginAsync(newUser, info);
@@ -98,7 +98,7 @@ public class LoginUserHandler
 
         if (roleName == null)
         {
-            throw new Exception("AuthenticatedUsersRoleName is not configured");
+            throw new InvalidOperationException("AuthenticatedUsersRoleName is not configured");
         }
         
         var role = await db.SiteRoles.FirstOrDefaultAsync(x => x.SiteGuid == site.SiteGuid && x.Name == roleName, ct);
@@ -151,7 +151,7 @@ public class LoginUserHandler
         {
             var errors = string.Join(",", updateResult.Errors.Select(e => e.Description));
             logger.LogError("Updating the user account failed: {errors}", errors);
-            return Results.Redirect($"{baseUrl}/auth/login?error=legacy_creation_failed&details={errors}");
+            return Results.Redirect($"{baseUrl}/auth/login?error=legacy_creation_failed");
         }
 
         await signInManager.SignInAsync(newUser, isPersistent: false);

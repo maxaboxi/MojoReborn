@@ -14,7 +14,7 @@ public record CreatePostCommand(int PageId, string Title, string SubTitle, strin
     {
         public CreatePostValidator()
         {
-            RuleFor(x => x.PageId).NotNull().WithMessage("PageId cannot be empty.");
+            RuleFor(x => x.PageId).GreaterThan(0).WithMessage("PageId must be greater than zero.");
             RuleFor(x => x.Title).NotNull().WithMessage("Title cannot be empty.")
                 .MaximumLength(255).WithMessage("Title cannot exceed 255 characters.");
             RuleFor(x => x.SubTitle).NotNull().WithMessage("SubTitle cannot be empty.")

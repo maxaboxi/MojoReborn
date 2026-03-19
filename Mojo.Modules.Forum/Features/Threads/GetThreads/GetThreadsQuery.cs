@@ -11,7 +11,8 @@ public record GetThreadsQuery(int PageId, int? LastThreadSequence, int? Amount)
     {
         public GetThreadsQueryValidator()
         {
-            RuleFor(x => x.PageId).NotNull().WithMessage("PageId cannot be empty.");
+            RuleFor(x => x.PageId).GreaterThan(0).WithMessage("PageId must be greater than zero.");
+            RuleFor(x => x.Amount).GreaterThan(0).LessThanOrEqualTo(100).When(x => x.Amount.HasValue);
         }
     }
 }

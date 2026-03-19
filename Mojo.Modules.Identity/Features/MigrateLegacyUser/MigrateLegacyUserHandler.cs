@@ -30,7 +30,7 @@ public class MigrateLegacyUserHandler
 
         if (baseUrl == null)
         {
-            throw new Exception("Frontend Url is not configured");
+            throw new InvalidOperationException("Frontend Url is not configured");
         }
         
         var info = await signInManager.GetExternalLoginInfoAsync();
@@ -142,7 +142,7 @@ public class MigrateLegacyUserHandler
         
         if (algorithm == null)
         {
-            throw new Exception("Hash algorithm is not configured");
+            throw new InvalidOperationException("Hash algorithm is not configured");
         }
         
         var saltBytes = Convert.FromBase64String(legacyUser.PasswordSalt);
@@ -180,7 +180,7 @@ public class MigrateLegacyUserHandler
 
         if (string.IsNullOrEmpty(validationKey))
         {
-            throw new Exception("Validation key is not configured");
+            throw new InvalidOperationException("Validation key is not configured");
         }
         
         var key = Convert.FromHexString(validationKey);

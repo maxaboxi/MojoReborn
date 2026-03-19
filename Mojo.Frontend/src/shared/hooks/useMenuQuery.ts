@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { menuApi } from '../api/menuApi';
 import type { PageMenuItem } from '../types/menu.types';
 
-export const MENU_QUERY_KEY = ['menu'];
+export const MENU_QUERY_KEY = ['menu'] as const;
 
 export const useMenuQuery = () => {
   const query = useQuery<PageMenuItem[], Error>({

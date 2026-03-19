@@ -14,9 +14,9 @@ public record EditThreadCommand(int PageId, int ForumId, int ThreadId, string Su
     {
         public EditThreadCommandValidator()
         {
-            RuleFor(x => x.PageId).NotNull().WithMessage("PageId cannot be empty.");
-            RuleFor(x => x.ForumId).NotNull().WithMessage("ForumId cannot be empty.");
-            RuleFor(x => x.ThreadId).NotNull().WithMessage("ThreadId cannot be empty.");
+            RuleFor(x => x.PageId).GreaterThan(0).WithMessage("PageId must be greater than zero.");
+            RuleFor(x => x.ForumId).GreaterThan(0).WithMessage("ForumId must be greater than zero.");
+            RuleFor(x => x.ThreadId).GreaterThan(0).WithMessage("ThreadId must be greater than zero.");
             RuleFor(x => x.Subject).NotNull().NotEmpty().WithMessage("Subject cannot be empty.");
         }
     }

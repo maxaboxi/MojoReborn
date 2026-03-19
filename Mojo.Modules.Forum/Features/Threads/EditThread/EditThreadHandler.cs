@@ -21,9 +21,13 @@ public class EditThreadHandler
             x => 
                 x.Forum.ModuleId == securityContext.FeatureContext.ModuleId &&
                 x.Id == command.ThreadId && 
-                x.ForumId == command.ForumId &&
-                x.StartedByUserId == securityContext.User.LegacyId, ct) ?? throw new KeyNotFoundException();
-        
+                x.ForumId == command.ForumId, ct) ?? throw new KeyNotFoundException();
+
+        if (existingThread.StartedByUserId != securityContext.User.LegacyId && !securityContext.IsAdmin)
+        {
+            throw new UnauthorizedAccessException();
+        }
+
         existingThread.ThreadSubject = command.Subject;
         
         await db.SaveChangesAsync(ct);
