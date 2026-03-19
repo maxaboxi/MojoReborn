@@ -155,7 +155,8 @@ app.UseRouting();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
-var frontendUrl = builder.Configuration["Frontend:Url"] ?? "http://localhost:5173";
+var frontendUrl = builder.Configuration["Frontend:Url"];
+if (string.IsNullOrWhiteSpace(frontendUrl)) frontendUrl = "http://localhost:5173";
 app.UseCors(opt => opt.WithOrigins(frontendUrl).AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 
 app.UseHttpsRedirection();

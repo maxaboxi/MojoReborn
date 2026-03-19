@@ -14,18 +14,21 @@ public class SiteResolver(SiteStructureDbContext db, IHttpContextAccessor httpCo
 
    public async Task<SiteDto> GetSite(CancellationToken ct)
    {
-      var forcedSiteId = configuration["ForceSiteId"];
+      var forcedSiteIdValue = configuration["ForceSiteId"];
 
-      if (!string.IsNullOrEmpty(forcedSiteId))
+      if (!string.IsNullOrEmpty(forcedSiteIdValue))
       {
+         if (!int.TryParse(forcedSiteIdValue, out var forcedSiteId))
+            throw new InvalidOperationException($"ForceSiteId config value '{forcedSiteIdValue}' is not a valid integer.");
+
          return await cache.GetOrCreateAsync($"site:forced:{forcedSiteId}", async entry =>
          {
             entry.SlidingExpiration = CacheDuration;
             return await db.Sites.AsNoTracking()
-               .Where(x => x.SiteId == int.Parse(forcedSiteId))
+               .Where(x => x.SiteId == forcedSiteId)
                .Select(x => new SiteDto(x.SiteId, x.SiteGuid)).FirstOrDefaultAsync(ct)
-               ?? throw new InvalidOperationException($"No sites configured in database with the forced site id: {forcedSiteId}.");
-         }) ?? throw new InvalidOperationException($"No sites configured in database with the forced site id: {forcedSiteId}.");
+               ?? throw new InvalidOperationException($"No sites configured in database with the forced site id: {forcedSiteIdValue}.");
+         }) ?? throw new InvalidOperationException($"No sites configured in database with the forced site id: {forcedSiteIdValue}.");
       }
       
       var context = httpContextAccessor.HttpContext;

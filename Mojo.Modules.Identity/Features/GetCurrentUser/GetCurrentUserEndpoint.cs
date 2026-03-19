@@ -20,7 +20,7 @@ public class GetCurrentUserEndpoint
         
         if (userId == null)
         {
-             return Results.Unauthorized();;
+             return Results.Unauthorized();
         }
         
         if (!Guid.TryParse(userId, out var parsedId))
@@ -36,7 +36,7 @@ public class GetCurrentUserEndpoint
         
         if (user == null)
         {
-            return Results.Unauthorized();;
+            return Results.Unauthorized();
         }
         
         var response =  new GetCurrentUserResponse

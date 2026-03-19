@@ -21,7 +21,7 @@ public class UserService(UserManager<ApplicationUser> userManager, ILogger<UserS
         
         if (!Guid.TryParse(userId, out var parsedId))
         {
-            logger.LogError("Invalid user id format.");
+            logger.LogError("Invalid user id format: {UserId}", userId);
             return null;
         }
 

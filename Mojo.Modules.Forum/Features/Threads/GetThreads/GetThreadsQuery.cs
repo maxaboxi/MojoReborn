@@ -12,7 +12,7 @@ public record GetThreadsQuery(int PageId, int? LastThreadSequence, int? Amount)
         public GetThreadsQueryValidator()
         {
             RuleFor(x => x.PageId).GreaterThan(0).WithMessage("PageId must be greater than zero.");
-            RuleFor(x => x.Amount).LessThanOrEqualTo(100).When(x => x.Amount.HasValue);
+            RuleFor(x => x.Amount).GreaterThan(0).LessThanOrEqualTo(100).When(x => x.Amount.HasValue);
         }
     }
 }

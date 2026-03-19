@@ -14,7 +14,7 @@ public record GetThreadQuery(int PageId, int ForumId, int ThreadId, int? Amount,
             RuleFor(x => x.PageId).GreaterThan(0).WithMessage("PageId must be greater than zero.");
             RuleFor(x => x.ForumId).GreaterThan(0).WithMessage("ForumId must be greater than zero.");
             RuleFor(x => x.ThreadId).GreaterThan(0).WithMessage("ThreadId must be greater than zero.");
-            RuleFor(x => x.Amount).LessThanOrEqualTo(100).When(x => x.Amount.HasValue);
+            RuleFor(x => x.Amount).GreaterThan(0).LessThanOrEqualTo(100).When(x => x.Amount.HasValue);
         }
     }
 }
