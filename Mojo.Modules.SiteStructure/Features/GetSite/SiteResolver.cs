@@ -38,25 +38,36 @@ public class SiteResolver(SiteStructureDbContext db, IHttpContextAccessor httpCo
          throw new InvalidOperationException("SiteResolver cannot be used outside of an HTTP request.");
       }
       
-      var host = context.Request.Host.Host;
+      var host = context.Request.Host.Host.ToLowerInvariant();
 
-      return await cache.GetOrCreateAsync($"site:host:{host}", async entry =>
+      // Check cache for this specific host
+      if (cache.TryGetValue($"site:host:{host}", out SiteDto? cached) && cached != null)
+         return cached;
+
+      // Try host-specific DB lookups
+      var site = await db.SiteHosts.AsNoTracking().Where(x => x.HostName == host)
+         .Select(x => new SiteDto(x.SiteId, x.SiteGuid))
+         .FirstOrDefaultAsync(ct);
+
+      site ??= await db.Sites.AsNoTracking().Where(x => x.SiteName == host || x.SiteAlias == host)
+         .Select(x => new SiteDto(x.SiteId, x.SiteGuid))
+         .FirstOrDefaultAsync(ct);
+
+      if (site != null)
+      {
+         // Only cache hosts that resolve to a known site — prevents unbounded growth from arbitrary Host headers
+         cache.Set($"site:host:{host}", site, new MemoryCacheEntryOptions { SlidingExpiration = CacheDuration });
+         return site;
+      }
+
+      // Unknown host — use shared cache key so all unrecognized hosts share one entry
+      return await cache.GetOrCreateAsync("site:default", async entry =>
       {
          entry.SlidingExpiration = CacheDuration;
-         
-         var site = await db.SiteHosts.AsNoTracking().Where(x => x.HostName == host)
-            .Select(x => new SiteDto(x.SiteId, x.SiteGuid))
-            .FirstOrDefaultAsync(ct);
-
-         site ??= await db.Sites.AsNoTracking().Where(x => x.SiteName == host || x.SiteAlias == host)
-            .Select(x => new SiteDto(x.SiteId, x.SiteGuid))
-            .FirstOrDefaultAsync(ct);
-
-         site ??= await db.Sites.AsNoTracking()
+         return await db.Sites.AsNoTracking()
             .Where(x => x.SiteId == 1).Select(x => new SiteDto(x.SiteId, x.SiteGuid))
-            .FirstOrDefaultAsync(ct);
-
-         return site ?? throw new InvalidOperationException("No sites configured in database.");
+            .FirstOrDefaultAsync(ct)
+            ?? throw new InvalidOperationException("No sites configured in database.");
       }) ?? throw new InvalidOperationException("No sites configured in database.");
    }
 }

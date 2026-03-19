@@ -156,7 +156,13 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 
 var frontendUrl = builder.Configuration["Frontend:Url"];
-if (string.IsNullOrWhiteSpace(frontendUrl)) frontendUrl = "http://localhost:5173";
+if (string.IsNullOrWhiteSpace(frontendUrl))
+{
+    if (!app.Environment.IsDevelopment())
+        throw new InvalidOperationException("Frontend:Url must be configured in non-development environments.");
+    frontendUrl = "http://localhost:5173";
+}
+frontendUrl = frontendUrl.TrimEnd('/');
 app.UseCors(opt => opt.WithOrigins(frontendUrl).AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 
 app.UseHttpsRedirection();
